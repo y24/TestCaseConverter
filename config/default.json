@@ -1,5 +1,5 @@
 {
-  "output_format": "yaml",
+  "output_format": "markdown",
   "split_mode": "per_sheet",
   "id_prefix": "TC",
   "id_padding": 3,

@@ -34,7 +34,7 @@ class HeaderConfig(BaseModel):
 
 class ConversionSettings(BaseModel):
     """変換設定"""
-    output_format: OutputFormat = Field(default=OutputFormat.YAML)
+    output_format: OutputFormat = Field(default=OutputFormat.MARKDOWN)
     split_mode: SplitMode = Field(default=SplitMode.PER_SHEET)
     id_prefix: str = Field(default="TC", description="IDプレフィックス")
     id_padding: int = Field(default=3, description="ID桁数")

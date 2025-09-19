@@ -57,7 +57,7 @@ function applySettingsToUI() {
     const caseIdSettings = currentSettings.ケースID || {};
     const stepSettings = currentSettings.手順 || {};
     
-    document.getElementById('output-format').value = outputSettings.output_format || currentSettings.output_format || 'yaml';
+    document.getElementById('output-format').value = outputSettings.output_format || currentSettings.output_format || 'markdown';
     document.getElementById('split-mode').value = outputSettings.split_mode || currentSettings.split_mode || 'per_sheet';
     document.getElementById('id-prefix').value = caseIdSettings.id_prefix || currentSettings.id_prefix || 'TC';
     document.getElementById('id-padding').value = caseIdSettings.id_padding || currentSettings.id_padding || 3;
@@ -414,7 +414,7 @@ async function downloadAll() {
             const fileContent = conversionResult.rendered_text[fileName];
             
             // ファイル拡張子を取得
-            const outputFormat = currentSettings.出力?.output_format || currentSettings.output_format || 'yaml';
+            const outputFormat = currentSettings.出力?.output_format || currentSettings.output_format || 'markdown';
             const extension = outputFormat === 'yaml' ? 'yaml' : 'md';
             const downloadFileName = fileName.endsWith(`.${extension}`) ? fileName : `${fileName}.${extension}`;
             
@@ -435,7 +435,7 @@ async function downloadAll() {
             // ファイルが複数の場合：ZIPダウンロード
             const formData = new FormData();
             formData.append('cache_key', conversionResult.cache_key);
-            const outputFormat = currentSettings.出力?.output_format || currentSettings.output_format || 'yaml';
+            const outputFormat = currentSettings.出力?.output_format || currentSettings.output_format || 'markdown';
             formData.append('output_format', outputFormat);
             
             const response = await fetch('/api/download', {
