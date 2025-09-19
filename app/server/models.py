@@ -56,7 +56,6 @@ class ConversionSettings(BaseModel):
     note_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["備考", "補足情報"]))
     
     # 処理設定
-    step_number_delimiter: str = Field(default=".", description="ステップ番号区切り文字")
     trim_whitespaces: bool = Field(default=True, description="空白トリム")
     normalize_zenkaku_numbers: bool = Field(default=True, description="全角数字正規化")
     category_display_compress: bool = Field(default=False, description="カテゴリ表示圧縮")

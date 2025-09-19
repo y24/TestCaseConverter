@@ -60,7 +60,6 @@
     ],
     "ignores": []
   },
-  "step_number_delimiter": ".",
   "trim_whitespaces": false,
   "normalize_zenkaku_numbers": true,
   "category_display_compress": false,

@@ -59,19 +59,15 @@
                         </div>
                     </div>
 
-                    <!-- 手順セクション -->
+                    <!-- 文字列処理の設定 -->
                     <div class="setting-section">
-                        <h3 class="section-title">手順</h3>
+                        <h3 class="section-title">文字列処理</h3>
                         <div class="setting-group">
-                            <label for="step-delimiter">ステップ区切り文字:</label>
-                            <select id="step-delimiter">
-                                <option value="." selected>.</option>
-                                <option value=":">:</option>
-                                <option value="：">：</option>
-                                <option value="、">、</option>
-                            </select>
+                            <label>
+                                <input type="checkbox" id="trim-whitespaces" checked>
+                                前後の空白をトリム
+                            </label>
                         </div>
-
                         <div class="setting-group">
                             <label>
                                 <input type="checkbox" id="normalize-zenkaku" checked>
@@ -80,19 +76,13 @@
                         </div>
                     </div>
 
-                    <!-- その他の設定 -->
+                    <!-- カテゴリ処理の設定 -->
                     <div class="setting-section">
-                        <h3 class="section-title">その他</h3>
-                        <div class="setting-group">
-                            <label>
-                                <input type="checkbox" id="trim-whitespaces" checked>
-                                空白をトリム
-                            </label>
-                        </div>
+                        <h3 class="section-title">カテゴリ処理</h3>
                         <div class="setting-group">
                             <label>
                                 <input type="checkbox" id="forward-fill-category" checked>
-                                カテゴリの空の値を前の行から埋める
+                                セルが空の場合、前の行を参照して埋める
                             </label>
                         </div>
                     </div>

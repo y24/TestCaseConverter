@@ -61,10 +61,9 @@ function applySettingsToUI() {
     document.getElementById('split-mode').value = outputSettings.split_mode || currentSettings.split_mode || 'per_sheet';
     document.getElementById('id-prefix').value = caseIdSettings.id_prefix || currentSettings.id_prefix || 'TC';
     document.getElementById('id-padding').value = caseIdSettings.id_padding || currentSettings.id_padding || 3;
-    document.getElementById('step-delimiter').value = stepSettings.step_number_delimiter || currentSettings.step_number_delimiter || '.';
     document.getElementById('trim-whitespaces').checked = currentSettings.trim_whitespaces !== false;
     document.getElementById('forward-fill-category').checked = currentSettings.forward_fill_category !== false;
-    document.getElementById('normalize-zenkaku').checked = stepSettings.normalize_zenkaku_numbers !== false && currentSettings.normalize_zenkaku_numbers !== false;
+    document.getElementById('normalize-zenkaku').checked = currentSettings.normalize_zenkaku_numbers !== false;
 }
 
 // 設定更新
@@ -80,10 +79,6 @@ function updateSettings() {
             id_padding: parseInt(document.getElementById('id-padding').value),
             force_id_regenerate: false
         },
-        手順: {
-            step_number_delimiter: document.getElementById('step-delimiter').value,
-            normalize_zenkaku_numbers: document.getElementById('normalize-zenkaku').checked
-        },
         sheet_search_keys: currentSettings.sheet_search_keys || ["テスト項目"],
         sheet_search_ignores: currentSettings.sheet_search_ignores || [],
         header: currentSettings.header || { search_col: "A", search_key: "#" },
@@ -93,6 +88,7 @@ function updateSettings() {
         test_type_row: currentSettings.test_type_row || { keys: ["テスト種別"] },
         note_row: currentSettings.note_row || { keys: ["備考", "補足情報"] },
         trim_whitespaces: document.getElementById('trim-whitespaces').checked,
+        normalize_zenkaku_numbers: document.getElementById('normalize-zenkaku').checked,
         category_display_compress: false,
         pad_category_levels: true,
         forward_fill_category: document.getElementById('forward-fill-category').checked
