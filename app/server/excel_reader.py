@@ -347,8 +347,8 @@ class ExcelReader:
         # 前提条件を文字列として取得（前後の空白を削除、連続する改行を単一の改行に正規化）
         preconditions = self._normalize_multiline_text(row_data.get('precondition', ''))
         
-        # テストケースIDを生成（仮）
-        test_id = f"{self.settings.id_prefix}-{row_data['row']:03d}"
+        # テストケースIDを生成（設定の桁数を使用）
+        test_id = f"{self.settings.id_prefix}-{row_data['row']:0{self.settings.id_padding}d}"
         
         return TestCase(
             id=test_id,

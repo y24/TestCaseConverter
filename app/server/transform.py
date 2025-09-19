@@ -47,9 +47,8 @@ class DataTransformer:
             transformed_case = self._transform_test_case(test_case)
             transformed_items.append(transformed_case)
         
-        # ID正規化
-        if self.settings.force_id_regenerate:
-            transformed_items = self._regenerate_ids(transformed_items)
+        # ID正規化（常に実行して設定の桁数を反映）
+        transformed_items = self._regenerate_ids(transformed_items)
         
         return type(sheet_data)(
             sheet_name=sheet_data.sheet_name,
