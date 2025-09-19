@@ -37,9 +37,42 @@ function setupEventListeners() {
     document.getElementById('preview-file-select').addEventListener('change', handlePreviewFileChange);
 }
 
+// localStorageから設定を読み込み
+function loadSettingsFromLocalStorage() {
+    try {
+        const savedSettings = localStorage.getItem('testCaseConverter_settings');
+        if (savedSettings) {
+            return JSON.parse(savedSettings);
+        }
+    } catch (error) {
+        console.error('設定の読み込みに失敗しました:', error);
+    }
+    return null;
+}
+
+// localStorageに設定を保存
+function saveSettingsToLocalStorage(settings) {
+    try {
+        localStorage.setItem('testCaseConverter_settings', JSON.stringify(settings));
+        return true;
+    } catch (error) {
+        console.error('設定の保存に失敗しました:', error);
+        return false;
+    }
+}
+
 // デフォルト設定読み込み
 async function loadDefaultSettings() {
     try {
+        // まずlocalStorageから保存された設定を読み込み
+        const savedSettings = loadSettingsFromLocalStorage();
+        if (savedSettings) {
+            currentSettings = savedSettings;
+            applySettingsToUI();
+            return;
+        }
+        
+        // localStorageに設定がない場合は、サーバーからデフォルト設定を読み込み
         const response = await fetch('/api/config/defaults');
         if (response.ok) {
             currentSettings = await response.json();
@@ -240,16 +273,8 @@ async function saveSettings() {
     try {
         updateSettings();
         
-        const formData = new FormData();
-        formData.append('settings_json', JSON.stringify(currentSettings));
-        formData.append('profile_name', 'default');
-        
-        const response = await fetch('/api/config/save', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (response.ok) {
+        // localStorageに保存
+        if (saveSettingsToLocalStorage(currentSettings)) {
             showSuccess('設定を保存しました');
         } else {
             throw new Error('設定の保存に失敗しました');
@@ -488,6 +513,28 @@ function showError(message) {
 function hideError() {
     const errorDiv = document.getElementById('error-message');
     errorDiv.style.display = 'none';
+}
+
+// デフォルト設定に戻す
+function resetToDefaultSettings() {
+    try {
+        // localStorageから設定を削除
+        localStorage.removeItem('testCaseConverter_settings');
+        
+        // サーバーからデフォルト設定を読み込み
+        fetch('/api/config/defaults')
+            .then(response => response.json())
+            .then(defaultSettings => {
+                currentSettings = defaultSettings;
+                applySettingsToUI();
+                showSuccess('デフォルト設定に戻しました');
+            })
+            .catch(error => {
+                showError('デフォルト設定の読み込みに失敗しました: ' + error.message);
+            });
+    } catch (error) {
+        showError('デフォルト設定の読み込みに失敗しました: ' + error.message);
+    }
 }
 
 // 成功メッセージ表示
