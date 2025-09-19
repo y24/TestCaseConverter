@@ -105,6 +105,7 @@ class ConversionResult(BaseModel):
     output_format: OutputFormat = Field(description="出力形式")
     rendered_text: Dict[str, str] = Field(description="レンダリング結果（ファイル名: 内容）")
     warnings: List[str] = Field(default_factory=list, description="全体警告")
+    cache_key: Optional[str] = Field(default=None, description="キャッシュキー（ダウンロード用）")
 
 
 class ErrorResponse(BaseModel):

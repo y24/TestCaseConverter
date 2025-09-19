@@ -150,27 +150,26 @@ async def convert_files(
         
         rendered_text = renderer.render(transformed_data)
         
+        # キャッシュキー生成
+        import uuid
+        cache_key = str(uuid.uuid4())
+        
         # 結果作成
         result = ConversionResult(
             files=transformed_data,
             output_format=settings.output_format,
             rendered_text=rendered_text,
-            warnings=[]
+            warnings=[],
+            cache_key=cache_key
         )
         
         # キャッシュに保存（ダウンロード用）
-        import uuid
-        cache_key = str(uuid.uuid4())
         conversion_cache[cache_key] = {
             'result': result,
             'settings': settings
         }
         
-        # キャッシュキーを結果に追加
-        result_dict = result.model_dump()
-        result_dict['cache_key'] = cache_key
-        
-        return result_dict
+        return result
         
     except Exception as e:
         logger.error(f"変換エラー: {e}")
