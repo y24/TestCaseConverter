@@ -126,7 +126,10 @@ function addFiles(files) {
         showError('一部のファイルが無効です。Excelファイル（.xlsx, .xls）で20MB以下のファイルを選択してください。');
     }
     
-    uploadedFiles = uploadedFiles.concat(validFiles);
+    // ファイル名の重複チェックと連番付与
+    const processedFiles = processDuplicateFilenames(validFiles);
+    
+    uploadedFiles = uploadedFiles.concat(processedFiles);
     updateFileList();
     updateConvertButton();
 }
@@ -149,6 +152,39 @@ function updateFileList() {
         `;
         fileList.appendChild(fileItem);
     });
+}
+
+// ファイル名の重複処理
+function processDuplicateFilenames(newFiles) {
+    const processedFiles = [];
+    
+    for (const file of newFiles) {
+        let finalFilename = file.name;
+        let counter = 1;
+        
+        // 既存のファイル名と重複チェック
+        while (isFilenameDuplicate(finalFilename)) {
+            const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+            const extension = file.name.match(/\.[^/.]+$/)?.[0] || '';
+            finalFilename = `${nameWithoutExt} (${counter})${extension}`;
+            counter++;
+        }
+        
+        // ファイルオブジェクトのクローンを作成してファイル名を変更
+        const processedFile = new File([file], finalFilename, {
+            type: file.type,
+            lastModified: file.lastModified
+        });
+        
+        processedFiles.push(processedFile);
+    }
+    
+    return processedFiles;
+}
+
+// ファイル名の重複チェック
+function isFilenameDuplicate(filename) {
+    return uploadedFiles.some(file => file.name === filename);
 }
 
 // ファイル削除

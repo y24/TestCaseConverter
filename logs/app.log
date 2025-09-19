@@ -81,3 +81,33 @@
 2025-09-20 03:40:52,844 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1.xlsx (サイズ: 14437 bytes)
 2025-09-20 03:40:52,856 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
 2025-09-20 03:40:52,857 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1.xlsx (シート数: 1)
+2025-09-20 03:42:30,366 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1.xlsx (サイズ: 14437 bytes)
+2025-09-20 03:42:30,376 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:42:30,377 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1.xlsx (シート数: 1)
+2025-09-20 03:42:53,697 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1.xlsx (サイズ: 14437 bytes)
+2025-09-20 03:42:53,705 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:42:53,706 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1.xlsx (シート数: 1)
+2025-09-20 03:42:53,706 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1.xlsx (サイズ: 14437 bytes)
+2025-09-20 03:42:53,714 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:42:53,714 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1.xlsx (シート数: 1)
+2025-09-20 03:42:53,715 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1 - コピー.xlsx (サイズ: 14437 bytes)
+2025-09-20 03:42:53,722 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:42:53,723 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1 - コピー.xlsx (シート数: 1)
+2025-09-20 03:48:32,288 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1.xlsx (サイズ: 14437 bytes)
+2025-09-20 03:48:32,300 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:48:32,302 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1.xlsx (シート数: 1)
+2025-09-20 03:48:32,302 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1 - コピー.xlsx (サイズ: 14437 bytes)
+2025-09-20 03:48:32,312 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:48:32,312 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1 - コピー.xlsx (シート数: 1)
+2025-09-20 03:48:32,312 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1 (1).xlsx (サイズ: 14437 bytes)
+2025-09-20 03:48:32,322 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:48:32,322 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1 (1).xlsx (シート数: 1)
+2025-09-20 03:49:30,680 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1.xlsx (サイズ: 14437 bytes)
+2025-09-20 03:49:30,693 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:49:30,694 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1.xlsx (シート数: 1)
+2025-09-20 03:49:30,694 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1 - コピー.xlsx (サイズ: 14437 bytes)
+2025-09-20 03:49:30,703 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:49:30,703 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1 - コピー.xlsx (シート数: 1)
+2025-09-20 03:49:30,703 - app.server.excel_reader - INFO - Excelファイル読み取り開始: sample1 (1).xlsx (サイズ: 14437 bytes)
+2025-09-20 03:49:30,712 - app.server.excel_reader - INFO - 対象シート発見: ['テスト項目1']
+2025-09-20 03:49:30,713 - app.server.excel_reader - INFO - Excelファイル読み取り完了: sample1 (1).xlsx (シート数: 1)

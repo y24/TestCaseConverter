@@ -28,6 +28,9 @@ class YamlRenderer:
         elif self.settings.split_mode == SplitMode.PER_CASE:
             rendered_files = self._render_per_case(file_data_list)
         
+        # ファイル名の重複処理
+        rendered_files = self._resolve_filename_conflicts(rendered_files)
+        
         return rendered_files
     
     def _render_per_excel(self, file_data_list: List[FileData]) -> Dict[str, str]:
@@ -251,3 +254,32 @@ class YamlRenderer:
             sanitized = sanitized[:100]
         
         return sanitized
+    
+    def _resolve_filename_conflicts(self, rendered_files: Dict[str, str]) -> Dict[str, str]:
+        """ファイル名の重複を解決"""
+        resolved_files = {}
+        filename_counts = {}
+        
+        for filename, content in rendered_files.items():
+            if filename in resolved_files:
+                # 重複している場合、連番を付与
+                base_name, extension = self._split_filename(filename)
+                counter = filename_counts.get(filename, 1)
+                
+                while f"{base_name} ({counter}){extension}" in resolved_files:
+                    counter += 1
+                
+                new_filename = f"{base_name} ({counter}){extension}"
+                resolved_files[new_filename] = content
+                filename_counts[filename] = counter + 1
+            else:
+                resolved_files[filename] = content
+                filename_counts[filename] = 1
+        
+        return resolved_files
+    
+    def _split_filename(self, filename: str) -> tuple:
+        """ファイル名をベース名と拡張子に分割"""
+        import os
+        base_name, extension = os.path.splitext(filename)
+        return base_name, extension
