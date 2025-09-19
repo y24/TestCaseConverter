@@ -165,13 +165,14 @@ class MarkdownRenderer:
         if test_case.priority:
             md_content += f"- priority: {test_case.priority}\n"
         
-        # 前提条件
-        if test_case.preconditions:
-            md_content += f"- preconditions: {test_case.preconditions}\n"
-        else:
-            md_content += "- preconditions:\n"
-        
         md_content += "\n"
+        
+        # 前提条件
+        md_content += "### 前提条件\n"
+        if test_case.preconditions:
+            md_content += f"{test_case.preconditions}\n\n"
+        else:
+            md_content += "- \n\n"
         
         # 手順
         if test_case.steps:
