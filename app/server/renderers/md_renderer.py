@@ -168,11 +168,9 @@ class MarkdownRenderer:
         md_content += "\n"
         
         # 前提条件
-        md_content += "### 前提条件\n"
         if test_case.preconditions:
+            md_content += "### 前提条件\n"
             md_content += f"{test_case.preconditions}\n\n"
-        else:
-            md_content += "- \n\n"
         
         # 手順
         if test_case.steps:
@@ -187,10 +185,8 @@ class MarkdownRenderer:
         
         # 備考
         if test_case.notes:
-            md_content += "### notes\n"
+            md_content += "### 備考\n"
             md_content += f"{test_case.notes}\n\n"
-        else:
-            md_content += "### notes\n\n"
         
         # ソース情報
         source_info = test_case.source
