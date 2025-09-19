@@ -107,7 +107,36 @@ async def convert_files(
         # 設定解析
         import json
         settings_data = json.loads(settings_json)
-        settings = ConversionSettings.model_validate(settings_data)
+        
+        # 新しい階層構造に対応
+        if '出力' in settings_data:
+            # 新しい構造から古い構造に変換
+            flat_settings = {
+                'output_format': settings_data['出力'].get('output_format', 'yaml'),
+                'split_mode': settings_data['出力'].get('split_mode', 'per_sheet'),
+                'id_prefix': settings_data['ケースID'].get('id_prefix', 'TC'),
+                'id_padding': settings_data['ケースID'].get('id_padding', 3),
+                'force_id_regenerate': settings_data['ケースID'].get('force_id_regenerate', False),
+                'step_number_delimiter': settings_data['手順'].get('step_number_delimiter', '.'),
+                'normalize_zenkaku_numbers': settings_data['手順'].get('normalize_zenkaku_numbers', True),
+                'trim_whitespaces': settings_data.get('trim_whitespaces', True),
+                'category_display_compress': settings_data.get('category_display_compress', False),
+                'pad_category_levels': settings_data.get('pad_category_levels', True),
+                'sheet_search_keys': settings_data.get('sheet_search_keys', ['テスト項目']),
+                'sheet_search_ignores': settings_data.get('sheet_search_ignores', []),
+                'header': settings_data.get('header', {'search_col': 'A', 'search_key': '#'}),
+                'category_row': settings_data.get('category_row', {'keys': ['大項目', '中項目', '小項目1', '小項目2']}),
+                'step_row': settings_data.get('step_row', {'keys': ['手順']}),
+                'tobe_row': settings_data.get('tobe_row', {'keys': ['期待結果'], 'ignores': ['実施']}),
+                'test_type_row': settings_data.get('test_type_row', {'keys': ['テスト種別']}),
+                'priority_row': settings_data.get('priority_row', {'keys': ['優先度']}),
+                'precondition_row': settings_data.get('precondition_row', {'keys': ['前提条件']}),
+                'note_row': settings_data.get('note_row', {'keys': ['備考', '補足情報']})
+            }
+            settings = ConversionSettings.model_validate(flat_settings)
+        else:
+            # 古い構造の場合はそのまま使用
+            settings = ConversionSettings.model_validate(settings_data)
         
         # ファイル数制限チェック
         if len(files) > 20:

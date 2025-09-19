@@ -179,10 +179,13 @@ class MarkdownRenderer:
         # 手順
         if test_case.steps:
             md_content += "### 手順\n"
-            for step in test_case.steps:
-                expect_text = f" （期待：{step.expect}）" if step.expect else ""
-                md_content += f"{step.num}. {step.action}{expect_text}\n"
-            md_content += "\n"
+            # stepsは文字列として処理
+            md_content += f"{test_case.steps}\n\n"
+        
+        # 期待結果
+        if test_case.expect:
+            md_content += "### 期待結果\n"
+            md_content += f"{test_case.expect}\n\n"
         
         # 備考
         if test_case.notes:

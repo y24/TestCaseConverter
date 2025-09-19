@@ -414,12 +414,13 @@ async function downloadAll() {
             const fileContent = conversionResult.rendered_text[fileName];
             
             // ファイル拡張子を取得
-            const extension = currentSettings.output_format === 'yaml' ? 'yaml' : 'md';
+            const outputFormat = currentSettings.出力?.output_format || currentSettings.output_format || 'yaml';
+            const extension = outputFormat === 'yaml' ? 'yaml' : 'md';
             const downloadFileName = fileName.endsWith(`.${extension}`) ? fileName : `${fileName}.${extension}`;
             
             // Blobを作成してダウンロード
             const blob = new Blob([fileContent], { 
-                type: currentSettings.output_format === 'yaml' ? 'text/yaml' : 'text/markdown' 
+                type: outputFormat === 'yaml' ? 'text/yaml' : 'text/markdown' 
             });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -434,7 +435,8 @@ async function downloadAll() {
             // ファイルが複数の場合：ZIPダウンロード
             const formData = new FormData();
             formData.append('cache_key', conversionResult.cache_key);
-            formData.append('output_format', currentSettings.output_format);
+            const outputFormat = currentSettings.出力?.output_format || currentSettings.output_format || 'yaml';
+            formData.append('output_format', outputFormat);
             
             const response = await fetch('/api/download', {
                 method: 'POST',
