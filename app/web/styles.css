@@ -55,7 +55,7 @@ header {
 
 /* サイドメニュー */
 .sidebar {
-    width: 300px;
+    width: 350px;
     background: white;
     border-right: 1px solid #e9ecef;
     display: flex;
@@ -106,9 +106,27 @@ section h2 {
     padding-bottom: 10px;
 }
 
+/* 設定セクション */
+.setting-section {
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+.section-title {
+    color: #2c3e50;
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e9ecef;
+}
+
 /* サイドメニュー内の設定グループ */
 .sidebar .setting-group {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .setting-group {
@@ -404,7 +422,7 @@ button:focus {
     .sidebar {
         position: fixed;
         top: 0;
-        left: -300px;
+        left: -350px;
         height: 100vh;
         transition: left 0.3s ease;
         z-index: 200;

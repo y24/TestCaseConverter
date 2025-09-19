@@ -52,23 +52,37 @@ async function loadDefaultSettings() {
 
 // 設定をUIに適用
 function applySettingsToUI() {
-    document.getElementById('output-format').value = currentSettings.output_format || 'yaml';
-    document.getElementById('split-mode').value = currentSettings.split_mode || 'per_sheet';
-    document.getElementById('id-prefix').value = currentSettings.id_prefix || 'TC';
-    document.getElementById('id-padding').value = currentSettings.id_padding || 3;
-    document.getElementById('step-delimiter').value = currentSettings.step_number_delimiter || '.';
+    // 新しい構造に対応
+    const outputSettings = currentSettings.出力 || {};
+    const caseIdSettings = currentSettings.ケースID || {};
+    const stepSettings = currentSettings.手順 || {};
+    
+    document.getElementById('output-format').value = outputSettings.output_format || currentSettings.output_format || 'yaml';
+    document.getElementById('split-mode').value = outputSettings.split_mode || currentSettings.split_mode || 'per_sheet';
+    document.getElementById('id-prefix').value = caseIdSettings.id_prefix || currentSettings.id_prefix || 'TC';
+    document.getElementById('id-padding').value = caseIdSettings.id_padding || currentSettings.id_padding || 3;
+    document.getElementById('step-delimiter').value = stepSettings.step_number_delimiter || currentSettings.step_number_delimiter || '.';
     document.getElementById('trim-whitespaces').checked = currentSettings.trim_whitespaces !== false;
-    document.getElementById('normalize-zenkaku').checked = currentSettings.normalize_zenkaku_numbers !== false;
+    document.getElementById('normalize-zenkaku').checked = stepSettings.normalize_zenkaku_numbers !== false && currentSettings.normalize_zenkaku_numbers !== false;
 }
 
 // 設定更新
 function updateSettings() {
+    // 新しい構造で設定を構築
     currentSettings = {
-        output_format: document.getElementById('output-format').value,
-        split_mode: document.getElementById('split-mode').value,
-        id_prefix: document.getElementById('id-prefix').value,
-        id_padding: parseInt(document.getElementById('id-padding').value),
-        force_id_regenerate: false,
+        出力: {
+            output_format: document.getElementById('output-format').value,
+            split_mode: document.getElementById('split-mode').value
+        },
+        ケースID: {
+            id_prefix: document.getElementById('id-prefix').value,
+            id_padding: parseInt(document.getElementById('id-padding').value),
+            force_id_regenerate: false
+        },
+        手順: {
+            step_number_delimiter: document.getElementById('step-delimiter').value,
+            normalize_zenkaku_numbers: document.getElementById('normalize-zenkaku').checked
+        },
         sheet_search_keys: currentSettings.sheet_search_keys || ["テスト項目"],
         sheet_search_ignores: currentSettings.sheet_search_ignores || [],
         header: currentSettings.header || { search_col: "A", search_key: "#" },
@@ -77,9 +91,7 @@ function updateSettings() {
         tobe_row: currentSettings.tobe_row || { keys: ["期待結果"], ignores: ["実施"] },
         test_type_row: currentSettings.test_type_row || { keys: ["テスト種別"] },
         note_row: currentSettings.note_row || { keys: ["備考", "補足情報"] },
-        step_number_delimiter: document.getElementById('step-delimiter').value,
         trim_whitespaces: document.getElementById('trim-whitespaces').checked,
-        normalize_zenkaku_numbers: document.getElementById('normalize-zenkaku').checked,
         category_display_compress: false,
         pad_category_levels: true
     };

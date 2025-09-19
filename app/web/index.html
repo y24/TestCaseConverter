@@ -24,56 +24,72 @@
                     <h2>変換設定</h2>
                 </div>
                 <div class="sidebar-content">
-                    <div class="setting-group">
-                        <label for="output-format">出力形式:</label>
-                        <select id="output-format">
-                            <option value="yaml">YAML</option>
-                            <option value="markdown">Markdown</option>
-                        </select>
+                    <!-- 出力セクション -->
+                    <div class="setting-section">
+                        <h3 class="section-title">出力</h3>
+                        <div class="setting-group">
+                            <label for="output-format">出力形式:</label>
+                            <select id="output-format">
+                                <option value="yaml">YAML</option>
+                                <option value="markdown">Markdown</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="split-mode">分割モード:</label>
+                            <select id="split-mode">
+                                <option value="per_excel">Excel単位</option>
+                                <option value="per_sheet" selected>シート単位</option>
+                                <option value="per_category">カテゴリ単位</option>
+                                <option value="per_case">ケース単位</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="setting-group">
-                        <label for="split-mode">分割モード:</label>
-                        <select id="split-mode">
-                            <option value="per_excel">Excel単位</option>
-                            <option value="per_sheet" selected>シート単位</option>
-                            <option value="per_category">カテゴリ単位</option>
-                            <option value="per_case">ケース単位</option>
-                        </select>
+                    <!-- ケースIDセクション -->
+                    <div class="setting-section">
+                        <h3 class="section-title">ケースID</h3>
+                        <div class="setting-group">
+                            <label for="id-prefix">IDプレフィックス:</label>
+                            <input type="text" id="id-prefix" value="TC" maxlength="10">
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="id-padding">ID桁数:</label>
+                            <input type="number" id="id-padding" value="3" min="1" max="10">
+                        </div>
                     </div>
 
-                    <div class="setting-group">
-                        <label for="id-prefix">IDプレフィックス:</label>
-                        <input type="text" id="id-prefix" value="TC" maxlength="10">
+                    <!-- 手順セクション -->
+                    <div class="setting-section">
+                        <h3 class="section-title">手順</h3>
+                        <div class="setting-group">
+                            <label for="step-delimiter">ステップ区切り文字:</label>
+                            <select id="step-delimiter">
+                                <option value="." selected>.</option>
+                                <option value=":">:</option>
+                                <option value="：">：</option>
+                                <option value="、">、</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>
+                                <input type="checkbox" id="normalize-zenkaku" checked>
+                                全角数字を正規化
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="setting-group">
-                        <label for="id-padding">ID桁数:</label>
-                        <input type="number" id="id-padding" value="3" min="1" max="10">
-                    </div>
-
-                    <div class="setting-group">
-                        <label for="step-delimiter">ステップ区切り文字:</label>
-                        <select id="step-delimiter">
-                            <option value="." selected>.</option>
-                            <option value=":">:</option>
-                            <option value="：">：</option>
-                            <option value="、">、</option>
-                        </select>
-                    </div>
-
-                    <div class="setting-group">
-                        <label>
-                            <input type="checkbox" id="trim-whitespaces" checked>
-                            空白をトリム
-                        </label>
-                    </div>
-
-                    <div class="setting-group">
-                        <label>
-                            <input type="checkbox" id="normalize-zenkaku" checked>
-                            全角数字を正規化
-                        </label>
+                    <!-- その他の設定 -->
+                    <div class="setting-section">
+                        <h3 class="section-title">その他</h3>
+                        <div class="setting-group">
+                            <label>
+                                <input type="checkbox" id="trim-whitespaces" checked>
+                                空白をトリム
+                            </label>
+                        </div>
                     </div>
 
                     <div class="settings-actions">
