@@ -28,7 +28,7 @@ function setupEventListeners() {
     fileInput.addEventListener('change', handleFileSelect);
     
     // 設定変更
-    const settingInputs = document.querySelectorAll('#settings-content input, #settings-content select');
+    const settingInputs = document.querySelectorAll('.sidebar-content input, .sidebar-content select');
     settingInputs.forEach(input => {
         input.addEventListener('change', updateSettings);
     });
@@ -209,19 +209,21 @@ function updateConvertButton() {
     convertBtn.disabled = uploadedFiles.length === 0;
 }
 
-// 設定パネル切り替え
-function toggleSettings() {
-    const content = document.getElementById('settings-content');
-    const icon = document.getElementById('settings-icon');
+// サイドメニュー切り替え
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
     
-    if (content.classList.contains('collapsed')) {
-        content.classList.remove('collapsed');
-        content.classList.add('expanded');
-        icon.textContent = '▲';
+    if (sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        if (overlay) {
+            overlay.classList.remove('show');
+        }
     } else {
-        content.classList.remove('expanded');
-        content.classList.add('collapsed');
-        icon.textContent = '▼';
+        sidebar.classList.add('open');
+        if (overlay) {
+            overlay.classList.add('show');
+        }
     }
 }
 

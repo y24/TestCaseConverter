@@ -7,80 +7,80 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <header>
-            <h1>テストケース変換ツール</h1>
-            <p>Excel形式のテストケースをMarkdown/YAMLに変換</p>
+            <button type="button" class="sidebar-toggle" onclick="toggleSidebar()">
+                <span id="sidebar-toggle-icon">☰</span>
+            </button>
         </header>
 
-        <main>
-            <!-- 設定パネル -->
-            <section class="settings-panel">
-                <h2>
-                    <button type="button" class="toggle-btn" onclick="toggleSettings()">
-                        <span id="settings-icon">▼</span> 設定
-                    </button>
-                </h2>
-                <div id="settings-content" class="settings-content collapsed">
-                    <div class="settings-grid">
-                        <div class="setting-group">
-                            <label for="output-format">出力形式:</label>
-                            <select id="output-format">
-                                <option value="yaml">YAML</option>
-                                <option value="markdown">Markdown</option>
-                            </select>
-                        </div>
+        <div class="main-layout">
+            <!-- オーバーレイ（モバイル用） -->
+            <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+            
+            <!-- サイドメニュー -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>変換設定</h2>
+                </div>
+                <div class="sidebar-content">
+                    <div class="setting-group">
+                        <label for="output-format">出力形式:</label>
+                        <select id="output-format">
+                            <option value="yaml">YAML</option>
+                            <option value="markdown">Markdown</option>
+                        </select>
+                    </div>
 
-                        <div class="setting-group">
-                            <label for="split-mode">分割モード:</label>
-                            <select id="split-mode">
-                                <option value="per_excel">Excel単位</option>
-                                <option value="per_sheet" selected>シート単位</option>
-                                <option value="per_category">カテゴリ単位</option>
-                                <option value="per_case">ケース単位</option>
-                            </select>
-                        </div>
+                    <div class="setting-group">
+                        <label for="split-mode">分割モード:</label>
+                        <select id="split-mode">
+                            <option value="per_excel">Excel単位</option>
+                            <option value="per_sheet" selected>シート単位</option>
+                            <option value="per_category">カテゴリ単位</option>
+                            <option value="per_case">ケース単位</option>
+                        </select>
+                    </div>
 
-                        <div class="setting-group">
-                            <label for="id-prefix">IDプレフィックス:</label>
-                            <input type="text" id="id-prefix" value="TC" maxlength="10">
-                        </div>
+                    <div class="setting-group">
+                        <label for="id-prefix">IDプレフィックス:</label>
+                        <input type="text" id="id-prefix" value="TC" maxlength="10">
+                    </div>
 
-                        <div class="setting-group">
-                            <label for="id-padding">ID桁数:</label>
-                            <input type="number" id="id-padding" value="3" min="1" max="10">
-                        </div>
+                    <div class="setting-group">
+                        <label for="id-padding">ID桁数:</label>
+                        <input type="number" id="id-padding" value="3" min="1" max="10">
+                    </div>
 
-                        <div class="setting-group">
-                            <label for="step-delimiter">ステップ区切り文字:</label>
-                            <select id="step-delimiter">
-                                <option value="." selected>.</option>
-                                <option value=":">:</option>
-                                <option value="：">：</option>
-                                <option value="、">、</option>
-                            </select>
-                        </div>
+                    <div class="setting-group">
+                        <label for="step-delimiter">ステップ区切り文字:</label>
+                        <select id="step-delimiter">
+                            <option value="." selected>.</option>
+                            <option value=":">:</option>
+                            <option value="：">：</option>
+                            <option value="、">、</option>
+                        </select>
+                    </div>
 
-                        <div class="setting-group">
-                            <label>
-                                <input type="checkbox" id="trim-whitespaces" checked>
-                                空白をトリム
-                            </label>
-                        </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="trim-whitespaces" checked>
+                            空白をトリム
+                        </label>
+                    </div>
 
-                        <div class="setting-group">
-                            <label>
-                                <input type="checkbox" id="normalize-zenkaku" checked>
-                                全角数字を正規化
-                            </label>
-                        </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="normalize-zenkaku" checked>
+                            全角数字を正規化
+                        </label>
+                    </div>
 
-                        <div class="setting-group">
-                            <label>
-                                <input type="checkbox" id="allow-yaml-anchors" checked>
-                                YAMLアンカーを許可
-                            </label>
-                        </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="allow-yaml-anchors" checked>
+                            YAMLアンカーを許可
+                        </label>
                     </div>
 
                     <div class="settings-actions">
@@ -88,7 +88,10 @@
                         <button type="button" onclick="loadDefaultSettings()">デフォルトに戻す</button>
                     </div>
                 </div>
-            </section>
+            </aside>
+
+            <!-- メインコンテンツ -->
+            <main class="main-content">
 
             <!-- ファイルアップロード -->
             <section class="upload-section">
@@ -130,9 +133,10 @@
                 </div>
             </section>
 
-            <!-- エラー表示 -->
-            <div class="error-message" id="error-message" style="display: none;"></div>
-        </main>
+                <!-- エラー表示 -->
+                <div class="error-message" id="error-message" style="display: none;"></div>
+            </main>
+        </div>
     </div>
 
     <script src="/static/app.js"></script>
