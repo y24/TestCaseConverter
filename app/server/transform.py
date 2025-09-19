@@ -65,15 +65,16 @@ class DataTransformer:
         # ステップ正規化（文字列として処理）
         normalized_steps = self._normalize_string(test_case.steps)
         
+        # 期待結果正規化（文字列として処理）
+        normalized_expect = self._normalize_string(test_case.expect)
+        
         # 文字列正規化
         normalized_title = self._normalize_string(test_case.title)
         normalized_type = self._normalize_string(test_case.type)
         normalized_notes = self._normalize_string(test_case.notes)
         
-        # 前提条件正規化
-        normalized_preconditions = [
-            self._normalize_string(cond) for cond in test_case.preconditions
-        ]
+        # 前提条件正規化（文字列として処理）
+        normalized_preconditions = self._normalize_string(test_case.preconditions)
         
         return TestCase(
             id=test_case.id,
@@ -83,6 +84,7 @@ class DataTransformer:
             priority=test_case.priority,
             preconditions=normalized_preconditions,
             steps=normalized_steps,
+            expect=normalized_expect,
             notes=normalized_notes,
             source=test_case.source
         )
@@ -147,6 +149,7 @@ class DataTransformer:
                 type=test_case.type,
                 preconditions=test_case.preconditions,
                 steps=test_case.steps,
+                expect=test_case.expect,
                 notes=test_case.notes,
                 source=test_case.source
             ))
@@ -178,6 +181,7 @@ class DataTransformer:
                 type=test_case.type,
                 preconditions=test_case.preconditions,
                 steps=test_case.steps,
+                expect=test_case.expect,
                 notes=test_case.notes,
                 source=test_case.source
             ))

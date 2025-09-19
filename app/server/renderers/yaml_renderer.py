@@ -168,6 +168,7 @@ class YamlRenderer:
                 'priority': test_case.priority,
                 'preconditions': test_case.preconditions,
                 'steps': test_case.steps,  # 文字列をそのまま使用
+                'expect': test_case.expect,  # 期待結果を追加
                 'notes': test_case.notes,
                 'source': test_case.source
             }
@@ -184,6 +185,29 @@ class YamlRenderer:
             sort_keys=False,
             indent=2
         )
+        
+        # 余計な空白行を削除
+        yaml_content = self._remove_extra_blank_lines(yaml_content)
+        
+        return yaml_content
+    
+    def _remove_extra_blank_lines(self, yaml_content: str) -> str:
+        """YAML出力の余計な空白行を削除"""
+        import re
+        
+        # steps、expect、preconditionsフィールドの余計な空白行を削除
+        # パターン: 'text\n\n    more_text' → 'text\nmore_text'
+        pattern = r"(\s+(?:steps|expect|preconditions):\s*'[^']*?)\n\n(\s+[^']*?')"
+        
+        def replace_blank_lines(match):
+            before = match.group(1)
+            after = match.group(2)
+            # 余計な空白行を削除し、インデントを調整
+            return before + '\n' + after
+        
+        # 複数回適用して、連続する空白行をすべて削除
+        while re.search(pattern, yaml_content, re.DOTALL):
+            yaml_content = re.sub(pattern, replace_blank_lines, yaml_content, flags=re.DOTALL)
         
         return yaml_content
     

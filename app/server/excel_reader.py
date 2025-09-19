@@ -251,7 +251,12 @@ class ExcelReader:
             for col_name, col_num in column_mapping.items():
                 cell_value = worksheet.cell(row=row, column=col_num).value
                 if cell_value is not None:
-                    row_data[col_name] = str(cell_value).strip()
+                    # セル値を文字列に変換し、前後の空白を削除
+                    cell_str = str(cell_value)
+                    # 各種改行文字を統一
+                    import re
+                    cell_str = re.sub(r'\r\n|\r', '\n', cell_str)
+                    row_data[col_name] = cell_str.strip()
                 else:
                     row_data[col_name] = ""
             
@@ -294,11 +299,14 @@ class ExcelReader:
         # カテゴリを取得（既にリスト形式で統合済み）
         category = row_data.get('category', [])
         
-        # 手順を文字列として取得
-        steps = row_data.get('step', '')
+        # 手順を文字列として取得（前後の空白を削除、連続する改行を単一の改行に正規化）
+        steps = self._normalize_multiline_text(row_data.get('step', ''))
         
-        # 前提条件を取得・処理
-        preconditions = self._parse_preconditions(row_data.get('precondition', ''))
+        # 期待結果を文字列として取得（前後の空白を削除、連続する改行を単一の改行に正規化）
+        expect = self._normalize_multiline_text(row_data.get('tobe', ''))
+        
+        # 前提条件を文字列として取得（前後の空白を削除、連続する改行を単一の改行に正規化）
+        preconditions = self._normalize_multiline_text(row_data.get('precondition', ''))
         
         # テストケースIDを生成（仮）
         test_id = f"{self.settings.id_prefix}-{row_data['row']:03d}"
@@ -311,6 +319,7 @@ class ExcelReader:
             priority=row_data.get('priority', ''),
             preconditions=preconditions,
             steps=steps,
+            expect=expect,
             notes=row_data.get('note', ''),
             source={
                 'file': sheet_name,
@@ -321,18 +330,32 @@ class ExcelReader:
     
     
     
-    def _parse_preconditions(self, precondition_text: str) -> List[str]:
-        """前提条件を解析"""
-        if not precondition_text:
-            return []
+    
+    def _normalize_multiline_text(self, text: str) -> str:
+        """複数行テキストを正規化（余計な空白行を削除）"""
+        if not text:
+            return ""
         
-        # 改行で分割して、空でない行のみを返す
-        preconditions = []
-        for line in precondition_text.split('\n'):
+        # 前後の空白を削除
+        text = text.strip()
+        
+        # 各種改行文字を統一（\r\n, \r, \n を \n に統一）
+        import re
+        text = re.sub(r'\r\n|\r', '\n', text)
+        
+        # 改行で分割
+        lines = text.split('\n')
+        
+        # 各行の前後の空白を削除し、空行を除去
+        normalized_lines = []
+        for line in lines:
             line = line.strip()
-            if line:
-                preconditions.append(line)
+            if line:  # 空行でない場合のみ追加
+                normalized_lines.append(line)
         
-        return preconditions
+        # 正規化された行を結合
+        result = '\n'.join(normalized_lines)
+        
+        return result
     
     

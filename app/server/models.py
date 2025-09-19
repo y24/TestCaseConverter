@@ -73,8 +73,9 @@ class TestCase(BaseModel):
     category: List[str] = Field(description="カテゴリ階層")
     type: str = Field(default="", description="テスト種別")
     priority: str = Field(default="", description="優先度")
-    preconditions: List[str] = Field(default_factory=list, description="前提条件")
+    preconditions: str = Field(default="", description="前提条件")
     steps: str = Field(description="テストステップ")
+    expect: str = Field(default="", description="期待結果")
     notes: str = Field(default="", description="備考")
     source: Dict[str, Any] = Field(description="ソース情報")
 
