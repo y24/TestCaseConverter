@@ -122,6 +122,7 @@ async def convert_files(
                 'trim_whitespaces': settings_data.get('trim_whitespaces', True),
                 'category_display_compress': settings_data.get('category_display_compress', False),
                 'pad_category_levels': settings_data.get('pad_category_levels', True),
+                'forward_fill_category': settings_data.get('forward_fill_category', True),
                 'sheet_search_keys': settings_data.get('sheet_search_keys', ['テスト項目']),
                 'sheet_search_ignores': settings_data.get('sheet_search_ignores', []),
                 'header': settings_data.get('header', {'search_col': 'A', 'search_key': '#'}),

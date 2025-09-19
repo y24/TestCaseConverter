@@ -243,6 +243,9 @@ class ExcelReader:
         # 期待結果列の最後の行を検索
         end_row = self._find_end_row(worksheet, column_mapping.get('tobe', 1))
         
+        # カテゴリのforward fill用のバッファ
+        last_category_values = [""] * len(self.settings.category_row.keys)
+        
         # データ行を取得
         for row in range(header_row + 1, end_row + 1):
             row_data = {'row': row}
@@ -268,11 +271,18 @@ class ExcelReader:
                     category_values.append(row_data[category_key])
                 else:
                     category_values.append("")
+            
+            # Forward fill処理
+            if self.settings.forward_fill_category:
+                category_values = self._forward_fill_category(category_values, last_category_values)
+            
             row_data['category'] = category_values
             
             # 期待結果が空でない行のみ追加
             if row_data.get('tobe', '').strip():
                 data_rows.append(row_data)
+                # 有効な行の場合のみ、カテゴリバッファを更新
+                last_category_values = category_values.copy()
         
         return data_rows
     
@@ -293,6 +303,35 @@ class ExcelReader:
                 break
         
         return end_row
+    
+    def _forward_fill_category(self, current_category: List[str], last_category: List[str]) -> List[str]:
+        """カテゴリの空の値を前の行から埋める（独立ブランチ対応）"""
+        filled_category = []
+        
+        # 左側のカテゴリが変わったかどうかをチェック
+        independent_branch = False
+        for i, current_value in enumerate(current_category):
+            if current_value.strip():  # 現在の値が空でない場合
+                filled_category.append(current_value)
+                # このレベルで値が変わった場合、それより右側は独立ブランチ
+                if i < len(last_category) and current_value != last_category[i]:
+                    independent_branch = True
+            else:  # 現在の値が空の場合
+                if independent_branch:
+                    # 独立ブランチの場合は空のまま
+                    filled_category.append("")
+                else:
+                    # 通常の場合は前の行の値を使用
+                    if i < len(last_category):
+                        filled_category.append(last_category[i])
+                    else:
+                        filled_category.append("")
+        
+        # 独立ブランチが発生した場合、残りの要素も空にする
+        while len(filled_category) < len(current_category):
+            filled_category.append("")
+        
+        return filled_category
     
     def _create_test_case(self, row_data: Dict, column_mapping: Dict[str, int], sheet_name: str) -> Optional[TestCase]:
         """テストケースを作成"""

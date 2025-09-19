@@ -61,8 +61,9 @@
     "ignores": []
   },
   "step_number_delimiter": ".",
-  "trim_whitespaces": true,
+  "trim_whitespaces": false,
   "normalize_zenkaku_numbers": true,
   "category_display_compress": false,
-  "pad_category_levels": true
+  "pad_category_levels": true,
+  "forward_fill_category": true
 }

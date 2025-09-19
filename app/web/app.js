@@ -63,6 +63,7 @@ function applySettingsToUI() {
     document.getElementById('id-padding').value = caseIdSettings.id_padding || currentSettings.id_padding || 3;
     document.getElementById('step-delimiter').value = stepSettings.step_number_delimiter || currentSettings.step_number_delimiter || '.';
     document.getElementById('trim-whitespaces').checked = currentSettings.trim_whitespaces !== false;
+    document.getElementById('forward-fill-category').checked = currentSettings.forward_fill_category !== false;
     document.getElementById('normalize-zenkaku').checked = stepSettings.normalize_zenkaku_numbers !== false && currentSettings.normalize_zenkaku_numbers !== false;
 }
 
@@ -93,7 +94,8 @@ function updateSettings() {
         note_row: currentSettings.note_row || { keys: ["備考", "補足情報"] },
         trim_whitespaces: document.getElementById('trim-whitespaces').checked,
         category_display_compress: false,
-        pad_category_levels: true
+        pad_category_levels: true,
+        forward_fill_category: document.getElementById('forward-fill-category').checked
     };
 }
 
