@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>テストケース変換ツール</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>テストケース変換ツール</h1>
+            <p>Excel形式のテストケースをMarkdown/YAMLに変換</p>
+        </header>
+
+        <main>
+            <!-- 設定パネル -->
+            <section class="settings-panel">
+                <h2>
+                    <button type="button" class="toggle-btn" onclick="toggleSettings()">
+                        <span id="settings-icon">▼</span> 設定
+                    </button>
+                </h2>
+                <div id="settings-content" class="settings-content collapsed">
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="output-format">出力形式:</label>
+                            <select id="output-format">
+                                <option value="yaml">YAML</option>
+                                <option value="markdown">Markdown</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="split-mode">分割モード:</label>
+                            <select id="split-mode">
+                                <option value="per_excel">Excel単位</option>
+                                <option value="per_sheet" selected>シート単位</option>
+                                <option value="per_category">カテゴリ単位</option>
+                                <option value="per_case">ケース単位</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="id-prefix">IDプレフィックス:</label>
+                            <input type="text" id="id-prefix" value="TC" maxlength="10">
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="id-padding">ID桁数:</label>
+                            <input type="number" id="id-padding" value="3" min="1" max="10">
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="step-delimiter">ステップ区切り文字:</label>
+                            <select id="step-delimiter">
+                                <option value="." selected>.</option>
+                                <option value=":">:</option>
+                                <option value="：">：</option>
+                                <option value="、">、</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>
+                                <input type="checkbox" id="trim-whitespaces" checked>
+                                空白をトリム
+                            </label>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>
+                                <input type="checkbox" id="normalize-zenkaku" checked>
+                                全角数字を正規化
+                            </label>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>
+                                <input type="checkbox" id="allow-yaml-anchors" checked>
+                                YAMLアンカーを許可
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="button" onclick="saveSettings()">設定を保存</button>
+                        <button type="button" onclick="loadDefaultSettings()">デフォルトに戻す</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ファイルアップロード -->
+            <section class="upload-section">
+                <h2>ファイルアップロード</h2>
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <p>Excelファイルをドラッグ&ドロップまたはクリックして選択</p>
+                        <p class="upload-hint">対応形式: .xlsx, .xls (最大20ファイル、総サイズ100MB)</p>
+                    </div>
+                    <input type="file" id="file-input" multiple accept=".xlsx,.xls" style="display: none;">
+                </div>
+
+                <div class="file-list" id="file-list"></div>
+            </section>
+
+            <!-- 変換ボタン -->
+            <section class="convert-section">
+                <button type="button" id="convert-btn" onclick="convertFiles()" disabled>
+                    変換実行
+                </button>
+                <div class="loading" id="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>変換中...</span>
+                </div>
+            </section>
+
+            <!-- プレビュー -->
+            <section class="preview-section" id="preview-section" style="display: none;">
+                <h2>プレビュー</h2>
+                <div class="preview-controls">
+                    <select id="preview-file-select">
+                        <option value="">ファイルを選択してください</option>
+                    </select>
+                    <button type="button" onclick="downloadAll()">すべてダウンロード (ZIP)</button>
+                </div>
+                <div class="preview-content">
+                    <pre id="preview-content"></pre>
+                </div>
+            </section>
+
+            <!-- エラー表示 -->
+            <div class="error-message" id="error-message" style="display: none;"></div>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,466 @@
+// グローバル変数
+let uploadedFiles = [];
+let conversionResult = null;
+let currentSettings = {};
+
+// 初期化
+document.addEventListener('DOMContentLoaded', function() {
+    initializeApp();
+});
+
+// アプリケーション初期化
+async function initializeApp() {
+    await loadDefaultSettings();
+    setupEventListeners();
+}
+
+// イベントリスナー設定
+function setupEventListeners() {
+    // ファイルアップロード
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', handleDragOver);
+    uploadArea.addEventListener('dragleave', handleDragLeave);
+    uploadArea.addEventListener('drop', handleDrop);
+    
+    fileInput.addEventListener('change', handleFileSelect);
+    
+    // 設定変更
+    const settingInputs = document.querySelectorAll('#settings-content input, #settings-content select');
+    settingInputs.forEach(input => {
+        input.addEventListener('change', updateSettings);
+    });
+    
+    // プレビューファイル選択
+    document.getElementById('preview-file-select').addEventListener('change', handlePreviewFileChange);
+}
+
+// デフォルト設定読み込み
+async function loadDefaultSettings() {
+    try {
+        const response = await fetch('/api/config/defaults');
+        if (response.ok) {
+            currentSettings = await response.json();
+            applySettingsToUI();
+        }
+    } catch (error) {
+        showError('設定の読み込みに失敗しました: ' + error.message);
+    }
+}
+
+// 設定をUIに適用
+function applySettingsToUI() {
+    document.getElementById('output-format').value = currentSettings.output_format || 'yaml';
+    document.getElementById('split-mode').value = currentSettings.split_mode || 'per_sheet';
+    document.getElementById('id-prefix').value = currentSettings.id_prefix || 'TC';
+    document.getElementById('id-padding').value = currentSettings.id_padding || 3;
+    document.getElementById('step-delimiter').value = currentSettings.step_number_delimiter || '.';
+    document.getElementById('trim-whitespaces').checked = currentSettings.trim_whitespaces !== false;
+    document.getElementById('normalize-zenkaku').checked = currentSettings.normalize_zenkaku_numbers !== false;
+    document.getElementById('allow-yaml-anchors').checked = currentSettings.allow_yaml_anchors !== false;
+}
+
+// 設定更新
+function updateSettings() {
+    currentSettings = {
+        output_format: document.getElementById('output-format').value,
+        split_mode: document.getElementById('split-mode').value,
+        id_prefix: document.getElementById('id-prefix').value,
+        id_padding: parseInt(document.getElementById('id-padding').value),
+        force_id_regenerate: false,
+        allow_yaml_anchors: document.getElementById('allow-yaml-anchors').checked,
+        sheet_search_keys: currentSettings.sheet_search_keys || ["テスト項目"],
+        sheet_search_ignores: currentSettings.sheet_search_ignores || [],
+        header: currentSettings.header || { search_col: "A", search_key: "#" },
+        category_row: currentSettings.category_row || { keys: ["大項目", "中項目", "小項目1", "小項目2"] },
+        step_row: currentSettings.step_row || { keys: ["手順"] },
+        tobe_row: currentSettings.tobe_row || { keys: ["期待結果"], ignores: ["実施"] },
+        test_type_row: currentSettings.test_type_row || { keys: ["テスト種別"] },
+        note_row: currentSettings.note_row || { keys: ["備考", "補足情報"] },
+        step_number_delimiter: document.getElementById('step-delimiter').value,
+        trim_whitespaces: document.getElementById('trim-whitespaces').checked,
+        normalize_zenkaku_numbers: document.getElementById('normalize-zenkaku').checked,
+        category_display_compress: false,
+        pad_category_levels: true
+    };
+}
+
+// ドラッグオーバー処理
+function handleDragOver(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add('dragover');
+}
+
+// ドラッグリーブ処理
+function handleDragLeave(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('dragover');
+}
+
+// ドロップ処理
+function handleDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('dragover');
+    
+    const files = Array.from(e.dataTransfer.files);
+    addFiles(files);
+}
+
+// ファイル選択処理
+function handleFileSelect(e) {
+    const files = Array.from(e.target.files);
+    addFiles(files);
+}
+
+// ファイル追加
+function addFiles(files) {
+    const validFiles = files.filter(file => {
+        const isValidType = file.name.match(/\.(xlsx|xls)$/i);
+        const isValidSize = file.size <= 20 * 1024 * 1024; // 20MB
+        return isValidType && isValidSize;
+    });
+    
+    if (validFiles.length !== files.length) {
+        showError('一部のファイルが無効です。Excelファイル（.xlsx, .xls）で20MB以下のファイルを選択してください。');
+    }
+    
+    uploadedFiles = uploadedFiles.concat(validFiles);
+    updateFileList();
+    updateConvertButton();
+}
+
+// ファイルリスト更新
+function updateFileList() {
+    const fileList = document.getElementById('file-list');
+    fileList.innerHTML = '';
+    
+    uploadedFiles.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+            <div class="file-info">
+                <span class="file-icon">📊</span>
+                <span class="file-name">${file.name}</span>
+                <span class="file-size">(${formatFileSize(file.size)})</span>
+            </div>
+            <button type="button" class="remove-btn" onclick="removeFile(${index})">削除</button>
+        `;
+        fileList.appendChild(fileItem);
+    });
+}
+
+// ファイル削除
+function removeFile(index) {
+    uploadedFiles.splice(index, 1);
+    updateFileList();
+    updateConvertButton();
+}
+
+// ファイルサイズフォーマット
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// 変換ボタン更新
+function updateConvertButton() {
+    const convertBtn = document.getElementById('convert-btn');
+    convertBtn.disabled = uploadedFiles.length === 0;
+}
+
+// 設定パネル切り替え
+function toggleSettings() {
+    const content = document.getElementById('settings-content');
+    const icon = document.getElementById('settings-icon');
+    
+    if (content.classList.contains('collapsed')) {
+        content.classList.remove('collapsed');
+        content.classList.add('expanded');
+        icon.textContent = '▲';
+    } else {
+        content.classList.remove('expanded');
+        content.classList.add('collapsed');
+        icon.textContent = '▼';
+    }
+}
+
+// 設定保存
+async function saveSettings() {
+    try {
+        updateSettings();
+        
+        const formData = new FormData();
+        formData.append('settings_json', JSON.stringify(currentSettings));
+        formData.append('profile_name', 'default');
+        
+        const response = await fetch('/api/config/save', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            showSuccess('設定を保存しました');
+        } else {
+            throw new Error('設定の保存に失敗しました');
+        }
+    } catch (error) {
+        showError('設定の保存に失敗しました: ' + error.message);
+    }
+}
+
+// ファイル変換
+async function convertFiles() {
+    if (uploadedFiles.length === 0) {
+        showError('ファイルを選択してください');
+        return;
+    }
+    
+    try {
+        updateSettings();
+        
+        // ローディング表示
+        showLoading(true);
+        hideError();
+        
+        // フォームデータ作成
+        const formData = new FormData();
+        uploadedFiles.forEach(file => {
+            formData.append('files', file);
+        });
+        formData.append('settings_json', JSON.stringify(currentSettings));
+        
+        // 変換実行
+        const response = await fetch('/api/convert', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || '変換に失敗しました');
+        }
+        
+        conversionResult = await response.json();
+        showPreview();
+        
+    } catch (error) {
+        showError('変換に失敗しました: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// プレビュー表示
+function showPreview() {
+    const previewSection = document.getElementById('preview-section');
+    const fileSelect = document.getElementById('preview-file-select');
+    const previewControls = document.querySelector('.preview-controls');
+    
+    if (conversionResult && conversionResult.rendered_text) {
+        const fileKeys = Object.keys(conversionResult.rendered_text);
+        console.log('showPreview - fileKeys:', fileKeys);
+        console.log('showPreview - conversionResult.rendered_text:', conversionResult.rendered_text);
+        
+        if (fileKeys.length === 1) {
+            // 最初のファイルの内容を表示（非表示にする前に設定）
+            fileSelect.value = fileKeys[0];
+            console.log('showPreview - fileSelect.value set to:', fileSelect.value);
+            
+            // ファイルが1件の場合：プルダウンを非表示にしてファイル名を直接表示
+            fileSelect.style.display = 'none';
+            
+            // ファイル名表示用の要素を作成
+            let fileNameDisplay = document.getElementById('file-name-display');
+            if (!fileNameDisplay) {
+                fileNameDisplay = document.createElement('div');
+                fileNameDisplay.id = 'file-name-display';
+                fileNameDisplay.className = 'file-name-display';
+                previewControls.insertBefore(fileNameDisplay, fileSelect);
+            }
+            fileNameDisplay.textContent = fileKeys[0];
+            fileNameDisplay.style.display = 'block';
+            
+            // ダウンロードボタンのテキストを変更
+            const downloadBtn = previewControls.querySelector('button');
+            downloadBtn.textContent = 'ダウンロード';
+            
+            // プレビュー内容を直接設定
+            const previewContent = document.getElementById('preview-content');
+            if (previewContent && conversionResult.rendered_text[fileKeys[0]]) {
+                previewContent.textContent = conversionResult.rendered_text[fileKeys[0]];
+                console.log('showPreview - preview content set directly');
+            } else {
+                console.log('showPreview - preview content not set, previewContent:', previewContent);
+            }
+        } else {
+            // ファイルが複数の場合：従来のプルダウン表示
+            fileSelect.style.display = 'block';
+            
+            // ファイル名表示を非表示
+            const fileNameDisplay = document.getElementById('file-name-display');
+            if (fileNameDisplay) {
+                fileNameDisplay.style.display = 'none';
+            }
+            
+            // ファイル選択肢を更新
+            fileSelect.innerHTML = '<option value="">ファイルを選択してください</option>';
+            fileKeys.forEach(filename => {
+                const option = document.createElement('option');
+                option.value = filename;
+                option.textContent = filename;
+                fileSelect.appendChild(option);
+            });
+            
+            // ダウンロードボタンのテキストを元に戻す
+            const downloadBtn = previewControls.querySelector('button');
+            downloadBtn.textContent = 'すべてダウンロード (ZIP)';
+            
+            // 最初のファイルを選択
+            if (fileSelect.options.length > 1) {
+                fileSelect.selectedIndex = 1;
+                handlePreviewFileChange();
+            }
+        }
+    }
+    
+    previewSection.style.display = 'block';
+    previewSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+// プレビューファイル変更
+function handlePreviewFileChange() {
+    const fileSelect = document.getElementById('preview-file-select');
+    const previewContent = document.getElementById('preview-content');
+    
+    const selectedFile = fileSelect.value;
+    console.log('handlePreviewFileChange - selectedFile:', selectedFile);
+    console.log('handlePreviewFileChange - conversionResult:', conversionResult);
+    
+    if (selectedFile && conversionResult && conversionResult.rendered_text) {
+        console.log('handlePreviewFileChange - setting content for:', selectedFile);
+        previewContent.textContent = conversionResult.rendered_text[selectedFile];
+    } else {
+        console.log('handlePreviewFileChange - clearing content');
+        previewContent.textContent = '';
+    }
+}
+
+// 全ファイルダウンロード
+async function downloadAll() {
+    if (!conversionResult || !conversionResult.cache_key) {
+        showError('ダウンロード可能なファイルがありません');
+        return;
+    }
+    
+    try {
+        const fileKeys = Object.keys(conversionResult.rendered_text || {});
+        
+        if (fileKeys.length === 1) {
+            // ファイルが1件の場合：単体ファイルダウンロード
+            const fileName = fileKeys[0];
+            const fileContent = conversionResult.rendered_text[fileName];
+            
+            // ファイル拡張子を取得
+            const extension = currentSettings.output_format === 'yaml' ? 'yaml' : 'md';
+            const downloadFileName = fileName.endsWith(`.${extension}`) ? fileName : `${fileName}.${extension}`;
+            
+            // Blobを作成してダウンロード
+            const blob = new Blob([fileContent], { 
+                type: currentSettings.output_format === 'yaml' ? 'text/yaml' : 'text/markdown' 
+            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = downloadFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+        } else {
+            // ファイルが複数の場合：ZIPダウンロード
+            const formData = new FormData();
+            formData.append('cache_key', conversionResult.cache_key);
+            formData.append('output_format', currentSettings.output_format);
+            
+            const response = await fetch('/api/download', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('ダウンロードに失敗しました');
+            }
+            
+            // ファイルダウンロード
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'test_cases.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+    } catch (error) {
+        showError('ダウンロードに失敗しました: ' + error.message);
+    }
+}
+
+// ローディング表示
+function showLoading(show) {
+    const loading = document.getElementById('loading');
+    const convertBtn = document.getElementById('convert-btn');
+    
+    if (show) {
+        loading.style.display = 'flex';
+        convertBtn.disabled = true;
+    } else {
+        loading.style.display = 'none';
+        convertBtn.disabled = uploadedFiles.length === 0;
+    }
+}
+
+// エラー表示
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    errorDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+// エラー非表示
+function hideError() {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.style.display = 'none';
+}
+
+// 成功メッセージ表示
+function showSuccess(message) {
+    // 簡単なトースト通知
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #27ae60;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 4px;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        document.body.removeChild(toast);
+    }, 3000);
+}

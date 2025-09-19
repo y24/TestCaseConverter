@@ -1,0 +1,401 @@
+"""
+Excel読み取り機能
+"""
+import re
+import logging
+import io
+from pathlib import Path
+from typing import List, Dict, Optional, Tuple, Union
+from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
+
+from .models import (
+    ConversionSettings, FileData, SheetData, TestCase, TestStep
+)
+
+logger = logging.getLogger(__name__)
+
+
+class ExcelReader:
+    """Excel読み取りクラス"""
+    
+    def __init__(self, settings: ConversionSettings):
+        self.settings = settings
+    
+    def read_file(self, file_source: Union[Path, bytes], filename: str) -> FileData:
+        """Excelファイルを読み取り（ファイルパスまたはバイトデータから）"""
+        workbook = None
+        try:
+            # ファイルサイズ確認
+            if isinstance(file_source, Path):
+                # ファイルパスから読み取り
+                if not file_source.exists():
+                    logger.error(f"ファイルが存在しません: {file_source}")
+                    return FileData(
+                        filename=filename,
+                        sheets=[],
+                        warnings=[f"ファイルが存在しません: {file_source}"]
+                    )
+                
+                file_size = file_source.stat().st_size
+                if file_size == 0:
+                    logger.error(f"ファイルが空です: {file_source}")
+                    return FileData(
+                        filename=filename,
+                        sheets=[],
+                        warnings=[f"ファイルが空です: {file_source}"]
+                    )
+                
+                logger.info(f"Excelファイル読み取り開始: {filename} (サイズ: {file_size} bytes)")
+                workbook = load_workbook(file_source, data_only=True)
+                
+            else:
+                # バイトデータから読み取り
+                if len(file_source) == 0:
+                    logger.error(f"ファイルが空です: {filename}")
+                    return FileData(
+                        filename=filename,
+                        sheets=[],
+                        warnings=[f"ファイルが空です: {filename}"]
+                    )
+                
+                logger.info(f"Excelファイル読み取り開始: {filename} (サイズ: {len(file_source)} bytes)")
+                workbook = load_workbook(io.BytesIO(file_source), data_only=True)
+            
+            sheets_data = []
+            file_warnings = []
+            
+            # 対象シートを検索
+            target_sheets = self._find_target_sheets(workbook)
+            
+            if not target_sheets:
+                file_warnings.append("対象シートが見つかりません")
+                return FileData(
+                    filename=filename,
+                    sheets=[],
+                    warnings=file_warnings
+                )
+            
+            logger.info(f"対象シート発見: {target_sheets}")
+            
+            # 各シートを処理
+            for sheet_name in target_sheets:
+                try:
+                    sheet_data = self._read_sheet(workbook[sheet_name], sheet_name)
+                    sheets_data.append(sheet_data)
+                except Exception as e:
+                    logger.error(f"シート {sheet_name} の読み取りエラー: {e}")
+                    file_warnings.append(f"シート {sheet_name} の読み取りに失敗: {str(e)}")
+            
+            logger.info(f"Excelファイル読み取り完了: {filename} (シート数: {len(sheets_data)})")
+            
+            return FileData(
+                filename=filename,
+                sheets=sheets_data,
+                warnings=file_warnings
+            )
+            
+        except PermissionError as e:
+            logger.error(f"ファイル {filename} のアクセス権限エラー: {e}")
+            return FileData(
+                filename=filename,
+                sheets=[],
+                warnings=[f"ファイルアクセス権限エラー: {str(e)}"]
+            )
+        except Exception as e:
+            logger.error(f"ファイル {filename} の読み取りエラー: {e}")
+            return FileData(
+                filename=filename,
+                sheets=[],
+                warnings=[f"ファイル読み取りエラー: {str(e)}"]
+            )
+        finally:
+            # ワークブックを明示的に閉じる
+            if workbook is not None:
+                try:
+                    workbook.close()
+                except Exception as e:
+                    logger.warning(f"ワークブッククローズエラー: {e}")
+    
+    def _find_target_sheets(self, workbook) -> List[str]:
+        """対象シートを検索"""
+        target_sheets = []
+        
+        for sheet_name in workbook.sheetnames:
+            # 除外シートチェック
+            if sheet_name in self.settings.sheet_search_ignores:
+                continue
+            
+            # 検索キーチェック
+            for search_key in self.settings.sheet_search_keys:
+                if search_key in sheet_name:
+                    target_sheets.append(sheet_name)
+                    break
+        
+        return target_sheets
+    
+    def _read_sheet(self, worksheet, sheet_name: str) -> SheetData:
+        """シートを読み取り"""
+        warnings = []
+        
+        # ヘッダー行を検索
+        header_row = self._find_header_row(worksheet)
+        if header_row is None:
+            warnings.append("ヘッダー行が見つかりません")
+            return SheetData(
+                sheet_name=sheet_name,
+                items=[],
+                warnings=warnings
+            )
+        
+        # 列マッピングを取得
+        column_mapping = self._get_column_mapping(worksheet, header_row)
+        if not column_mapping:
+            warnings.append("必須列が見つかりません")
+            return SheetData(
+                sheet_name=sheet_name,
+                items=[],
+                warnings=warnings
+            )
+        
+        # データ行を取得
+        data_rows = self._get_data_rows(worksheet, header_row, column_mapping)
+        
+        # テストケースに変換
+        test_cases = []
+        for row_data in data_rows:
+            try:
+                test_case = self._create_test_case(row_data, column_mapping, sheet_name)
+                if test_case:
+                    test_cases.append(test_case)
+            except Exception as e:
+                logger.error(f"テストケース作成エラー (行 {row_data.get('row', '?')}): {e}")
+                warnings.append(f"行 {row_data.get('row', '?')} の処理に失敗: {str(e)}")
+        
+        return SheetData(
+            sheet_name=sheet_name,
+            items=test_cases,
+            warnings=warnings
+        )
+    
+    def _find_header_row(self, worksheet) -> Optional[int]:
+        """ヘッダー行を検索"""
+        search_col = self.settings.header.search_col
+        search_key = self.settings.header.search_key
+        
+        # 列番号に変換
+        if search_col.isalpha():
+            col_num = ord(search_col.upper()) - ord('A') + 1
+        else:
+            col_num = int(search_col)
+        
+        # 最大50行まで検索
+        for row in range(1, min(51, worksheet.max_row + 1)):
+            cell_value = worksheet.cell(row=row, column=col_num).value
+            if cell_value and search_key in str(cell_value):
+                return row
+        
+        return None
+    
+    def _get_column_mapping(self, worksheet, header_row: int) -> Dict[str, int]:
+        """列マッピングを取得"""
+        mapping = {}
+        
+        # ヘッダー行の各列をチェック
+        for col in range(1, worksheet.max_column + 1):
+            header_value = worksheet.cell(row=header_row, column=col).value
+            if not header_value:
+                continue
+            
+            header_str = str(header_value).strip()
+            
+            # カテゴリ列の個別マッピング
+            for i, category_key in enumerate(self.settings.category_row.keys):
+                if category_key in header_str:
+                    mapping[f'category_{i}'] = col
+                    break
+            
+            # その他の設定のキーと照合
+            configs = [
+                ('step', self.settings.step_row),
+                ('tobe', self.settings.tobe_row),
+                ('test_type', self.settings.test_type_row),
+                ('priority', self.settings.priority_row),
+                ('precondition', self.settings.precondition_row),
+                ('note', self.settings.note_row),
+            ]
+            
+            for config_name, config in configs:
+                for key in config.keys:
+                    if key in header_str:
+                        # 除外チェック
+                        if header_str in config.ignores:
+                            continue
+                        mapping[config_name] = col
+                        break
+        
+        return mapping
+    
+    def _get_data_rows(self, worksheet, header_row: int, column_mapping: Dict[str, int]) -> List[Dict]:
+        """データ行を取得"""
+        data_rows = []
+        
+        # 期待結果列の最後の行を検索
+        end_row = self._find_end_row(worksheet, column_mapping.get('tobe', 1))
+        
+        # データ行を取得
+        for row in range(header_row + 1, end_row + 1):
+            row_data = {'row': row}
+            
+            # 各列の値を取得
+            for col_name, col_num in column_mapping.items():
+                cell_value = worksheet.cell(row=row, column=col_num).value
+                if cell_value is not None:
+                    row_data[col_name] = str(cell_value).strip()
+                else:
+                    row_data[col_name] = ""
+            
+            # カテゴリを統合
+            category_values = []
+            for i in range(len(self.settings.category_row.keys)):
+                category_key = f'category_{i}'
+                if category_key in row_data:
+                    category_values.append(row_data[category_key])
+                else:
+                    category_values.append("")
+            row_data['category'] = category_values
+            
+            # 期待結果が空でない行のみ追加
+            if row_data.get('tobe', '').strip():
+                data_rows.append(row_data)
+        
+        return data_rows
+    
+    def _find_end_row(self, worksheet, tobe_col: int) -> int:
+        """期待結果列の最後の行を検索"""
+        # ヘッダー行を取得
+        header_row = self._find_header_row(worksheet)
+        if header_row is None:
+            return 1
+        
+        end_row = header_row + 1
+        
+        # 下から上に検索
+        for row in range(worksheet.max_row, header_row, -1):
+            cell_value = worksheet.cell(row=row, column=tobe_col).value
+            if cell_value and str(cell_value).strip():
+                end_row = row
+                break
+        
+        return end_row
+    
+    def _create_test_case(self, row_data: Dict, column_mapping: Dict[str, int], sheet_name: str) -> Optional[TestCase]:
+        """テストケースを作成"""
+        # カテゴリを取得（既にリスト形式で統合済み）
+        category = row_data.get('category', [])
+        
+        # 手順を分割・正規化
+        steps = self._parse_steps(row_data.get('step', ''))
+        
+        # 期待結果を取得
+        expect_text = row_data.get('tobe', '')
+        
+        # ステップと期待結果を結合
+        if len(steps) == 1 and not steps[0].expect:
+            steps[0].expect = expect_text
+        elif len(steps) > 1:
+            # 複数ステップの場合、期待結果を分割
+            expect_steps = self._split_expect_text(expect_text, len(steps))
+            for i, step in enumerate(steps):
+                if i < len(expect_steps):
+                    step.expect = expect_steps[i]
+        
+        # 前提条件を取得・処理
+        preconditions = self._parse_preconditions(row_data.get('precondition', ''))
+        
+        # テストケースIDを生成（仮）
+        test_id = f"{self.settings.id_prefix}-{row_data['row']:03d}"
+        
+        return TestCase(
+            id=test_id,
+            title="",
+            category=category,
+            type=row_data.get('test_type', ''),
+            priority=row_data.get('priority', ''),
+            preconditions=preconditions,
+            steps=steps,
+            notes=row_data.get('note', ''),
+            source={
+                'file': sheet_name,
+                'sheet': sheet_name,
+                'row': row_data['row']
+            }
+        )
+    
+    
+    def _parse_steps(self, step_text: str) -> List[TestStep]:
+        """手順を分割・正規化"""
+        if not step_text:
+            return [TestStep(num=1, action="", expect="")]
+        
+        # 改行で分割
+        step_lines = step_text.split('\n')
+        steps = []
+        
+        for i, line in enumerate(step_lines, 1):
+            line = line.strip()
+            if not line:
+                continue
+            
+            # 番号正規化
+            normalized_line = self._normalize_step_number(line, i)
+            
+            steps.append(TestStep(
+                num=i,
+                action=normalized_line,
+                expect=""
+            ))
+        
+        return steps if steps else [TestStep(num=1, action="", expect="")]
+    
+    def _parse_preconditions(self, precondition_text: str) -> List[str]:
+        """前提条件を解析"""
+        if not precondition_text:
+            return []
+        
+        # 改行で分割して、空でない行のみを返す
+        preconditions = []
+        for line in precondition_text.split('\n'):
+            line = line.strip()
+            if line:
+                preconditions.append(line)
+        
+        return preconditions
+    
+    def _normalize_step_number(self, text: str, default_num: int) -> str:
+        """ステップ番号を正規化"""
+        # 番号パターンを検索
+        pattern = r'^[\d０-９]+[\.:：．、]\s*'
+        match = re.match(pattern, text)
+        
+        if match:
+            # 既存の番号を置換
+            return f"{default_num}{self.settings.step_number_delimiter} {text[match.end():].strip()}"
+        else:
+            # 番号を追加
+            return f"{default_num}{self.settings.step_number_delimiter} {text}"
+    
+    def _split_expect_text(self, expect_text: str, step_count: int) -> List[str]:
+        """期待結果テキストを分割"""
+        if not expect_text:
+            return [""] * step_count
+        
+        # 改行で分割
+        parts = expect_text.split('\n')
+        
+        # ステップ数に合わせて調整
+        if len(parts) >= step_count:
+            return parts[:step_count]
+        else:
+            # 不足分は空文字で埋める
+            return parts + [""] * (step_count - len(parts))

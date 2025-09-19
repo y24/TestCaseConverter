@@ -1,0 +1,253 @@
+"""
+YAMLレンダラー
+"""
+import yaml
+import logging
+from typing import Dict, List, Any
+from ..models import ConversionSettings, FileData, TestCase, SplitMode
+
+logger = logging.getLogger(__name__)
+
+
+class YamlRenderer:
+    """YAMLレンダラー"""
+    
+    def __init__(self, settings: ConversionSettings):
+        self.settings = settings
+    
+    def render(self, file_data_list: List[FileData]) -> Dict[str, str]:
+        """YAML形式でレンダリング"""
+        rendered_files = {}
+        
+        if self.settings.split_mode == SplitMode.PER_EXCEL:
+            rendered_files = self._render_per_excel(file_data_list)
+        elif self.settings.split_mode == SplitMode.PER_SHEET:
+            rendered_files = self._render_per_sheet(file_data_list)
+        elif self.settings.split_mode == SplitMode.PER_CATEGORY:
+            rendered_files = self._render_per_category(file_data_list)
+        elif self.settings.split_mode == SplitMode.PER_CASE:
+            rendered_files = self._render_per_case(file_data_list)
+        
+        return rendered_files
+    
+    def _render_per_excel(self, file_data_list: List[FileData]) -> Dict[str, str]:
+        """Excel単位でレンダリング"""
+        rendered_files = {}
+        
+        for file_data in file_data_list:
+            all_test_cases = []
+            meta_info = {
+                'output_format': 'yaml',
+                'split_mode': 'per_excel',
+                'id_prefix': self.settings.id_prefix,
+                'id_padding': self.settings.id_padding,
+                'settings_profile': 'default',
+                'source_files': [file_data.filename],
+                'sheets_included': []
+            }
+            
+            for sheet_data in file_data.sheets:
+                all_test_cases.extend(sheet_data.items)
+                meta_info['sheets_included'].append(sheet_data.sheet_name)
+            
+            # YAMLアンカーを生成
+            if self.settings.allow_yaml_anchors:
+                all_test_cases = self._add_yaml_anchors(all_test_cases)
+            
+            # レンダリング
+            yaml_content = self._render_test_cases(all_test_cases, meta_info)
+            
+            # ファイル名を生成
+            filename = self._sanitize_filename(file_data.filename)
+            output_filename = f"{filename}.yaml"
+            
+            rendered_files[output_filename] = yaml_content
+        
+        return rendered_files
+    
+    def _render_per_sheet(self, file_data_list: List[FileData]) -> Dict[str, str]:
+        """シート単位でレンダリング"""
+        rendered_files = {}
+        
+        for file_data in file_data_list:
+            for sheet_data in file_data.sheets:
+                meta_info = {
+                    'output_format': 'yaml',
+                    'split_mode': 'per_sheet',
+                    'id_prefix': self.settings.id_prefix,
+                    'id_padding': self.settings.id_padding,
+                    'settings_profile': 'default',
+                    'source_files': [file_data.filename],
+                    'sheets_included': [sheet_data.sheet_name]
+                }
+                
+                # YAMLアンカーを生成
+                if self.settings.allow_yaml_anchors:
+                    test_cases = self._add_yaml_anchors(sheet_data.items)
+                else:
+                    test_cases = sheet_data.items
+                
+                # レンダリング
+                yaml_content = self._render_test_cases(test_cases, meta_info)
+                
+                # ファイル名を生成
+                filename = self._sanitize_filename(file_data.filename)
+                sheet_name = self._sanitize_filename(sheet_data.sheet_name)
+                output_filename = f"{filename}__{sheet_name}.yaml"
+                
+                rendered_files[output_filename] = yaml_content
+        
+        return rendered_files
+    
+    def _render_per_category(self, file_data_list: List[FileData]) -> Dict[str, str]:
+        """カテゴリ単位でレンダリング"""
+        rendered_files = {}
+        
+        for file_data in file_data_list:
+            for sheet_data in file_data.sheets:
+                # カテゴリごとにグループ化
+                category_groups = self._group_by_category(sheet_data.items)
+                
+                for category, test_cases in category_groups.items():
+                    meta_info = {
+                        'output_format': 'yaml',
+                        'split_mode': 'per_category',
+                        'id_prefix': self.settings.id_prefix,
+                        'id_padding': self.settings.id_padding,
+                        'settings_profile': 'default',
+                        'source_files': [file_data.filename],
+                        'sheets_included': [sheet_data.sheet_name]
+                    }
+                    
+                    # レンダリング
+                    yaml_content = self._render_test_cases(test_cases, meta_info)
+                    
+                    # ファイル名を生成
+                    filename = self._sanitize_filename(file_data.filename)
+                    sheet_name = self._sanitize_filename(sheet_data.sheet_name)
+                    category_name = self._sanitize_filename(category)
+                    output_filename = f"{filename}__{sheet_name}__{category_name}.yaml"
+                    
+                    rendered_files[output_filename] = yaml_content
+        
+        return rendered_files
+    
+    def _render_per_case(self, file_data_list: List[FileData]) -> Dict[str, str]:
+        """ケース単位でレンダリング"""
+        rendered_files = {}
+        
+        for file_data in file_data_list:
+            for sheet_data in file_data.sheets:
+                for test_case in sheet_data.items:
+                    meta_info = {
+                        'output_format': 'yaml',
+                        'split_mode': 'per_case',
+                        'id_prefix': self.settings.id_prefix,
+                        'id_padding': self.settings.id_padding,
+                        'settings_profile': 'default',
+                        'source_files': [file_data.filename],
+                        'sheets_included': [sheet_data.sheet_name]
+                    }
+                    
+                    # レンダリング
+                    yaml_content = self._render_test_cases([test_case], meta_info)
+                    
+                    # ファイル名を生成
+                    sheet_name = self._sanitize_filename(sheet_data.sheet_name)
+                    output_filename = f"{test_case.id}__{sheet_name}.yaml"
+                    
+                    rendered_files[output_filename] = yaml_content
+        
+        return rendered_files
+    
+    def _render_test_cases(self, test_cases: List[TestCase], meta_info: Dict[str, Any]) -> str:
+        """テストケースをYAML形式でレンダリング"""
+        yaml_data = []
+        
+        for test_case in test_cases:
+            case_data = {
+                'id': test_case.id,
+                'title': test_case.title,
+                'category': test_case.category,
+                'type': test_case.type,
+                'priority': test_case.priority,
+                'preconditions': test_case.preconditions,
+                'steps': [
+                    {
+                        'num': step.num,
+                        'action': step.action,
+                        'expect': step.expect
+                    }
+                    for step in test_case.steps
+                ],
+                'notes': test_case.notes,
+                'source': test_case.source
+            }
+            yaml_data.append(case_data)
+        
+        # メタ情報を最後に追加
+        yaml_data.append({'meta': meta_info})
+        
+        # YAML文字列に変換
+        yaml_content = yaml.dump(
+            yaml_data,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            indent=2
+        )
+        
+        return yaml_content
+    
+    def _add_yaml_anchors(self, test_cases: List[TestCase]) -> List[TestCase]:
+        """YAMLアンカーを追加"""
+        # 前提条件の共通パターンを検索
+        preconditions_map = {}
+        anchor_counter = 1
+        
+        for test_case in test_cases:
+            # 前提条件が空の場合はアンカーを追加しない
+            if not test_case.preconditions or all(not cond.strip() for cond in test_case.preconditions):
+                continue
+                
+            preconditions_key = tuple(test_case.preconditions)
+            if preconditions_key in preconditions_map:
+                # 既存のアンカーを使用
+                anchor_name = preconditions_map[preconditions_key]
+                test_case.preconditions = [f"*{anchor_name}"]
+            else:
+                # 新しいアンカーを作成
+                anchor_name = f"precondition_{anchor_counter}"
+                preconditions_map[preconditions_key] = anchor_name
+                test_case.preconditions = [f"&{anchor_name}"] + list(preconditions_key)
+                anchor_counter += 1
+        
+        return test_cases
+    
+    def _group_by_category(self, test_cases: List[TestCase]) -> Dict[str, List[TestCase]]:
+        """カテゴリごとにグループ化"""
+        groups = {}
+        
+        for test_case in test_cases:
+            # 大項目（最初のカテゴリ）でグループ化
+            category_key = test_case.category[0] if test_case.category else "未分類"
+            
+            if category_key not in groups:
+                groups[category_key] = []
+            
+            groups[category_key].append(test_case)
+        
+        return groups
+    
+    def _sanitize_filename(self, filename: str) -> str:
+        """ファイル名を安全化"""
+        # 禁止文字を置換
+        forbidden_chars = r'[<>:"/\\|?*]'
+        import re
+        sanitized = re.sub(forbidden_chars, '_', filename)
+        
+        # 長さ制限（100文字）
+        if len(sanitized) > 100:
+            sanitized = sanitized[:100]
+        
+        return sanitized
