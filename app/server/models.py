@@ -64,11 +64,6 @@ class ConversionSettings(BaseModel):
     pad_category_levels: bool = Field(default=True, description="カテゴリレベルパディング")
 
 
-class TestStep(BaseModel):
-    """テストステップ"""
-    num: int = Field(description="ステップ番号")
-    action: str = Field(description="アクション")
-    expect: str = Field(description="期待結果")
 
 
 class TestCase(BaseModel):
@@ -79,7 +74,7 @@ class TestCase(BaseModel):
     type: str = Field(default="", description="テスト種別")
     priority: str = Field(default="", description="優先度")
     preconditions: List[str] = Field(default_factory=list, description="前提条件")
-    steps: List[TestStep] = Field(description="テストステップ")
+    steps: str = Field(description="テストステップ")
     notes: str = Field(default="", description="備考")
     source: Dict[str, Any] = Field(description="ソース情報")
 

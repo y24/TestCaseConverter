@@ -62,8 +62,8 @@ class DataTransformer:
         # カテゴリ正規化
         normalized_category = self._normalize_category(test_case.category)
         
-        # ステップ正規化
-        normalized_steps = self._normalize_steps(test_case.steps)
+        # ステップ正規化（文字列として処理）
+        normalized_steps = self._normalize_string(test_case.steps)
         
         # 文字列正規化
         normalized_title = self._normalize_string(test_case.title)
@@ -103,24 +103,6 @@ class DataTransformer:
         
         return normalized
     
-    def _normalize_steps(self, steps: List) -> List:
-        """ステップを正規化"""
-        normalized_steps = []
-        
-        for i, step in enumerate(steps, 1):
-            normalized_action = self._normalize_string(step.action)
-            normalized_expect = self._normalize_string(step.expect)
-            
-            # ステップ番号を正規化
-            normalized_action = self._normalize_step_number(normalized_action, i)
-            
-            normalized_steps.append(type(step)(
-                num=i,
-                action=normalized_action,
-                expect=normalized_expect
-            ))
-        
-        return normalized_steps
     
     def _normalize_string(self, text: str) -> str:
         """文字列を正規化"""
@@ -150,21 +132,6 @@ class DataTransformer:
         
         return text
     
-    def _normalize_step_number(self, text: str, step_num: int) -> str:
-        """ステップ番号を正規化"""
-        if not text:
-            return f"{step_num}{self.settings.step_number_delimiter} "
-        
-        # 既存の番号パターンを検索
-        pattern = r'^[\d０-９]+[\.:：．、]\s*'
-        match = re.match(pattern, text)
-        
-        if match:
-            # 既存の番号を置換
-            return f"{step_num}{self.settings.step_number_delimiter} {text[match.end():].strip()}"
-        else:
-            # 番号を追加
-            return f"{step_num}{self.settings.step_number_delimiter} {text}"
     
     def _regenerate_ids(self, test_cases: List[TestCase]) -> List[TestCase]:
         """IDを再生成"""

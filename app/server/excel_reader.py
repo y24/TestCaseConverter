@@ -10,7 +10,7 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 from .models import (
-    ConversionSettings, FileData, SheetData, TestCase, TestStep
+    ConversionSettings, FileData, SheetData, TestCase
 )
 
 logger = logging.getLogger(__name__)
@@ -294,21 +294,8 @@ class ExcelReader:
         # カテゴリを取得（既にリスト形式で統合済み）
         category = row_data.get('category', [])
         
-        # 手順を分割・正規化
-        steps = self._parse_steps(row_data.get('step', ''))
-        
-        # 期待結果を取得
-        expect_text = row_data.get('tobe', '')
-        
-        # ステップと期待結果を結合
-        if len(steps) == 1 and not steps[0].expect:
-            steps[0].expect = expect_text
-        elif len(steps) > 1:
-            # 複数ステップの場合、期待結果を分割
-            expect_steps = self._split_expect_text(expect_text, len(steps))
-            for i, step in enumerate(steps):
-                if i < len(expect_steps):
-                    step.expect = expect_steps[i]
+        # 手順を文字列として取得
+        steps = row_data.get('step', '')
         
         # 前提条件を取得・処理
         preconditions = self._parse_preconditions(row_data.get('precondition', ''))
@@ -333,30 +320,6 @@ class ExcelReader:
         )
     
     
-    def _parse_steps(self, step_text: str) -> List[TestStep]:
-        """手順を分割・正規化"""
-        if not step_text:
-            return [TestStep(num=1, action="", expect="")]
-        
-        # 改行で分割
-        step_lines = step_text.split('\n')
-        steps = []
-        
-        for i, line in enumerate(step_lines, 1):
-            line = line.strip()
-            if not line:
-                continue
-            
-            # 番号正規化
-            normalized_line = self._normalize_step_number(line, i)
-            
-            steps.append(TestStep(
-                num=i,
-                action=normalized_line,
-                expect=""
-            ))
-        
-        return steps if steps else [TestStep(num=1, action="", expect="")]
     
     def _parse_preconditions(self, precondition_text: str) -> List[str]:
         """前提条件を解析"""
@@ -372,30 +335,4 @@ class ExcelReader:
         
         return preconditions
     
-    def _normalize_step_number(self, text: str, default_num: int) -> str:
-        """ステップ番号を正規化"""
-        # 番号パターンを検索
-        pattern = r'^[\d０-９]+[\.:：．、]\s*'
-        match = re.match(pattern, text)
-        
-        if match:
-            # 既存の番号を置換
-            return f"{default_num}{self.settings.step_number_delimiter} {text[match.end():].strip()}"
-        else:
-            # 番号を追加
-            return f"{default_num}{self.settings.step_number_delimiter} {text}"
     
-    def _split_expect_text(self, expect_text: str, step_count: int) -> List[str]:
-        """期待結果テキストを分割"""
-        if not expect_text:
-            return [""] * step_count
-        
-        # 改行で分割
-        parts = expect_text.split('\n')
-        
-        # ステップ数に合わせて調整
-        if len(parts) >= step_count:
-            return parts[:step_count]
-        else:
-            # 不足分は空文字で埋める
-            return parts + [""] * (step_count - len(parts))

@@ -6,6 +6,8 @@ import logging
 from typing import Dict, List, Any
 from ..models import ConversionSettings, FileData, TestCase, SplitMode
 
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -165,14 +167,7 @@ class YamlRenderer:
                 'type': test_case.type,
                 'priority': test_case.priority,
                 'preconditions': test_case.preconditions,
-                'steps': [
-                    {
-                        'num': step.num,
-                        'action': step.action,
-                        'expect': step.expect
-                    }
-                    for step in test_case.steps
-                ],
+                'steps': test_case.steps,  # 文字列をそのまま使用
                 'notes': test_case.notes,
                 'source': test_case.source
             }
