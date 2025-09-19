@@ -27,14 +27,41 @@ function setupEventListeners() {
     
     fileInput.addEventListener('change', handleFileSelect);
     
-    // 設定変更
-    const settingInputs = document.querySelectorAll('.sidebar-content input, .sidebar-content select');
-    settingInputs.forEach(input => {
-        input.addEventListener('change', updateSettings);
-    });
+    // 設定変更 - 自動変換対応
+    setupAutoConvertListeners();
     
     // プレビューファイル選択
     document.getElementById('preview-file-select').addEventListener('change', handlePreviewFileChange);
+}
+
+// 自動変換用のイベントリスナー設定
+function setupAutoConvertListeners() {
+    // プルダウン（select）の変更時
+    const selectElements = document.querySelectorAll('.sidebar-content select');
+    selectElements.forEach(select => {
+        select.addEventListener('change', () => {
+            updateSettings();
+            autoConvert();
+        });
+    });
+    
+    // チェックボックスの変更時
+    const checkboxElements = document.querySelectorAll('.sidebar-content input[type="checkbox"]');
+    checkboxElements.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            updateSettings();
+            autoConvert();
+        });
+    });
+    
+    // テキストボックスのフォーカスOFF時
+    const textInputs = document.querySelectorAll('.sidebar-content input[type="text"], .sidebar-content input[type="number"]');
+    textInputs.forEach(input => {
+        input.addEventListener('blur', () => {
+            updateSettings();
+            autoConvert();
+        });
+    });
 }
 
 // localStorageから設定を読み込み
@@ -173,6 +200,11 @@ function addFiles(files) {
     uploadedFiles = uploadedFiles.concat(processedFiles);
     updateFileList();
     updateConvertButton();
+    
+    // ファイル追加時に自動変換実行
+    if (processedFiles.length > 0) {
+        autoConvert();
+    }
 }
 
 // ファイルリスト更新
@@ -233,6 +265,15 @@ function removeFile(index) {
     uploadedFiles.splice(index, 1);
     updateFileList();
     updateConvertButton();
+    
+    // ファイルが0件になった場合は初期表示に戻す
+    if (uploadedFiles.length === 0) {
+        resetToInitialState();
+        return;
+    }
+    
+    // ファイル削除時に自動変換実行
+    autoConvert();
 }
 
 // ファイルサイズフォーマット
@@ -248,6 +289,87 @@ function formatFileSize(bytes) {
 function updateConvertButton() {
     const convertBtn = document.getElementById('convert-btn');
     convertBtn.disabled = uploadedFiles.length === 0;
+}
+
+// 初期状態に戻す
+function resetToInitialState() {
+    // プレビューセクションを非表示
+    const previewSection = document.getElementById('preview-section');
+    previewSection.style.display = 'none';
+    
+    // 変換結果をクリア
+    conversionResult = null;
+    
+    // エラーメッセージを非表示
+    hideError();
+    
+    // ローディングを非表示
+    showLoading(false);
+    
+    // プレビューファイル選択をリセット
+    const fileSelect = document.getElementById('preview-file-select');
+    fileSelect.innerHTML = '<option value="">ファイルを選択してください</option>';
+    fileSelect.style.display = 'block';
+    
+    // ファイル名表示を非表示
+    const fileNameDisplay = document.getElementById('file-name-display');
+    if (fileNameDisplay) {
+        fileNameDisplay.style.display = 'none';
+    }
+    
+    // ダウンロードボタンのテキストを元に戻す
+    const downloadBtn = document.querySelector('.preview-controls button');
+    if (downloadBtn) {
+        downloadBtn.textContent = 'すべてダウンロード (ZIP)';
+    }
+    
+    // プレビュー内容をクリア
+    const previewContent = document.getElementById('preview-content');
+    if (previewContent) {
+        previewContent.textContent = '';
+    }
+}
+
+// 自動変換実行
+async function autoConvert() {
+    // ファイルがアップロードされていない場合は何もしない
+    if (uploadedFiles.length === 0) {
+        return;
+    }
+    
+    try {
+        updateSettings();
+        
+        // ローディング表示
+        showLoading(true);
+        hideError();
+        
+        // フォームデータ作成
+        const formData = new FormData();
+        uploadedFiles.forEach(file => {
+            formData.append('files', file);
+        });
+        formData.append('settings_json', JSON.stringify(currentSettings));
+        
+        // 変換実行
+        const response = await fetch('/api/convert', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || '変換に失敗しました');
+        }
+        
+        conversionResult = await response.json();
+        showPreview();
+        
+    } catch (error) {
+        showError('自動変換に失敗しました: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
 }
 
 // サイドメニュー切り替え
@@ -517,6 +639,14 @@ function hideError() {
 
 // デフォルト設定に戻す
 function resetToDefaultSettings() {
+    // 確認ダイアログを表示
+    const confirmed = confirm('設定をデフォルトに戻しますか？\n\nこの操作により、現在の設定はすべて失われます。');
+    
+    if (!confirmed) {
+        // キャンセルがクリックされた場合は何もしない
+        return;
+    }
+    
     try {
         // localStorageから設定を削除
         localStorage.removeItem('testCaseConverter_settings');

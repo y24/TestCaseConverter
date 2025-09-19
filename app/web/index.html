@@ -112,16 +112,18 @@
                 <div class="file-list" id="file-list"></div>
             </section>
 
-            <!-- 変換ボタン -->
-            <section class="convert-section">
+            <!-- 変換ボタン（自動変換のため非表示） -->
+            <section class="convert-section" style="display: none;">
                 <button type="button" id="convert-btn" onclick="convertFiles()" disabled>
                     変換実行
                 </button>
-                <div class="loading" id="loading" style="display: none;">
-                    <div class="spinner"></div>
-                    <span>変換中...</span>
-                </div>
             </section>
+
+            <!-- ローディング表示 -->
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <span>変換中...</span>
+            </div>
 
             <!-- プレビュー -->
             <section class="preview-section" id="preview-section" style="display: none;">
