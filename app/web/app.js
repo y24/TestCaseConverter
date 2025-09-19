@@ -59,7 +59,6 @@ function applySettingsToUI() {
     document.getElementById('step-delimiter').value = currentSettings.step_number_delimiter || '.';
     document.getElementById('trim-whitespaces').checked = currentSettings.trim_whitespaces !== false;
     document.getElementById('normalize-zenkaku').checked = currentSettings.normalize_zenkaku_numbers !== false;
-    document.getElementById('allow-yaml-anchors').checked = currentSettings.allow_yaml_anchors !== false;
 }
 
 // 設定更新
@@ -70,7 +69,6 @@ function updateSettings() {
         id_prefix: document.getElementById('id-prefix').value,
         id_padding: parseInt(document.getElementById('id-padding').value),
         force_id_regenerate: false,
-        allow_yaml_anchors: document.getElementById('allow-yaml-anchors').checked,
         sheet_search_keys: currentSettings.sheet_search_keys || ["テスト項目"],
         sheet_search_ignores: currentSettings.sheet_search_ignores || [],
         header: currentSettings.header || { search_col: "A", search_key: "#" },

@@ -1,0 +1,68 @@
+{
+  "output_format": "yaml",
+  "split_mode": "per_sheet",
+  "id_prefix": "TC",
+  "id_padding": 3,
+  "force_id_regenerate": false,
+  "sheet_search_keys": [
+    "テスト項目"
+  ],
+  "sheet_search_ignores": [],
+  "header": {
+    "search_col": "A",
+    "search_key": "#"
+  },
+  "category_row": {
+    "keys": [
+      "大項目",
+      "中項目",
+      "小項目1",
+      "小項目2"
+    ],
+    "ignores": []
+  },
+  "step_row": {
+    "keys": [
+      "手順"
+    ],
+    "ignores": []
+  },
+  "tobe_row": {
+    "keys": [
+      "期待結果"
+    ],
+    "ignores": [
+      "実施"
+    ]
+  },
+  "test_type_row": {
+    "keys": [
+      "テスト種別"
+    ],
+    "ignores": []
+  },
+  "priority_row": {
+    "keys": [
+      "優先度"
+    ],
+    "ignores": []
+  },
+  "precondition_row": {
+    "keys": [
+      "前提条件"
+    ],
+    "ignores": []
+  },
+  "note_row": {
+    "keys": [
+      "備考",
+      "補足情報"
+    ],
+    "ignores": []
+  },
+  "step_number_delimiter": ".",
+  "trim_whitespaces": true,
+  "normalize_zenkaku_numbers": true,
+  "category_display_compress": false,
+  "pad_category_levels": true
+}

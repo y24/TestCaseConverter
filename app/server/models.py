@@ -39,7 +39,6 @@ class ConversionSettings(BaseModel):
     id_prefix: str = Field(default="TC", description="IDプレフィックス")
     id_padding: int = Field(default=3, description="ID桁数")
     force_id_regenerate: bool = Field(default=False, description="ID強制再生成")
-    allow_yaml_anchors: bool = Field(default=True, description="YAMLアンカー許可")
     
     # シート設定
     sheet_search_keys: List[str] = Field(default_factory=lambda: ["テスト項目"])

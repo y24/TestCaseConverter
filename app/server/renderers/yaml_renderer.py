@@ -53,10 +53,6 @@ class YamlRenderer:
                 all_test_cases.extend(sheet_data.items)
                 meta_info['sheets_included'].append(sheet_data.sheet_name)
             
-            # YAMLアンカーを生成
-            if self.settings.allow_yaml_anchors:
-                all_test_cases = self._add_yaml_anchors(all_test_cases)
-            
             # レンダリング
             yaml_content = self._render_test_cases(all_test_cases, meta_info)
             
@@ -84,14 +80,8 @@ class YamlRenderer:
                     'sheets_included': [sheet_data.sheet_name]
                 }
                 
-                # YAMLアンカーを生成
-                if self.settings.allow_yaml_anchors:
-                    test_cases = self._add_yaml_anchors(sheet_data.items)
-                else:
-                    test_cases = sheet_data.items
-                
                 # レンダリング
-                yaml_content = self._render_test_cases(test_cases, meta_info)
+                yaml_content = self._render_test_cases(sheet_data.items, meta_info)
                 
                 # ファイル名を生成
                 filename = self._sanitize_filename(file_data.filename)
@@ -201,31 +191,6 @@ class YamlRenderer:
         )
         
         return yaml_content
-    
-    def _add_yaml_anchors(self, test_cases: List[TestCase]) -> List[TestCase]:
-        """YAMLアンカーを追加"""
-        # 前提条件の共通パターンを検索
-        preconditions_map = {}
-        anchor_counter = 1
-        
-        for test_case in test_cases:
-            # 前提条件が空の場合はアンカーを追加しない
-            if not test_case.preconditions or all(not cond.strip() for cond in test_case.preconditions):
-                continue
-                
-            preconditions_key = tuple(test_case.preconditions)
-            if preconditions_key in preconditions_map:
-                # 既存のアンカーを使用
-                anchor_name = preconditions_map[preconditions_key]
-                test_case.preconditions = [f"*{anchor_name}"]
-            else:
-                # 新しいアンカーを作成
-                anchor_name = f"precondition_{anchor_counter}"
-                preconditions_map[preconditions_key] = anchor_name
-                test_case.preconditions = [f"&{anchor_name}"] + list(preconditions_key)
-                anchor_counter += 1
-        
-        return test_cases
     
     def _group_by_category(self, test_cases: List[TestCase]) -> Dict[str, List[TestCase]]:
         """カテゴリごとにグループ化"""
