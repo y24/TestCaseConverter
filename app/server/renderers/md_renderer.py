@@ -167,10 +167,7 @@ class MarkdownRenderer:
         
         # 前提条件
         if test_case.preconditions:
-            md_content += "- preconditions:\n"
-            for precondition in test_case.preconditions:
-                if precondition:
-                    md_content += f"  - {precondition}\n"
+            md_content += f"- preconditions: {test_case.preconditions}\n"
         else:
             md_content += "- preconditions:\n"
         
