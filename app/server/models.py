@@ -14,7 +14,6 @@ class OutputFormat(str, Enum):
 
 class SplitMode(str, Enum):
     """分割モード"""
-    PER_EXCEL = "per_excel"
     PER_SHEET = "per_sheet"
     PER_CATEGORY = "per_category"
     PER_CASE = "per_case"

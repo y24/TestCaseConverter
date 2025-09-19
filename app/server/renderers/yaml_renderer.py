@@ -21,9 +21,7 @@ class YamlRenderer:
         """YAML形式でレンダリング"""
         rendered_files = {}
         
-        if self.settings.split_mode == SplitMode.PER_EXCEL:
-            rendered_files = self._render_per_excel(file_data_list)
-        elif self.settings.split_mode == SplitMode.PER_SHEET:
+        if self.settings.split_mode == SplitMode.PER_SHEET:
             rendered_files = self._render_per_sheet(file_data_list)
         elif self.settings.split_mode == SplitMode.PER_CATEGORY:
             rendered_files = self._render_per_category(file_data_list)
@@ -35,36 +33,6 @@ class YamlRenderer:
         
         return rendered_files
     
-    def _render_per_excel(self, file_data_list: List[FileData]) -> Dict[str, str]:
-        """Excel単位でレンダリング"""
-        rendered_files = {}
-        
-        for file_data in file_data_list:
-            all_test_cases = []
-            meta_info = {
-                'output_format': 'yaml',
-                'split_mode': 'per_excel',
-                'id_prefix': self.settings.id_prefix,
-                'id_padding': self.settings.id_padding,
-                'settings_profile': 'default',
-                'source_files': [file_data.filename],
-                'sheets_included': []
-            }
-            
-            for sheet_data in file_data.sheets:
-                all_test_cases.extend(sheet_data.items)
-                meta_info['sheets_included'].append(sheet_data.sheet_name)
-            
-            # レンダリング
-            yaml_content = self._render_test_cases(all_test_cases, meta_info)
-            
-            # ファイル名を生成
-            filename = self._sanitize_filename(file_data.filename)
-            output_filename = f"{filename}.yaml"
-            
-            rendered_files[output_filename] = yaml_content
-        
-        return rendered_files
     
     def _render_per_sheet(self, file_data_list: List[FileData]) -> Dict[str, str]:
         """シート単位でレンダリング"""

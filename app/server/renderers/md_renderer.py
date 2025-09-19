@@ -18,9 +18,7 @@ class MarkdownRenderer:
         """Markdown形式でレンダリング"""
         rendered_files = {}
         
-        if self.settings.split_mode == SplitMode.PER_EXCEL:
-            rendered_files = self._render_per_excel(file_data_list)
-        elif self.settings.split_mode == SplitMode.PER_SHEET:
+        if self.settings.split_mode == SplitMode.PER_SHEET:
             rendered_files = self._render_per_sheet(file_data_list)
         elif self.settings.split_mode == SplitMode.PER_CATEGORY:
             rendered_files = self._render_per_category(file_data_list)
@@ -32,28 +30,6 @@ class MarkdownRenderer:
         
         return rendered_files
     
-    def _render_per_excel(self, file_data_list: List[FileData]) -> Dict[str, str]:
-        """Excel単位でレンダリング"""
-        rendered_files = {}
-        
-        for file_data in file_data_list:
-            all_test_cases = []
-            sheet_names = []
-            
-            for sheet_data in file_data.sheets:
-                all_test_cases.extend(sheet_data.items)
-                sheet_names.append(sheet_data.sheet_name)
-            
-            # レンダリング
-            md_content = self._render_test_cases(all_test_cases, file_data.filename, sheet_names)
-            
-            # ファイル名を生成
-            filename = self._sanitize_filename(file_data.filename)
-            output_filename = f"{filename}.md"
-            
-            rendered_files[output_filename] = md_content
-        
-        return rendered_files
     
     def _render_per_sheet(self, file_data_list: List[FileData]) -> Dict[str, str]:
         """シート単位でレンダリング"""
