@@ -31,9 +31,7 @@
     "keys": [
       "期待結果"
     ],
-    "ignores": [
-      "実施"
-    ]
+    "ignores": []
   },
   "test_type_row": {
     "keys": [

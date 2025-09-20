@@ -107,6 +107,7 @@ async def convert_files(
         # 設定解析
         import json
         settings_data = json.loads(settings_json)
+        logger.info(f"受信した設定データ: {settings_data}")
         
         # 新しい階層構造に対応
         if '出力' in settings_data:
@@ -170,6 +171,12 @@ async def convert_files(
         # データ変換
         transformer = DataTransformer(settings)
         transformed_data = transformer.transform(file_data_list)
+        
+        # 変換結果の検証
+        total_items = sum(len(sheet.items) for file_data in transformed_data for sheet in file_data.sheets)
+        if total_items == 0:
+            # 変換結果が空の場合はエラー
+            raise HTTPException(status_code=400, detail="変換結果が空です。設定を確認してください。")
         
         # レンダリング
         if settings.output_format == OutputFormat.YAML:

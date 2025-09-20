@@ -58,8 +58,19 @@ function setupAutoConvertListeners() {
     const textInputs = document.querySelectorAll('.sidebar-content input[type="text"], .sidebar-content input[type="number"]');
     textInputs.forEach(input => {
         input.addEventListener('blur', () => {
+            console.log('テキストボックス blur イベント:', input.id);
             updateSettings();
             autoConvert();
+        });
+        // 入力中にもリアルタイムで変換（デバウンス付き）
+        let timeoutId;
+        input.addEventListener('input', () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                console.log('テキストボックス input イベント（デバウンス後）:', input.id);
+                updateSettings();
+                autoConvert();
+            }, 500); // 500ms後に実行
         });
     });
 }
@@ -117,17 +128,54 @@ function applySettingsToUI() {
     const caseIdSettings = currentSettings.ケースID || {};
     const stepSettings = currentSettings.手順 || {};
     
+    // 出力設定
     document.getElementById('output-format').value = outputSettings.output_format || currentSettings.output_format || 'markdown';
     document.getElementById('split-mode').value = outputSettings.split_mode || currentSettings.split_mode || 'per_sheet';
+    
+    // ケースID設定
     document.getElementById('id-prefix').value = caseIdSettings.id_prefix || currentSettings.id_prefix || 'TC';
     document.getElementById('id-padding').value = caseIdSettings.id_padding || currentSettings.id_padding || 3;
+    
+    // 文字列処理設定
     document.getElementById('trim-whitespaces').checked = currentSettings.trim_whitespaces !== false;
     document.getElementById('forward-fill-category').checked = currentSettings.forward_fill_category !== false;
     document.getElementById('normalize-zenkaku').checked = currentSettings.normalize_zenkaku_numbers !== false;
+    
+    // 読み取り設定
+    const header = currentSettings.header || { search_col: "A", search_key: "#" };
+    document.getElementById('header-search-col').value = header.search_col || "A";
+    document.getElementById('header-search-key').value = header.search_key || "#";
+    
+    const categoryRow = currentSettings.category_row || { keys: ["大項目", "中項目", "小項目1", "小項目2"] };
+    document.getElementById('category-keys').value = categoryRow.keys ? categoryRow.keys.join(',') : "大項目,中項目,小項目1,小項目2";
+    
+    const stepRow = currentSettings.step_row || { keys: ["手順"] };
+    document.getElementById('step-keys').value = stepRow.keys ? stepRow.keys.join(',') : "手順";
+    
+    const tobeRow = currentSettings.tobe_row || { keys: ["期待結果"], ignores: [] };
+    document.getElementById('tobe-keys').value = tobeRow.keys ? tobeRow.keys.join(',') : "期待結果";
+    
+    const testTypeRow = currentSettings.test_type_row || { keys: ["テスト種別"] };
+    document.getElementById('test-type-keys').value = testTypeRow.keys ? testTypeRow.keys.join(',') : "テスト種別";
+    
+    const priorityRow = currentSettings.priority_row || { keys: ["優先度"] };
+    document.getElementById('priority-keys').value = priorityRow.keys ? priorityRow.keys.join(',') : "優先度";
+    
+    const preconditionRow = currentSettings.precondition_row || { keys: ["前提条件"] };
+    document.getElementById('precondition-keys').value = preconditionRow.keys ? preconditionRow.keys.join(',') : "前提条件";
+    
+    const noteRow = currentSettings.note_row || { keys: ["備考", "補足情報"] };
+    document.getElementById('note-keys').value = noteRow.keys ? noteRow.keys.join(',') : "備考,補足情報";
 }
 
 // 設定更新
 function updateSettings() {
+    // カンマ区切りの文字列を配列に変換するヘルパー関数
+    function parseCommaSeparated(value) {
+        if (!value || value.trim() === '') return [];
+        return value.split(',').map(item => item.trim()).filter(item => item !== '');
+    }
+    
     // 新しい構造で設定を構築
     currentSettings = {
         出力: {
@@ -139,14 +187,44 @@ function updateSettings() {
             id_padding: parseInt(document.getElementById('id-padding').value),
             force_id_regenerate: false
         },
-        sheet_search_keys: currentSettings.sheet_search_keys || ["テスト項目"],
-        sheet_search_ignores: currentSettings.sheet_search_ignores || [],
-        header: currentSettings.header || { search_col: "A", search_key: "#" },
-        category_row: currentSettings.category_row || { keys: ["大項目", "中項目", "小項目1", "小項目2"] },
-        step_row: currentSettings.step_row || { keys: ["手順"] },
-        tobe_row: currentSettings.tobe_row || { keys: ["期待結果"], ignores: ["実施"] },
-        test_type_row: currentSettings.test_type_row || { keys: ["テスト種別"] },
-        note_row: currentSettings.note_row || { keys: ["備考", "補足情報"] },
+        sheet_search_keys: ["テスト項目"],
+        sheet_search_ignores: [],
+        
+        // 読み取り設定
+        header: {
+            search_col: document.getElementById('header-search-col').value,
+            search_key: document.getElementById('header-search-key').value
+        },
+        category_row: {
+            keys: parseCommaSeparated(document.getElementById('category-keys').value),
+            ignores: []
+        },
+        step_row: {
+            keys: parseCommaSeparated(document.getElementById('step-keys').value),
+            ignores: []
+        },
+        tobe_row: {
+            keys: parseCommaSeparated(document.getElementById('tobe-keys').value),
+            ignores: []
+        },
+        test_type_row: {
+            keys: parseCommaSeparated(document.getElementById('test-type-keys').value),
+            ignores: []
+        },
+        priority_row: {
+            keys: parseCommaSeparated(document.getElementById('priority-keys').value),
+            ignores: []
+        },
+        precondition_row: {
+            keys: parseCommaSeparated(document.getElementById('precondition-keys').value),
+            ignores: []
+        },
+        note_row: {
+            keys: parseCommaSeparated(document.getElementById('note-keys').value),
+            ignores: []
+        },
+        
+        // 処理設定
         trim_whitespaces: document.getElementById('trim-whitespaces').checked,
         normalize_zenkaku_numbers: document.getElementById('normalize-zenkaku').checked,
         category_display_compress: false,
@@ -344,6 +422,9 @@ async function autoConvert() {
         showLoading(true);
         hideError();
         
+        // 変換開始時に古い結果をクリア
+        conversionResult = null;
+        
         // フォームデータ作成
         const formData = new FormData();
         uploadedFiles.forEach(file => {
@@ -367,6 +448,9 @@ async function autoConvert() {
         
     } catch (error) {
         showError('自動変換に失敗しました: ' + error.message);
+        // 変換に失敗した場合はプレビューをクリア
+        conversionResult = null;
+        resetToInitialState();
     } finally {
         showLoading(false);
     }
