@@ -130,6 +130,18 @@ header {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
+.app-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: color 0.3s ease;
+}
+
 /* メインレイアウト */
 .main-layout {
     display: flex;
@@ -380,7 +392,7 @@ section h2 {
 
 /* ファイルリスト */
 .file-list {
-    margin-top: 20px;
+    margin-top: 0;
 }
 
 .file-item {
@@ -790,6 +802,11 @@ button:focus {
         min-width: 30px;
         min-height: 30px;
     }
+    
+    .app-title {
+        font-size: 14px;
+        letter-spacing: 0.3px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -814,5 +831,10 @@ button:focus {
         font-size: 11px;
         min-width: 28px;
         min-height: 28px;
+    }
+    
+    .app-title {
+        font-size: 13px;
+        letter-spacing: 0.2px;
     }
 }
