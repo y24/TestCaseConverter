@@ -30,7 +30,7 @@ class ExcelReader:
             if isinstance(file_source, Path):
                 # ファイルパスから読み取り
                 if not file_source.exists():
-                    logger.error(f"ファイルが存在しません: {file_source}")
+                    logger.error(f"File does not exist: {file_source}")
                     return FileData(
                         filename=filename,
                         sheets=[],
@@ -39,27 +39,27 @@ class ExcelReader:
                 
                 file_size = file_source.stat().st_size
                 if file_size == 0:
-                    logger.error(f"ファイルが空です: {file_source}")
+                    logger.error(f"File is empty: {file_source}")
                     return FileData(
                         filename=filename,
                         sheets=[],
                         warnings=[f"ファイルが空です: {file_source}"]
                     )
                 
-                logger.info(f"Excelファイル読み取り開始: {filename} (サイズ: {file_size} bytes)")
+                logger.info(f"Excel file reading started: {filename} (size: {file_size} bytes)")
                 workbook = load_workbook(file_source, data_only=True)
                 
             else:
                 # バイトデータから読み取り
                 if len(file_source) == 0:
-                    logger.error(f"ファイルが空です: {filename}")
+                    logger.error(f"File is empty: {filename}")
                     return FileData(
                         filename=filename,
                         sheets=[],
                         warnings=[f"ファイルが空です: {filename}"]
                     )
                 
-                logger.info(f"Excelファイル読み取り開始: {filename} (サイズ: {len(file_source)} bytes)")
+                logger.info(f"Excel file reading started: {filename} (size: {len(file_source)} bytes)")
                 workbook = load_workbook(io.BytesIO(file_source), data_only=True)
             
             sheets_data = []
@@ -76,7 +76,7 @@ class ExcelReader:
                     warnings=file_warnings
                 )
             
-            logger.info(f"対象シート発見: {target_sheets}")
+            logger.info(f"Target sheets found: {target_sheets}")
             
             # 各シートを処理
             for sheet_name in target_sheets:
@@ -84,10 +84,10 @@ class ExcelReader:
                     sheet_data = self._read_sheet(workbook[sheet_name], sheet_name)
                     sheets_data.append(sheet_data)
                 except Exception as e:
-                    logger.error(f"シート {sheet_name} の読み取りエラー: {e}")
+                    logger.error(f"Sheet {sheet_name} reading error: {e}")
                     file_warnings.append(f"シート {sheet_name} の読み取りに失敗: {str(e)}")
             
-            logger.info(f"Excelファイル読み取り完了: {filename} (シート数: {len(sheets_data)})")
+            logger.info(f"Excel file reading completed: {filename} (sheets: {len(sheets_data)})")
             
             return FileData(
                 filename=filename,
@@ -96,14 +96,14 @@ class ExcelReader:
             )
             
         except PermissionError as e:
-            logger.error(f"ファイル {filename} のアクセス権限エラー: {e}")
+            logger.error(f"File {filename} access permission error: {e}")
             return FileData(
                 filename=filename,
                 sheets=[],
                 warnings=[f"ファイルアクセス権限エラー: {str(e)}"]
             )
         except Exception as e:
-            logger.error(f"ファイル {filename} の読み取りエラー: {e}")
+            logger.error(f"File {filename} reading error: {e}")
             return FileData(
                 filename=filename,
                 sheets=[],
@@ -115,7 +115,7 @@ class ExcelReader:
                 try:
                     workbook.close()
                 except Exception as e:
-                    logger.warning(f"ワークブッククローズエラー: {e}")
+                    logger.warning(f"Workbook close error: {e}")
     
     def _find_target_sheets(self, workbook) -> List[str]:
         """対象シートを検索"""
@@ -169,7 +169,7 @@ class ExcelReader:
                 if test_case:
                     test_cases.append(test_case)
             except Exception as e:
-                logger.error(f"テストケース作成エラー (行 {row_data.get('row', '?')}): {e}")
+                logger.error(f"Test case creation error (row {row_data.get('row', '?')}): {e}")
                 warnings.append(f"行 {row_data.get('row', '?')} の処理に失敗: {str(e)}")
         
         return SheetData(

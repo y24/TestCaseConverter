@@ -86,7 +86,7 @@ async def save_config(
         settings_manager.save_settings(settings, profile_name)
         return {"status": "success", "message": f"設定を {profile_name} として保存しました"}
     except Exception as e:
-        logger.error(f"設定保存エラー: {e}")
+        logger.error(f"Settings save error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -164,7 +164,7 @@ async def convert_files(
                 file_data_list.append(file_data)
                 
             except Exception as e:
-                logger.error(f"ファイル {file.filename} の読み取りエラー: {e}")
+                logger.error(f"File {file.filename} reading error: {e}")
                 continue
         
         # データ変換
@@ -207,7 +207,7 @@ async def convert_files(
         return result
         
     except Exception as e:
-        logger.error(f"変換エラー: {e}")
+        logger.error(f"Conversion error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -251,7 +251,7 @@ async def download_files(
             )
             
     except Exception as e:
-        logger.error(f"ダウンロードエラー: {e}")
+        logger.error(f"Download error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
