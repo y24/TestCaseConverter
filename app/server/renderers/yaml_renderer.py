@@ -60,7 +60,7 @@ class YamlRenderer:
                 # ファイル名を生成
                 filename = self._sanitize_filename(file_data.filename)
                 sheet_name = self._sanitize_filename(sheet_data.sheet_name)
-                output_filename = f"{filename}__{sheet_name}.yaml"
+                output_filename = f"{filename}_{sheet_name}.yaml"
                 
                 rendered_files[output_filename] = yaml_content
         
@@ -97,7 +97,7 @@ class YamlRenderer:
                     filename = self._sanitize_filename(file_data.filename)
                     sheet_name = self._sanitize_filename(sheet_data.sheet_name)
                     category_name = self._sanitize_filename(category)
-                    output_filename = f"{filename}__{sheet_name}__{category_name}.yaml"
+                    output_filename = f"{filename}_{sheet_name}_{category_name}.yaml"
                     
                     rendered_files[output_filename] = yaml_content
         
@@ -129,7 +129,7 @@ class YamlRenderer:
                     
                     # ファイル名を生成
                     sheet_name = self._sanitize_filename(sheet_data.sheet_name)
-                    output_filename = f"{test_case.id}__{sheet_name}.yaml"
+                    output_filename = f"{test_case.id}_{sheet_name}.yaml"
                     
                     rendered_files[output_filename] = yaml_content
         

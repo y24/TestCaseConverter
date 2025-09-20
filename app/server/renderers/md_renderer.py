@@ -47,7 +47,7 @@ class MarkdownRenderer:
                 # ファイル名を生成
                 filename = self._sanitize_filename(file_data.filename)
                 sheet_name = self._sanitize_filename(sheet_data.sheet_name)
-                output_filename = f"{filename}__{sheet_name}.md"
+                output_filename = f"{filename}_{sheet_name}.md"
                 
                 rendered_files[output_filename] = md_content
         
@@ -75,7 +75,7 @@ class MarkdownRenderer:
                     filename = self._sanitize_filename(file_data.filename)
                     sheet_name = self._sanitize_filename(sheet_data.sheet_name)
                     category_name = self._sanitize_filename(category)
-                    output_filename = f"{filename}__{sheet_name}__{category_name}.md"
+                    output_filename = f"{filename}_{sheet_name}_{category_name}.md"
                     
                     rendered_files[output_filename] = md_content
         
@@ -97,7 +97,7 @@ class MarkdownRenderer:
                     
                     # ファイル名を生成
                     sheet_name = self._sanitize_filename(sheet_data.sheet_name)
-                    output_filename = f"{test_case.id}__{sheet_name}.md"
+                    output_filename = f"{test_case.id}_{sheet_name}.md"
                     
                     rendered_files[output_filename] = md_content
         
