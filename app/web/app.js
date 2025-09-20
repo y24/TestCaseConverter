@@ -342,6 +342,8 @@ function addFiles(files) {
 // ファイルリスト更新
 function updateFileList() {
     const fileList = document.getElementById('file-list');
+    const uploadArea = document.getElementById('upload-area');
+    
     fileList.innerHTML = '';
     
     uploadedFiles.forEach((file, index) => {
@@ -357,6 +359,13 @@ function updateFileList() {
         `;
         fileList.appendChild(fileItem);
     });
+    
+    // ファイルが1件以上ある場合はドロップエリアを非表示、0件の場合は表示
+    if (uploadedFiles.length > 0) {
+        uploadArea.style.display = 'none';
+    } else {
+        uploadArea.style.display = 'block';
+    }
 }
 
 // ファイル名の重複処理
@@ -660,7 +669,6 @@ function showPreview() {
     }
     
     previewSection.style.display = 'block';
-    previewSection.scrollIntoView({ behavior: 'smooth' });
 }
 
 // プレビューファイル変更
@@ -766,7 +774,6 @@ function showError(message) {
     const errorDiv = document.getElementById('error-message');
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
-    errorDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
 // エラー非表示
