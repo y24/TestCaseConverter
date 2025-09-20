@@ -70,25 +70,25 @@ body {
 /* ヘッダー */
 header {
     position: relative;
-    padding: 10px 20px;
+    padding: 8px 16px;
     background: var(--bg-secondary);
     box-shadow: 0 2px 4px var(--shadow);
     z-index: 100;
-    min-height: 50px;
+    min-height: 48px;
     transition: background-color 0.3s ease;
 }
 
 .sidebar-toggle {
     position: absolute;
-    top: 10px;
-    left: 20px;
+    top: 8px;
+    left: 16px;
     background: var(--accent-color);
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 8px 12px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     display: none;
     transition: background 0.3s ease;
 }
@@ -97,42 +97,37 @@ header {
     background: var(--accent-hover);
 }
 
-.theme-selector {
+.settings-button {
     position: absolute;
-    top: 10px;
-    right: 20px;
+    top: 8px;
+    right: 16px;
+}
+
+.settings-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
 }
 
-.theme-label {
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.theme-selector select {
-    background: var(--bg-secondary);
+.settings-btn:hover {
+    background: var(--bg-tertiary);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-    min-width: 100px;
+    border-color: var(--accent-color);
 }
 
-.theme-selector select:focus {
+.settings-btn:focus {
     outline: none;
-    border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-}
-
-.theme-selector select:hover {
-    border-color: var(--accent-color);
 }
 
 /* メインレイアウト */
@@ -574,8 +569,8 @@ button:focus {
     .sidebar-toggle {
         display: block;
         position: fixed;
-        top: 15px;
-        left: 15px;
+        top: 12px;
+        left: 12px;
         z-index: 300;
         padding: 6px 10px;
         font-size: 12px;
@@ -583,8 +578,8 @@ button:focus {
     }
     
     header {
-        padding: 15px;
-        min-height: 50px;
+        padding: 12px;
+        min-height: 48px;
     }
     
     .sidebar {
@@ -622,24 +617,6 @@ button:focus {
         display: none;
     }
     
-    /* モバイル用テーマセレクター */
-    .theme-selector {
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        z-index: 300;
-        gap: 6px;
-    }
-    
-    .theme-label {
-        font-size: 12px;
-    }
-    
-    .theme-selector select {
-        padding: 6px 10px;
-        font-size: 12px;
-        min-width: 80px;
-    }
     
     .sidebar-overlay.show {
         display: block;
@@ -655,24 +632,208 @@ button:focus {
         font-size: 11px;
     }
     
-    .theme-selector {
-        top: 12px;
-        right: 12px;
-        gap: 4px;
-    }
-    
-    .theme-label {
-        font-size: 11px;
-    }
-    
-    .theme-selector select {
-        padding: 5px 8px;
-        font-size: 11px;
-        min-width: 70px;
-    }
     
     header {
         padding: 12px;
         min-height: 45px;
+    }
+}
+
+/* モーダルウィンドウ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1.2em;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.modal-close:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal-body .setting-group {
+    margin-bottom: 0;
+}
+
+.modal-body .theme-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.modal-body select {
+    width: 100%;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.modal-body select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.modal-body select:hover {
+    border-color: var(--accent-color);
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+    min-width: 80px;
+}
+
+.modal-btn-primary {
+    background: var(--accent-color);
+    color: white;
+}
+
+.modal-btn-primary:hover {
+    background: var(--accent-hover);
+}
+
+.modal-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* レスポンシブ対応 - モーダル */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 15px;
+    }
+    
+    .settings-button {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        z-index: 300;
+    }
+    
+    .settings-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+        min-width: 30px;
+        min-height: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 98%;
+        margin: 10px;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 12px;
+    }
+    
+    .settings-button {
+        top: 10px;
+        right: 10px;
+    }
+    
+    .settings-btn {
+        padding: 5px 7px;
+        font-size: 11px;
+        min-width: 28px;
+        min-height: 28px;
     }
 }

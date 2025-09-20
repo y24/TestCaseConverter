@@ -914,7 +914,7 @@ function getSystemTheme() {
 
 // テーマセレクターの選択状態を更新
 function updateThemeSelector() {
-    const themeSelect = document.getElementById('theme-select');
+    const themeSelect = document.getElementById('modal-theme-select');
     const savedTheme = localStorage.getItem('testCaseConverter_theme') || 'system';
     
     if (themeSelect) {
@@ -934,3 +934,40 @@ function watchSystemTheme() {
         });
     }
 }
+
+// 設定モーダルを開く
+function openSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    if (modal) {
+        modal.classList.add('show');
+        // モーダル内のテーマセレクターの選択状態を更新
+        updateThemeSelector();
+        // ボディのスクロールを無効化
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// 設定モーダルを閉じる
+function closeSettingsModal(event) {
+    // イベントが渡された場合（オーバーレイクリック）は、オーバーレイ以外のクリックは無視
+    if (event && event.target !== event.currentTarget) {
+        return;
+    }
+    
+    const modal = document.getElementById('settings-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        // ボディのスクロールを有効化
+        document.body.style.overflow = '';
+    }
+}
+
+// ESCキーでモーダルを閉じる
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('settings-modal');
+        if (modal && modal.classList.contains('show')) {
+            closeSettingsModal();
+        }
+    }
+});
