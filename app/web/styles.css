@@ -124,6 +124,15 @@ section h2 {
     border-bottom: 1px solid #e9ecef;
 }
 
+.subsection-title {
+    color: #34495e;
+    font-size: 0.95em;
+    font-weight: 500;
+    margin: 15px 0 8px 0;
+    padding: 4px 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
 /* 折りたたみ可能なセクションタイトル */
 .section-title.collapsible {
     cursor: pointer;
