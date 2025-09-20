@@ -40,6 +40,9 @@ class YamlRenderer:
         
         for file_data in file_data_list:
             for sheet_data in file_data.sheets:
+                # ヘッダー生成
+                header = self._generate_header(file_data.filename, sheet_data.sheet_name)
+                
                 meta_info = {
                     'output_format': 'yaml',
                     'split_mode': 'per_sheet',
@@ -47,7 +50,8 @@ class YamlRenderer:
                     'id_padding': self.settings.id_padding,
                     'settings_profile': 'default',
                     'source_files': [file_data.filename],
-                    'sheets_included': [sheet_data.sheet_name]
+                    'sheets_included': [sheet_data.sheet_name],
+                    'header': header
                 }
                 
                 # レンダリング
@@ -72,6 +76,9 @@ class YamlRenderer:
                 category_groups = self._group_by_category(sheet_data.items)
                 
                 for category, test_cases in category_groups.items():
+                    # ヘッダー生成
+                    header = self._generate_header(file_data.filename, sheet_data.sheet_name, category)
+                    
                     meta_info = {
                         'output_format': 'yaml',
                         'split_mode': 'per_category',
@@ -79,7 +86,8 @@ class YamlRenderer:
                         'id_padding': self.settings.id_padding,
                         'settings_profile': 'default',
                         'source_files': [file_data.filename],
-                        'sheets_included': [sheet_data.sheet_name]
+                        'sheets_included': [sheet_data.sheet_name],
+                        'header': header
                     }
                     
                     # レンダリング
@@ -102,6 +110,9 @@ class YamlRenderer:
         for file_data in file_data_list:
             for sheet_data in file_data.sheets:
                 for test_case in sheet_data.items:
+                    # ヘッダー生成
+                    header = self._generate_header(file_data.filename, sheet_data.sheet_name)
+                    
                     meta_info = {
                         'output_format': 'yaml',
                         'split_mode': 'per_case',
@@ -109,7 +120,8 @@ class YamlRenderer:
                         'id_padding': self.settings.id_padding,
                         'settings_profile': 'default',
                         'source_files': [file_data.filename],
-                        'sheets_included': [sheet_data.sheet_name]
+                        'sheets_included': [sheet_data.sheet_name],
+                        'header': header
                     }
                     
                     # レンダリング
@@ -158,6 +170,27 @@ class YamlRenderer:
         yaml_content = self._remove_extra_blank_lines(yaml_content)
         
         return yaml_content
+    
+    def _generate_header(self, filename: str, sheet_name: str, category_name: str = None) -> str:
+        """分割モードに応じたヘッダーを生成"""
+        # ファイル名から拡張子を除去
+        base_filename = filename.replace('.xlsx', '').replace('.xls', '')
+        
+        if self.settings.split_mode == SplitMode.PER_SHEET:
+            # シート単位：{ファイル名} ({シート名})
+            return f"{base_filename} ({sheet_name})"
+        elif self.settings.split_mode == SplitMode.PER_CATEGORY:
+            # カテゴリ単位：{ファイル名} ({シート名}) - {カテゴリ名}
+            if category_name:
+                return f"{base_filename} ({sheet_name}) - {category_name}"
+            else:
+                return f"{base_filename} ({sheet_name})"
+        elif self.settings.split_mode == SplitMode.PER_CASE:
+            # ケース単位：{ファイル名} ({シート名})
+            return f"{base_filename} ({sheet_name})"
+        else:
+            # デフォルト
+            return sheet_name
     
     def _remove_extra_blank_lines(self, yaml_content: str) -> str:
         """YAML出力の余計な空白行を削除"""

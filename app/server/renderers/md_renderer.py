@@ -67,7 +67,8 @@ class MarkdownRenderer:
                     md_content = self._render_test_cases(
                         test_cases, 
                         file_data.filename, 
-                        [sheet_data.sheet_name]
+                        [sheet_data.sheet_name],
+                        category
                     )
                     
                     # ファイル名を生成
@@ -102,14 +103,15 @@ class MarkdownRenderer:
         
         return rendered_files
     
-    def _render_test_cases(self, test_cases: List[TestCase], filename: str, sheet_names: List[str]) -> str:
+    def _render_test_cases(self, test_cases: List[TestCase], filename: str, sheet_names: List[str], category_name: str = None) -> str:
         """テストケースをMarkdown形式でレンダリング"""
         if not test_cases:
             return ""
         
-        # ヘッダー
+        # ヘッダー生成（分割モードに応じて出し分け）
         sheet_name = sheet_names[0] if sheet_names else "テスト項目"
-        md_content = f"# テストケース一覧（{sheet_name}）\n\n"
+        header = self._generate_header(filename, sheet_name, category_name)
+        md_content = f"# {header}\n\n"
         
         # 各テストケースをレンダリング
         for i, test_case in enumerate(test_cases):
@@ -123,6 +125,27 @@ class MarkdownRenderer:
         md_content += self._render_meta_info(filename, sheet_names)
         
         return md_content
+    
+    def _generate_header(self, filename: str, sheet_name: str, category_name: str = None) -> str:
+        """分割モードに応じたヘッダーを生成"""
+        # ファイル名から拡張子を除去
+        base_filename = filename.replace('.xlsx', '').replace('.xls', '')
+        
+        if self.settings.split_mode == SplitMode.PER_SHEET:
+            # シート単位：{ファイル名} ({シート名})
+            return f"{base_filename} ({sheet_name})"
+        elif self.settings.split_mode == SplitMode.PER_CATEGORY:
+            # カテゴリ単位：{ファイル名} ({シート名}) - {カテゴリ名}
+            if category_name:
+                return f"{base_filename} ({sheet_name}) - {category_name}"
+            else:
+                return f"{base_filename} ({sheet_name})"
+        elif self.settings.split_mode == SplitMode.PER_CASE:
+            # ケース単位：{ファイル名} ({シート名})
+            return f"{base_filename} ({sheet_name})"
+        else:
+            # デフォルト
+            return sheet_name
     
     def _render_single_test_case(self, test_case: TestCase, filename: str) -> str:
         """単一テストケースをレンダリング"""
