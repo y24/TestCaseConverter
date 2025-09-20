@@ -54,6 +54,7 @@ class ConversionSettings(BaseModel):
     priority_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["優先度"]))
     precondition_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["前提条件"]))
     note_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["備考", "補足情報"]))
+    title_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=[]))
     
     # 処理設定
     trim_whitespaces: bool = Field(default=True, description="空白トリム")

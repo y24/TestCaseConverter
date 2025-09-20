@@ -223,6 +223,7 @@ class ExcelReader:
                 ('priority', self.settings.priority_row),
                 ('precondition', self.settings.precondition_row),
                 ('note', self.settings.note_row),
+                ('title', self.settings.title_row),
             ]
             
             for config_name, config in configs:
@@ -347,12 +348,15 @@ class ExcelReader:
         # 前提条件を文字列として取得（前後の空白を削除、連続する改行を単一の改行に正規化）
         preconditions = self._normalize_multiline_text(row_data.get('precondition', ''))
         
+        # タイトルを文字列として取得（前後の空白を削除、連続する改行を単一の改行に正規化）
+        title = self._normalize_multiline_text(row_data.get('title', ''))
+        
         # テストケースIDを生成（設定の桁数を使用）
         test_id = f"{self.settings.id_prefix}-{row_data['row']:0{self.settings.id_padding}d}"
         
         return TestCase(
             id=test_id,
-            title="",
+            title=title,
             category=category,
             type=row_data.get('test_type', ''),
             priority=row_data.get('priority', ''),

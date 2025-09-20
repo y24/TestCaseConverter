@@ -121,114 +121,169 @@ async function loadDefaultSettings() {
 
 // 設定をUIに適用
 function applySettingsToUI() {
-    // 新しい構造に対応
-    const outputSettings = currentSettings.出力 || {};
-    const caseIdSettings = currentSettings.ケースID || {};
-    const stepSettings = currentSettings.手順 || {};
-    
-    // 出力設定
-    document.getElementById('output-format').value = outputSettings.output_format || currentSettings.output_format || 'markdown';
-    document.getElementById('split-mode').value = outputSettings.split_mode || currentSettings.split_mode || 'per_sheet';
-    
-    // ケースID設定
-    document.getElementById('id-prefix').value = caseIdSettings.id_prefix || currentSettings.id_prefix || 'TC';
-    document.getElementById('id-padding').value = caseIdSettings.id_padding || currentSettings.id_padding || 3;
-    
-    // 文字列処理設定
-    document.getElementById('trim-whitespaces').checked = currentSettings.trim_whitespaces !== false;
-    document.getElementById('forward-fill-category').checked = currentSettings.forward_fill_category !== false;
-    document.getElementById('normalize-zenkaku').checked = currentSettings.normalize_zenkaku_numbers !== false;
-    
-    // 読み取り設定
-    const header = currentSettings.header || { search_col: "A", search_key: "#" };
-    document.getElementById('header-search-col').value = header.search_col || "A";
-    document.getElementById('header-search-key').value = header.search_key || "#";
-    
-    const categoryRow = currentSettings.category_row || { keys: ["大項目", "中項目", "小項目1", "小項目2"] };
-    document.getElementById('category-keys').value = categoryRow.keys ? categoryRow.keys.join(',') : "大項目,中項目,小項目1,小項目2";
-    
-    const stepRow = currentSettings.step_row || { keys: ["手順"] };
-    document.getElementById('step-keys').value = stepRow.keys ? stepRow.keys.join(',') : "手順";
-    
-    const tobeRow = currentSettings.tobe_row || { keys: ["期待結果"], ignores: [] };
-    document.getElementById('tobe-keys').value = tobeRow.keys ? tobeRow.keys.join(',') : "期待結果";
-    
-    const testTypeRow = currentSettings.test_type_row || { keys: ["テスト種別"] };
-    document.getElementById('test-type-keys').value = testTypeRow.keys ? testTypeRow.keys.join(',') : "テスト種別";
-    
-    const priorityRow = currentSettings.priority_row || { keys: ["優先度"] };
-    document.getElementById('priority-keys').value = priorityRow.keys ? priorityRow.keys.join(',') : "優先度";
-    
-    const preconditionRow = currentSettings.precondition_row || { keys: ["前提条件"] };
-    document.getElementById('precondition-keys').value = preconditionRow.keys ? preconditionRow.keys.join(',') : "前提条件";
-    
-    const noteRow = currentSettings.note_row || { keys: ["備考", "補足情報"] };
-    document.getElementById('note-keys').value = noteRow.keys ? noteRow.keys.join(',') : "備考,補足情報";
+    try {
+        // 新しい構造に対応
+        const outputSettings = currentSettings.出力 || {};
+        const caseIdSettings = currentSettings.ケースID || {};
+        const stepSettings = currentSettings.手順 || {};
+        
+        // 出力設定
+        setElementValue('output-format', outputSettings.output_format || currentSettings.output_format || 'markdown');
+        setElementValue('split-mode', outputSettings.split_mode || currentSettings.split_mode || 'per_sheet');
+        
+        // ケースID設定
+        setElementValue('id-prefix', caseIdSettings.id_prefix || currentSettings.id_prefix || 'TC');
+        setElementValue('id-padding', caseIdSettings.id_padding || currentSettings.id_padding || 3);
+        
+        // 文字列処理設定
+        setElementChecked('trim-whitespaces', currentSettings.trim_whitespaces !== false);
+        setElementChecked('forward-fill-category', currentSettings.forward_fill_category !== false);
+        setElementChecked('normalize-zenkaku', currentSettings.normalize_zenkaku_numbers !== false);
+        
+        // 読み取り設定
+        const header = currentSettings.header || { search_col: "A", search_key: "#" };
+        setElementValue('header-search-col', header.search_col || "A");
+        setElementValue('header-search-key', header.search_key || "#");
+        
+        const categoryRow = currentSettings.category_row || { keys: ["大項目", "中項目", "小項目1", "小項目2"] };
+        setElementValue('category-keys', categoryRow.keys ? categoryRow.keys.join(',') : "大項目,中項目,小項目1,小項目2");
+        
+        const stepRow = currentSettings.step_row || { keys: ["手順"] };
+        setElementValue('step-keys', stepRow.keys ? stepRow.keys.join(',') : "手順");
+        
+        const tobeRow = currentSettings.tobe_row || { keys: ["期待結果"], ignores: [] };
+        setElementValue('tobe-keys', tobeRow.keys ? tobeRow.keys.join(',') : "期待結果");
+        
+        const testTypeRow = currentSettings.test_type_row || { keys: ["テスト種別"] };
+        setElementValue('test-type-keys', testTypeRow.keys ? testTypeRow.keys.join(',') : "テスト種別");
+        
+        const priorityRow = currentSettings.priority_row || { keys: ["優先度"] };
+        setElementValue('priority-keys', priorityRow.keys ? priorityRow.keys.join(',') : "優先度");
+        
+        const preconditionRow = currentSettings.precondition_row || { keys: ["前提条件"] };
+        setElementValue('precondition-keys', preconditionRow.keys ? preconditionRow.keys.join(',') : "前提条件");
+        
+        const noteRow = currentSettings.note_row || { keys: ["備考", "補足情報"] };
+        setElementValue('note-keys', noteRow.keys ? noteRow.keys.join(',') : "備考,補足情報");
+        
+        const titleRow = currentSettings.title_row || { keys: [] };
+        setElementValue('title-keys', titleRow.keys ? titleRow.keys.join(',') : "");
+        
+    } catch (error) {
+        console.error('設定のUI適用中にエラーが発生しました:', error);
+        showError('設定の適用に失敗しました: ' + error.message);
+    }
+}
+
+// 要素の値を安全に設定するヘルパー関数
+function setElementValue(elementId, value) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.value = value;
+    } else {
+        console.warn(`要素が見つかりません: ${elementId}`);
+    }
+}
+
+// チェックボックスの値を安全に設定するヘルパー関数
+function setElementChecked(elementId, checked) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.checked = checked;
+    } else {
+        console.warn(`要素が見つかりません: ${elementId}`);
+    }
 }
 
 // 設定更新
 function updateSettings() {
-    // カンマ区切りの文字列を配列に変換するヘルパー関数
-    function parseCommaSeparated(value) {
-        if (!value || value.trim() === '') return [];
-        return value.split(',').map(item => item.trim()).filter(item => item !== '');
+    try {
+        // カンマ区切りの文字列を配列に変換するヘルパー関数
+        function parseCommaSeparated(value) {
+            if (!value || value.trim() === '') return [];
+            return value.split(',').map(item => item.trim()).filter(item => item !== '');
+        }
+        
+        // 要素の値を安全に取得するヘルパー関数
+        function getElementValue(elementId, defaultValue = '') {
+            const element = document.getElementById(elementId);
+            return element ? element.value : defaultValue;
+        }
+        
+        function getElementChecked(elementId, defaultValue = false) {
+            const element = document.getElementById(elementId);
+            return element ? element.checked : defaultValue;
+        }
+        
+        function getElementNumber(elementId, defaultValue = 0) {
+            const element = document.getElementById(elementId);
+            return element ? parseInt(element.value) || defaultValue : defaultValue;
+        }
+        
+        // 新しい構造で設定を構築
+        currentSettings = {
+            出力: {
+                output_format: getElementValue('output-format', 'markdown'),
+                split_mode: getElementValue('split-mode', 'per_sheet')
+            },
+            ケースID: {
+                id_prefix: getElementValue('id-prefix', 'TC'),
+                id_padding: getElementNumber('id-padding', 3),
+                force_id_regenerate: false
+            },
+            sheet_search_keys: ["テスト項目"],
+            sheet_search_ignores: [],
+            
+            // 読み取り設定
+            header: {
+                search_col: getElementValue('header-search-col', 'A'),
+                search_key: getElementValue('header-search-key', '#')
+            },
+            category_row: {
+                keys: parseCommaSeparated(getElementValue('category-keys', '大項目,中項目,小項目1,小項目2')),
+                ignores: []
+            },
+            step_row: {
+                keys: parseCommaSeparated(getElementValue('step-keys', '手順')),
+                ignores: []
+            },
+            tobe_row: {
+                keys: parseCommaSeparated(getElementValue('tobe-keys', '期待結果')),
+                ignores: []
+            },
+            test_type_row: {
+                keys: parseCommaSeparated(getElementValue('test-type-keys', 'テスト種別')),
+                ignores: []
+            },
+            priority_row: {
+                keys: parseCommaSeparated(getElementValue('priority-keys', '優先度')),
+                ignores: []
+            },
+            precondition_row: {
+                keys: parseCommaSeparated(getElementValue('precondition-keys', '前提条件')),
+                ignores: []
+            },
+            note_row: {
+                keys: parseCommaSeparated(getElementValue('note-keys', '備考,補足情報')),
+                ignores: []
+            },
+            title_row: {
+                keys: parseCommaSeparated(getElementValue('title-keys', '')),
+                ignores: []
+            },
+            
+            // 処理設定
+            trim_whitespaces: getElementChecked('trim-whitespaces', true),
+            normalize_zenkaku_numbers: getElementChecked('normalize-zenkaku', true),
+            category_display_compress: false,
+            pad_category_levels: true,
+            forward_fill_category: getElementChecked('forward-fill-category', true)
+        };
+        
+    } catch (error) {
+        console.error('設定の更新中にエラーが発生しました:', error);
+        showError('設定の更新に失敗しました: ' + error.message);
     }
-    
-    // 新しい構造で設定を構築
-    currentSettings = {
-        出力: {
-            output_format: document.getElementById('output-format').value,
-            split_mode: document.getElementById('split-mode').value
-        },
-        ケースID: {
-            id_prefix: document.getElementById('id-prefix').value,
-            id_padding: parseInt(document.getElementById('id-padding').value),
-            force_id_regenerate: false
-        },
-        sheet_search_keys: ["テスト項目"],
-        sheet_search_ignores: [],
-        
-        // 読み取り設定
-        header: {
-            search_col: document.getElementById('header-search-col').value,
-            search_key: document.getElementById('header-search-key').value
-        },
-        category_row: {
-            keys: parseCommaSeparated(document.getElementById('category-keys').value),
-            ignores: []
-        },
-        step_row: {
-            keys: parseCommaSeparated(document.getElementById('step-keys').value),
-            ignores: []
-        },
-        tobe_row: {
-            keys: parseCommaSeparated(document.getElementById('tobe-keys').value),
-            ignores: []
-        },
-        test_type_row: {
-            keys: parseCommaSeparated(document.getElementById('test-type-keys').value),
-            ignores: []
-        },
-        priority_row: {
-            keys: parseCommaSeparated(document.getElementById('priority-keys').value),
-            ignores: []
-        },
-        precondition_row: {
-            keys: parseCommaSeparated(document.getElementById('precondition-keys').value),
-            ignores: []
-        },
-        note_row: {
-            keys: parseCommaSeparated(document.getElementById('note-keys').value),
-            ignores: []
-        },
-        
-        // 処理設定
-        trim_whitespaces: document.getElementById('trim-whitespaces').checked,
-        normalize_zenkaku_numbers: document.getElementById('normalize-zenkaku').checked,
-        category_display_compress: false,
-        pad_category_levels: true,
-        forward_fill_category: document.getElementById('forward-fill-category').checked
-    };
 }
 
 // ドラッグオーバー処理
