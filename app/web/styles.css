@@ -108,7 +108,7 @@ section h2 {
 
 /* 設定セクション */
 .setting-section {
-    margin-bottom: 20px;
+    margin-bottom: 8px;
     padding: 12px;
     background: #f8f9fa;
     border-radius: 6px;
@@ -142,7 +142,7 @@ section h2 {
     gap: 8px;
     transition: background-color 0.2s ease;
     padding: 8px 12px;
-    margin: -12px -12px 12px -12px;
+    margin: -12px -12px 0 -12px;
     border-radius: 4px;
     border-bottom: 1px solid #e9ecef;
 }
@@ -165,15 +165,16 @@ section h2 {
 /* セクションコンテンツ */
 .section-content {
     overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
     max-height: 0;
     opacity: 0;
-    margin-bottom: 0;
+    margin: 0;
 }
 
 .section-content.expanded {
     max-height: 1000px;
     opacity: 1;
+    margin-bottom: 12px;
 }
 
 /* サイドメニュー内の設定グループ */

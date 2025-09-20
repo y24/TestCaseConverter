@@ -28,20 +28,22 @@
                     <div class="setting-section">
                         <h3 class="section-title collapsible" onclick="toggleSection(this)">
                             <span class="section-toggle-icon">▼</span>
-                            読み取り設定
+                            読み取り
                         </h3>
                         <div class="section-content">
                         
+                        <h4 class="subsection-title">ヘッダー行</h4>
                         <div class="setting-group">
-                            <label for="header-search-col">ヘッダー行検索列:</label>
+                            <label for="header-search-col">検索列:</label>
                             <input type="text" id="header-search-col" value="A" maxlength="3">
                         </div>
                         
                         <div class="setting-group">
-                            <label for="header-search-key">ヘッダー行検索キー:</label>
+                            <label for="header-search-key">検索キー:</label>
                             <input type="text" id="header-search-key" value="#" maxlength="10">
                         </div>
                         
+                        <h4 class="subsection-title">列名</h4>
                         <div class="setting-group">
                             <label for="category-keys">カテゴリ:</label>
                             <input type="text" id="category-keys" value="大項目,中項目,小項目1,小項目2" placeholder="カンマ区切りで入力">
@@ -89,7 +91,7 @@
                     <div class="setting-section">
                         <h3 class="section-title collapsible" onclick="toggleSection(this)">
                             <span class="section-toggle-icon">▼</span>
-                            処理設定
+                            処理
                         </h3>
                         <div class="section-content">
                             <h4 class="subsection-title">カテゴリ</h4>
@@ -113,16 +115,8 @@
                                     全角数字を正規化
                                 </label>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- ケースIDセクション -->
-                    <div class="setting-section">
-                        <h3 class="section-title collapsible" onclick="toggleSection(this)">
-                            <span class="section-toggle-icon">▼</span>
-                            ケースID設定
-                        </h3>
-                        <div class="section-content">
+                            
+                            <h4 class="subsection-title">ケースID</h4>
                             <div class="setting-group">
                                 <label for="id-prefix">IDプレフィックス:</label>
                                 <input type="text" id="id-prefix" value="TC" maxlength="10">
@@ -135,11 +129,12 @@
                         </div>
                     </div>
 
+
                     <!-- 出力セクション -->
                     <div class="setting-section">
                         <h3 class="section-title collapsible" onclick="toggleSection(this)">
                             <span class="section-toggle-icon">▼</span>
-                            出力設定
+                            出力
                         </h3>
                         <div class="section-content">
                             <div class="setting-group">
