@@ -26,7 +26,11 @@
                 <div class="sidebar-content">
                     <!-- 読み取り設定セクション -->
                     <div class="setting-section">
-                        <h3 class="section-title">読み取り設定</h3>
+                        <h3 class="section-title collapsible" onclick="toggleSection(this)">
+                            <span class="section-toggle-icon">▼</span>
+                            読み取り設定
+                        </h3>
+                        <div class="section-content">
                         
                         <div class="setting-group">
                             <label for="header-search-col">ヘッダー行検索列:</label>
@@ -78,68 +82,89 @@
                             <input type="text" id="note-keys" value="備考,補足情報" placeholder="カンマ区切りで入力">
                         </div>
                         
+                        </div>
                     </div>
 
                     <!-- カテゴリ処理の設定 -->
                     <div class="setting-section">
-                        <h3 class="section-title">カテゴリ処理</h3>
-                        <div class="setting-group">
-                            <label>
-                                <input type="checkbox" id="forward-fill-category" checked>
-                                セルが空の場合、前の行を参照して埋める
-                            </label>
+                        <h3 class="section-title collapsible" onclick="toggleSection(this)">
+                            <span class="section-toggle-icon">▼</span>
+                            カテゴリ処理
+                        </h3>
+                        <div class="section-content">
+                            <div class="setting-group">
+                                <label>
+                                    <input type="checkbox" id="forward-fill-category" checked>
+                                    セルが空の場合、前の行を参照して埋める
+                                </label>
+                            </div>
                         </div>
                     </div>
 
                     <!-- 文字列処理の設定 -->
                     <div class="setting-section">
-                        <h3 class="section-title">文字列処理</h3>
-                        <div class="setting-group">
-                            <label>
-                                <input type="checkbox" id="trim-whitespaces" checked>
-                                前後の空白をトリム
-                            </label>
-                        </div>
-                        <div class="setting-group">
-                            <label>
-                                <input type="checkbox" id="normalize-zenkaku" checked>
-                                全角数字を正規化
-                            </label>
+                        <h3 class="section-title collapsible" onclick="toggleSection(this)">
+                            <span class="section-toggle-icon">▼</span>
+                            文字列処理
+                        </h3>
+                        <div class="section-content">
+                            <div class="setting-group">
+                                <label>
+                                    <input type="checkbox" id="trim-whitespaces" checked>
+                                    前後の空白をトリム
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label>
+                                    <input type="checkbox" id="normalize-zenkaku" checked>
+                                    全角数字を正規化
+                                </label>
+                            </div>
                         </div>
                     </div>
 
                     <!-- ケースIDセクション -->
                     <div class="setting-section">
-                        <h3 class="section-title">ケースID設定</h3>
-                        <div class="setting-group">
-                            <label for="id-prefix">IDプレフィックス:</label>
-                            <input type="text" id="id-prefix" value="TC" maxlength="10">
-                        </div>
+                        <h3 class="section-title collapsible" onclick="toggleSection(this)">
+                            <span class="section-toggle-icon">▼</span>
+                            ケースID設定
+                        </h3>
+                        <div class="section-content">
+                            <div class="setting-group">
+                                <label for="id-prefix">IDプレフィックス:</label>
+                                <input type="text" id="id-prefix" value="TC" maxlength="10">
+                            </div>
 
-                        <div class="setting-group">
-                            <label for="id-padding">ID桁数:</label>
-                            <input type="number" id="id-padding" value="3" min="1" max="10">
+                            <div class="setting-group">
+                                <label for="id-padding">ID桁数:</label>
+                                <input type="number" id="id-padding" value="3" min="1" max="10">
+                            </div>
                         </div>
                     </div>
 
                     <!-- 出力セクション -->
                     <div class="setting-section">
-                        <h3 class="section-title">出力設定</h3>
-                        <div class="setting-group">
-                            <label for="output-format">フォーマット:</label>
-                            <select id="output-format">
-                                <option value="markdown">Markdown</option>
-                                <option value="yaml">YAML</option>
-                            </select>
-                        </div>
+                        <h3 class="section-title collapsible" onclick="toggleSection(this)">
+                            <span class="section-toggle-icon">▼</span>
+                            出力設定
+                        </h3>
+                        <div class="section-content">
+                            <div class="setting-group">
+                                <label for="output-format">フォーマット:</label>
+                                <select id="output-format">
+                                    <option value="markdown">Markdown</option>
+                                    <option value="yaml">YAML</option>
+                                </select>
+                            </div>
 
-                        <div class="setting-group">
-                            <label for="split-mode">分割モード:</label>
-                            <select id="split-mode">
-                                <option value="per_sheet" selected>シート単位</option>
-                                <option value="per_category">カテゴリ単位</option>
-                                <option value="per_case">ケース単位</option>
-                            </select>
+                            <div class="setting-group">
+                                <label for="split-mode">分割モード:</label>
+                                <select id="split-mode">
+                                    <option value="per_sheet" selected>シート単位</option>
+                                    <option value="per_category">カテゴリ単位</option>
+                                    <option value="per_case">ケース単位</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 

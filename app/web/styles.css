@@ -124,6 +124,49 @@ section h2 {
     border-bottom: 1px solid #e9ecef;
 }
 
+/* 折りたたみ可能なセクションタイトル */
+.section-title.collapsible {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease;
+    padding: 8px 12px;
+    margin: -12px -12px 12px -12px;
+    border-radius: 4px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.section-title.collapsible:hover {
+    background-color: #f8f9fa;
+}
+
+.section-toggle-icon {
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+    color: #3498db;
+    transform: rotate(-90deg);
+}
+
+.section-toggle-icon.expanded {
+    transform: rotate(0deg);
+}
+
+/* セクションコンテンツ */
+.section-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
+}
+
+.section-content.expanded {
+    max-height: 1000px;
+    opacity: 1;
+}
+
 /* サイドメニュー内の設定グループ */
 .sidebar .setting-group {
     margin-bottom: 12px;

@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initializeApp() {
     await loadDefaultSettings();
     setupEventListeners();
+    initializeCollapsibleSections();
 }
 
 // イベントリスナー設定
@@ -825,4 +826,33 @@ function showSuccess(message) {
     setTimeout(() => {
         document.body.removeChild(toast);
     }, 3000);
+}
+
+// 折りたたみ可能セクションの初期化
+function initializeCollapsibleSections() {
+    const collapsibleSections = document.querySelectorAll('.section-title.collapsible');
+    collapsibleSections.forEach(sectionTitle => {
+        const sectionContent = sectionTitle.nextElementSibling;
+        const toggleIcon = sectionTitle.querySelector('.section-toggle-icon');
+        
+        // デフォルトで折りたたみ状態に設定
+        sectionContent.classList.remove('expanded');
+        toggleIcon.classList.remove('expanded');
+    });
+}
+
+// セクション折りたたみ機能
+function toggleSection(sectionTitle) {
+    const sectionContent = sectionTitle.nextElementSibling;
+    const toggleIcon = sectionTitle.querySelector('.section-toggle-icon');
+    
+    if (sectionContent.classList.contains('expanded')) {
+        // 折りたたみ
+        sectionContent.classList.remove('expanded');
+        toggleIcon.classList.remove('expanded');
+    } else {
+        // 展開
+        sectionContent.classList.add('expanded');
+        toggleIcon.classList.add('expanded');
+    }
 }
