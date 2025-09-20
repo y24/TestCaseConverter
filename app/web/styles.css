@@ -680,7 +680,7 @@ button:focus {
 .modal-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: 20px;
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-tertiary);
@@ -690,27 +690,6 @@ button:focus {
     margin: 0;
     color: var(--text-secondary);
     font-size: 1.2em;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: var(--text-muted);
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.modal-close:hover {
-    background: var(--bg-primary);
-    color: var(--text-primary);
 }
 
 .modal-body {
