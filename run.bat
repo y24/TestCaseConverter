@@ -34,14 +34,14 @@ if errorlevel 1 (
 REM Start server
 echo.
 echo Starting server...
-echo Please access http://localhost:8000 in your browser.
+echo Please access http://localhost:8765 in your browser.
 echo.
 echo Press Ctrl+C to stop the server.
 echo ================================================
 
 REM Open browser after 5 seconds
 start /b timeout /t 5 /nobreak >nul 2>&1
-if not errorlevel 1 start http://localhost:8000
+if not errorlevel 1 start http://localhost:8765
 
 REM Start server
 call venv\Scripts\activate.bat
