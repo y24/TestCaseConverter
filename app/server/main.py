@@ -142,10 +142,10 @@ async def convert_files(
         if len(files) > 20:
             raise HTTPException(status_code=400, detail="同時アップロードは最大20ファイルまでです")
         
-        # 総サイズチェック（200MB制限）
+        # 総サイズチェック（400MB制限）
         total_size = sum(file.size or 0 for file in files)
-        if total_size > 200 * 1024 * 1024:  # 200MB
-            raise HTTPException(status_code=400, detail="総ファイルサイズが200MBを超えています")
+        if total_size > 400 * 1024 * 1024:  # 400MB
+            raise HTTPException(status_code=400, detail="総ファイルサイズが400MBを超えています")
         
         # Excel読み取り
         excel_reader = ExcelReader(settings)
