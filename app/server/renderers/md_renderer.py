@@ -155,7 +155,9 @@ class MarkdownRenderer:
         category_str = " > ".join([cat for cat in test_case.category if cat])
         md_content += f"- category: {category_str}\n"
         
-        md_content += f"- type: {test_case.type}\n"
+        # テスト種別が空でない場合のみ追加
+        if test_case.type and test_case.type.strip():
+            md_content += f"- type: {test_case.type}\n"
         
         # 優先度
         if test_case.priority:

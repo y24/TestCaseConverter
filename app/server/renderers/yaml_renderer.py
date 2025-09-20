@@ -144,7 +144,6 @@ class YamlRenderer:
                 'id': test_case.id,
                 'title': test_case.title,
                 'category': test_case.category,
-                'type': test_case.type,
                 'priority': test_case.priority,
                 'preconditions': test_case.preconditions,
                 'steps': test_case.steps,  # 文字列をそのまま使用
@@ -152,6 +151,11 @@ class YamlRenderer:
                 'notes': test_case.notes,
                 'source': test_case.source
             }
+            
+            # テスト種別が空でない場合のみ追加
+            if test_case.type and test_case.type.strip():
+                case_data['type'] = test_case.type
+            
             yaml_data.append(case_data)
         
         # メタ情報を最後に追加
