@@ -58,7 +58,6 @@ function setupAutoConvertListeners() {
     const textInputs = document.querySelectorAll('.sidebar-content input[type="text"], .sidebar-content input[type="number"]');
     textInputs.forEach(input => {
         input.addEventListener('blur', () => {
-            console.log('テキストボックス blur イベント:', input.id);
             updateSettings();
             autoConvert();
         });
@@ -67,7 +66,6 @@ function setupAutoConvertListeners() {
         input.addEventListener('input', () => {
             clearTimeout(timeoutId);
             timeoutId = setTimeout(() => {
-                console.log('テキストボックス input イベント（デバウンス後）:', input.id);
                 updateSettings();
                 autoConvert();
             }, 500); // 500ms後に実行

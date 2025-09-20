@@ -21,10 +21,6 @@ class ExcelReader:
     
     def __init__(self, settings: ConversionSettings):
         self.settings = settings
-        logger.info(f"ExcelReader初期化 - ヘッダー設定: {settings.header}")
-        logger.info(f"ExcelReader初期化 - カテゴリ設定: {settings.category_row}")
-        logger.info(f"ExcelReader初期化 - 手順設定: {settings.step_row}")
-        logger.info(f"ExcelReader初期化 - 期待結果設定: {settings.tobe_row}")
     
     def read_file(self, file_source: Union[Path, bytes], filename: str) -> FileData:
         """Excelファイルを読み取り（ファイルパスまたはバイトデータから）"""
@@ -144,7 +140,6 @@ class ExcelReader:
         
         # ヘッダー行を検索
         header_row = self._find_header_row(worksheet)
-        logger.info(f"ヘッダー行検索結果: 行{header_row} (検索列: {self.settings.header.search_col}, 検索キー: {self.settings.header.search_key})")
         if header_row is None:
             warnings.append("ヘッダー行が見つかりません")
             return SheetData(
@@ -153,17 +148,8 @@ class ExcelReader:
                 warnings=warnings
             )
         
-        # ヘッダー行の内容をログに出力
-        header_content = []
-        for col in range(1, min(worksheet.max_column + 1, 20)):  # 最大20列まで
-            cell_value = worksheet.cell(row=header_row, column=col).value
-            if cell_value:
-                header_content.append(f"列{col}: {cell_value}")
-        logger.info(f"ヘッダー行{header_row}の内容: {', '.join(header_content)}")
-        
         # 列マッピングを取得
         column_mapping = self._get_column_mapping(worksheet, header_row)
-        logger.info(f"列マッピング結果: {column_mapping}")
         if not column_mapping:
             warnings.append("必須列が見つかりません")
             return SheetData(

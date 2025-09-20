@@ -107,7 +107,6 @@ async def convert_files(
         # 設定解析
         import json
         settings_data = json.loads(settings_json)
-        logger.info(f"受信した設定データ: {settings_data}")
         
         # 新しい階層構造に対応
         if '出力' in settings_data:
