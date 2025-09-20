@@ -12,6 +12,14 @@
             <button type="button" class="sidebar-toggle" onclick="toggleSidebar()">
                 <span id="sidebar-toggle-icon">☰</span>
             </button>
+            <div class="theme-selector">
+                <label for="theme-select" class="theme-label">Theme:</label>
+                <select id="theme-select" onchange="changeTheme(this.value)" title="テーマを選択">
+                    <option value="system">OS</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
         </header>
 
         <div class="main-layout">

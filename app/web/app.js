@@ -13,6 +13,8 @@ async function initializeApp() {
     await loadDefaultSettings();
     setupEventListeners();
     initializeCollapsibleSections();
+    initializeTheme();
+    watchSystemTheme();
 }
 
 // イベントリスナー設定
@@ -861,5 +863,74 @@ function toggleSection(sectionTitle) {
         // 展開
         sectionContent.classList.add('expanded');
         toggleIcon.classList.add('expanded');
+    }
+}
+
+// テーマ初期化
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('testCaseConverter_theme');
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else {
+        // デフォルトはSystem
+        setTheme('system');
+    }
+    
+    // プルダウンの選択状態を更新
+    updateThemeSelector();
+}
+
+// テーマ変更
+function changeTheme(theme) {
+    setTheme(theme);
+}
+
+// テーマ設定
+function setTheme(theme) {
+    localStorage.setItem('testCaseConverter_theme', theme);
+    
+    let actualTheme;
+    if (theme === 'system') {
+        // システム設定を検出
+        actualTheme = getSystemTheme();
+    } else {
+        actualTheme = theme;
+    }
+    
+    document.documentElement.setAttribute('data-theme', actualTheme);
+    
+    // プルダウンの選択状態を更新
+    updateThemeSelector();
+}
+
+// システムテーマを取得
+function getSystemTheme() {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+    } else {
+        return 'light';
+    }
+}
+
+// テーマセレクターの選択状態を更新
+function updateThemeSelector() {
+    const themeSelect = document.getElementById('theme-select');
+    const savedTheme = localStorage.getItem('testCaseConverter_theme') || 'system';
+    
+    if (themeSelect) {
+        themeSelect.value = savedTheme;
+    }
+}
+
+// システムテーマ変更の監視
+function watchSystemTheme() {
+    if (window.matchMedia) {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', (e) => {
+            const currentTheme = localStorage.getItem('testCaseConverter_theme');
+            if (currentTheme === 'system') {
+                setTheme('system');
+            }
+        });
     }
 }

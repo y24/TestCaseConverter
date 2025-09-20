@@ -1,3 +1,51 @@
+/* CSS変数定義 */
+:root {
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f8f9fa;
+    --text-primary: #333333;
+    --text-secondary: #2c3e50;
+    --text-tertiary: #34495e;
+    --text-muted: #7f8c8d;
+    --border-color: #e9ecef;
+    --border-light: #ecf0f1;
+    --shadow: rgba(0,0,0,0.1);
+    --accent-color: #3498db;
+    --accent-hover: #2980b9;
+    --success-color: #27ae60;
+    --success-hover: #229954;
+    --error-bg: #f8d7da;
+    --error-text: #721c24;
+    --error-border: #f5c6cb;
+    --warning-bg: #fff3cd;
+    --warning-text: #856404;
+    --warning-border: #ffeaa7;
+}
+
+/* ダークモード用CSS変数 */
+[data-theme="dark"] {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #3a3a3a;
+    --text-primary: #e0e0e0;
+    --text-secondary: #f0f0f0;
+    --text-tertiary: #d0d0d0;
+    --text-muted: #a0a0a0;
+    --border-color: #404040;
+    --border-light: #505050;
+    --shadow: rgba(0,0,0,0.3);
+    --accent-color: #4a9eff;
+    --accent-hover: #3a8eef;
+    --success-color: #2ecc71;
+    --success-hover: #27ae60;
+    --error-bg: #4a2c2c;
+    --error-text: #ff6b6b;
+    --error-border: #5a3c3c;
+    --warning-bg: #4a3c2c;
+    --warning-text: #ffd93d;
+    --warning-border: #5a4c3c;
+}
+
 /* リセットとベーススタイル */
 * {
     margin: 0;
@@ -8,8 +56,9 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
-    color: #333;
-    background-color: #f5f5f5;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .app-container {
@@ -22,17 +71,18 @@ body {
 header {
     position: relative;
     padding: 10px 20px;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: var(--bg-secondary);
+    box-shadow: 0 2px 4px var(--shadow);
     z-index: 100;
     min-height: 50px;
+    transition: background-color 0.3s ease;
 }
 
 .sidebar-toggle {
     position: absolute;
     top: 10px;
     left: 20px;
-    background: #3498db;
+    background: var(--accent-color);
     color: white;
     border: none;
     padding: 10px 15px;
@@ -40,10 +90,49 @@ header {
     cursor: pointer;
     font-size: 16px;
     display: none;
+    transition: background 0.3s ease;
 }
 
 .sidebar-toggle:hover {
-    background: #2980b9;
+    background: var(--accent-hover);
+}
+
+.theme-selector {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.theme-selector select {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    min-width: 100px;
+}
+
+.theme-selector select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.theme-selector select:hover {
+    border-color: var(--accent-color);
 }
 
 /* メインレイアウト */
@@ -56,24 +145,27 @@ header {
 /* サイドメニュー */
 .sidebar {
     width: 350px;
-    background: white;
-    border-right: 1px solid #e9ecef;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+    box-shadow: 2px 0 4px var(--shadow);
     z-index: 50;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .sidebar-header {
     padding: 20px;
-    border-bottom: 1px solid #e9ecef;
-    background: #f8f9fa;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .sidebar-header h2 {
-    color: #2c3e50;
+    color: var(--text-secondary);
     margin: 0;
     font-size: 1.2em;
+    transition: color 0.3s ease;
 }
 
 .sidebar-content {
@@ -87,50 +179,56 @@ header {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
-    background: #f5f5f5;
+    background: var(--bg-primary);
+    transition: background-color 0.3s ease;
 }
 
 /* セクション */
 section {
-    background: white;
+    background: var(--bg-secondary);
     margin-bottom: 20px;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px var(--shadow);
+    transition: background-color 0.3s ease;
 }
 
 section h2 {
-    color: #2c3e50;
+    color: var(--text-secondary);
     margin-bottom: 15px;
-    border-bottom: 2px solid #ecf0f1;
+    border-bottom: 2px solid var(--border-light);
     padding-bottom: 10px;
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 /* 設定セクション */
 .setting-section {
     margin-bottom: 8px;
     padding: 12px;
-    background: #f8f9fa;
+    background: var(--bg-tertiary);
     border-radius: 6px;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--accent-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .section-title {
-    color: #2c3e50;
+    color: var(--text-secondary);
     font-size: 1.1em;
     font-weight: 600;
     margin-bottom: 12px;
     padding-bottom: 6px;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--border-color);
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .subsection-title {
-    color: #34495e;
+    color: var(--text-tertiary);
     font-size: 0.95em;
     font-weight: 500;
     margin: 15px 0 8px 0;
     padding: 4px 0;
-    border-bottom: 1px solid #ecf0f1;
+    border-bottom: 1px solid var(--border-light);
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 /* 折りたたみ可能なセクションタイトル */
@@ -144,17 +242,17 @@ section h2 {
     padding: 8px 12px;
     margin: -12px -12px 0 -12px;
     border-radius: 4px;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .section-title.collapsible:hover {
-    background-color: #f8f9fa;
+    background-color: var(--bg-tertiary);
 }
 
 .section-toggle-icon {
     font-size: 0.8em;
     transition: transform 0.3s ease;
-    color: #3498db;
+    color: var(--accent-color);
     transform: rotate(-90deg);
 }
 
@@ -190,21 +288,25 @@ section h2 {
 
 .setting-group label {
     font-weight: 500;
-    color: #2c3e50;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
 }
 
 .setting-group input,
 .setting-group select {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 14px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .setting-group input:focus,
 .setting-group select:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
@@ -223,16 +325,17 @@ section h2 {
 .settings-actions button {
     width: 100%;
     padding: 10px;
-    background: #3498db;
+    background: var(--accent-color);
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
+    transition: background 0.3s ease;
 }
 
 .settings-actions button:hover {
-    background: #2980b9;
+    background: var(--accent-hover);
 }
 
 .settings-actions button:last-child {
@@ -245,23 +348,23 @@ section h2 {
 
 /* アップロードエリア */
 .upload-area {
-    border: 2px dashed #bdc3c7;
+    border: 2px dashed var(--border-color);
     border-radius: 8px;
     padding: 40px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: #fafafa;
+    background: var(--bg-tertiary);
 }
 
 .upload-area:hover {
-    border-color: #3498db;
-    background: #f0f8ff;
+    border-color: var(--accent-color);
+    background: var(--bg-secondary);
 }
 
 .upload-area.dragover {
-    border-color: #27ae60;
-    background: #f0fff0;
+    border-color: var(--success-color);
+    background: var(--bg-secondary);
 }
 
 .upload-content {
@@ -274,9 +377,10 @@ section h2 {
 }
 
 .upload-hint {
-    color: #7f8c8d;
+    color: var(--text-muted);
     font-size: 0.9em;
     margin-top: 10px;
+    transition: color 0.3s ease;
 }
 
 /* ファイルリスト */
@@ -289,10 +393,11 @@ section h2 {
     align-items: center;
     justify-content: space-between;
     padding: 10px 15px;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     margin-bottom: 10px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .file-info {
@@ -310,8 +415,9 @@ section h2 {
 }
 
 .file-size {
-    color: #7f8c8d;
+    color: var(--text-muted);
     font-size: 0.9em;
+    transition: color 0.3s ease;
 }
 
 .remove-btn {
@@ -334,7 +440,7 @@ section h2 {
 }
 
 #convert-btn {
-    background: #27ae60;
+    background: var(--success-color);
     color: white;
     border: none;
     padding: 15px 30px;
@@ -345,7 +451,7 @@ section h2 {
 }
 
 #convert-btn:hover:not(:disabled) {
-    background: #229954;
+    background: var(--success-hover);
 }
 
 #convert-btn:disabled {
@@ -365,8 +471,8 @@ section h2 {
 .spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #3498db;
+    border: 2px solid var(--border-light);
+    border-top: 2px solid var(--accent-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -387,40 +493,46 @@ section h2 {
 .preview-controls select {
     flex: 1;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .file-name-display {
     flex: 1;
     padding: 8px 12px;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-weight: 500;
-    color: #2c3e50;
+    color: var(--text-secondary);
     display: none;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .preview-controls button {
-    background: #3498db;
+    background: var(--accent-color);
     color: white;
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
+    transition: background 0.3s ease;
 }
 
 .preview-controls button:hover {
-    background: #2980b9;
+    background: var(--accent-hover);
 }
 
 .preview-content {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     max-height: 500px;
     overflow: auto;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .preview-content pre {
@@ -431,16 +543,19 @@ section h2 {
     font-family: 'Courier New', monospace;
     font-size: 13px;
     line-height: 1.4;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
 }
 
 /* エラーメッセージ */
 .error-message {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background: var(--error-bg);
+    color: var(--error-text);
+    border: 1px solid var(--error-border);
     border-radius: 4px;
     padding: 15px;
     margin: 20px 0;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* ボタン共通スタイル */
@@ -450,7 +565,7 @@ button {
 }
 
 button:focus {
-    outline: 2px solid #3498db;
+    outline: 2px solid var(--accent-color);
     outline-offset: 2px;
 }
 
@@ -507,6 +622,25 @@ button:focus {
         display: none;
     }
     
+    /* モバイル用テーマセレクター */
+    .theme-selector {
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 300;
+        gap: 6px;
+    }
+    
+    .theme-label {
+        font-size: 12px;
+    }
+    
+    .theme-selector select {
+        padding: 6px 10px;
+        font-size: 12px;
+        min-width: 80px;
+    }
+    
     .sidebar-overlay.show {
         display: block;
     }
@@ -519,6 +653,22 @@ button:focus {
         left: 12px;
         padding: 5px 8px;
         font-size: 11px;
+    }
+    
+    .theme-selector {
+        top: 12px;
+        right: 12px;
+        gap: 4px;
+    }
+    
+    .theme-label {
+        font-size: 11px;
+    }
+    
+    .theme-selector select {
+        padding: 5px 8px;
+        font-size: 11px;
+        min-width: 70px;
     }
     
     header {
