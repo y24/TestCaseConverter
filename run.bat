@@ -44,6 +44,5 @@ start /b timeout /t 5 /nobreak >nul 2>&1
 if not errorlevel 1 start http://localhost:8000
 
 REM Start server
-cd /d "%~dp0.."
 call venv\Scripts\activate.bat
 python -m app.server.main
