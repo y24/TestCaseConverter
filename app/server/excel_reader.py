@@ -21,6 +21,7 @@ class ExcelReader:
     
     def __init__(self, settings: ConversionSettings):
         self.settings = settings
+        self.global_test_case_counter = 0  # グローバルなテストケースカウンター
     
     def read_file(self, file_source: Union[Path, bytes], filename: str) -> FileData:
         """Excelファイルを読み取り（ファイルパスまたはバイトデータから）"""
@@ -380,8 +381,9 @@ class ExcelReader:
         # タイトルを文字列として取得（前後の空白を削除、連続する改行を単一の改行に正規化）
         title = self._normalize_multiline_text(row_data.get('title', ''))
         
-        # テストケースIDを生成（設定の桁数を使用）
-        test_id = f"{self.settings.id_prefix}-{row_data['row']:0{self.settings.id_padding}d}"
+        # テストケースIDを生成（グローバルカウンターを使用して通しの連番）
+        self.global_test_case_counter += 1
+        test_id = f"{self.settings.id_prefix}-{self.global_test_case_counter:0{self.settings.id_padding}d}"
         
         return TestCase(
             id=test_id,

@@ -120,7 +120,7 @@ async def convert_files(
         if total_size > 400 * 1024 * 1024:  # 400MB
             raise HTTPException(status_code=400, detail="総ファイルサイズが400MBを超えています")
         
-        # Excel読み取り
+        # Excel読み取り（グローバルカウンターを維持するため、1つのインスタンスを使用）
         excel_reader = ExcelReader(settings)
         file_data_list = []
         

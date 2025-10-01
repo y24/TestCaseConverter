@@ -14,6 +14,7 @@ class DataTransformer:
     
     def __init__(self, settings: ConversionSettings):
         self.settings = settings
+        self.global_test_case_counter = 0  # グローバルなテストケースカウンター
     
     def transform(self, file_data_list: List[FileData]) -> List[FileData]:
         """データを変換・正規化"""
@@ -47,8 +48,9 @@ class DataTransformer:
             transformed_case = self._transform_test_case(test_case)
             transformed_items.append(transformed_case)
         
-        # ID正規化（常に実行して設定の桁数を反映）
-        transformed_items = self._regenerate_ids(transformed_items)
+        # ID正規化（設定で有効な場合のみ実行）
+        if self.settings.force_id_regenerate:
+            transformed_items = self._regenerate_ids(transformed_items)
         
         return type(sheet_data)(
             sheet_name=sheet_data.sheet_name,
@@ -155,11 +157,12 @@ class DataTransformer:
     
     
     def _regenerate_ids(self, test_cases: List[TestCase]) -> List[TestCase]:
-        """IDを再生成"""
+        """IDを再生成（グローバルカウンターを使用して通しの連番）"""
         regenerated_cases = []
         
-        for i, test_case in enumerate(test_cases, 1):
-            new_id = f"{self.settings.id_prefix}-{i:0{self.settings.id_padding}d}"
+        for test_case in test_cases:
+            self.global_test_case_counter += 1
+            new_id = f"{self.settings.id_prefix}-{self.global_test_case_counter:0{self.settings.id_padding}d}"
             
             regenerated_cases.append(TestCase(
                 id=new_id,
