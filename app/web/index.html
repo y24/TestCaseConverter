@@ -27,14 +27,14 @@
             <!-- サイドメニュー -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <h2>🔧 変換設定</h2>
+                    <h2>🔧 設定</h2>
                 </div>
                 <div class="sidebar-content">
                     <!-- 読み取り設定セクション -->
                     <div class="setting-section">
                         <h3 class="section-title collapsible" onclick="toggleSection(this)">
                             <span class="section-toggle-icon">▼</span>
-                            読み取り
+                            インプット設定
                         </h3>
                         <div class="section-content">
                         
@@ -67,32 +67,32 @@
 
                         <div class="setting-group">
                             <label for="test-type-keys">テスト種別:</label>
-                            <input type="text" id="test-type-keys" value="テスト種別" placeholder="カンマ区切りで入力">
+                            <input type="text" id="test-type-keys" value="テスト種別" placeholder="カンマ区切りで入力。除外したい文字列は括弧で囲む">
                         </div>
                         
                         <div class="setting-group">
                             <label for="priority-keys">優先度:</label>
-                            <input type="text" id="priority-keys" value="優先度" placeholder="カンマ区切りで入力">
+                            <input type="text" id="priority-keys" value="優先度" placeholder="カンマ区切りで入力。除外したい文字列は括弧で囲む">
                         </div>
                         
                         <div class="setting-group">
                             <label for="precondition-keys">前提条件:</label>
-                            <input type="text" id="precondition-keys" value="前提条件" placeholder="カンマ区切りで入力">
+                            <input type="text" id="precondition-keys" value="前提条件" placeholder="カンマ区切りで入力。除外したい文字列は括弧で囲む">
                         </div>
 
                         <div class="setting-group">
                             <label for="step-keys">手順:</label>
-                            <input type="text" id="step-keys" value="手順" placeholder="カンマ区切りで入力">
+                            <input type="text" id="step-keys" value="手順" placeholder="カンマ区切りで入力。除外したい文字列は括弧で囲む">
                         </div>
                         
                         <div class="setting-group">
                             <label for="tobe-keys">期待結果:</label>
-                            <input type="text" id="tobe-keys" value="期待結果" placeholder="カンマ区切りで入力">
+                            <input type="text" id="tobe-keys" value="結果,(実施結果)" placeholder="カンマ区切りで入力。除外したい文字列は括弧で囲む">
                         </div>
                       
                         <div class="setting-group">
                             <label for="note-keys">備考:</label>
-                            <input type="text" id="note-keys" value="備考,補足情報" placeholder="カンマ区切りで入力">
+                            <input type="text" id="note-keys" value="備考,補足情報" placeholder="カンマ区切りで入力。除外したい文字列は括弧で囲む">
                         </div>
                         
                         </div>
@@ -151,7 +151,7 @@
                     <div class="setting-section">
                         <h3 class="section-title collapsible" onclick="toggleSection(this)">
                             <span class="section-toggle-icon">▼</span>
-                            出力
+                            出力設定
                         </h3>
                         <div class="section-content">
                             <div class="setting-group">
@@ -174,8 +174,8 @@
                     </div>
 
                     <div class="settings-actions">
-                        <button type="button" onclick="saveSettings()">💾 設定を保存</button>
-                        <button type="button" onclick="resetToDefaultSettings()">デフォルトに戻す</button>
+                        <button type="button" onclick="saveSettings()">💾 設定をブラウザに保存</button>
+                        <button type="button" onclick="resetToDefaultSettings()">デフォルト設定に戻す</button>
                     </div>
                 </div>
             </aside>

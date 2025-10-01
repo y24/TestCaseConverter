@@ -150,23 +150,71 @@ function applySettingsToUI() {
         const categoryRow = currentSettings.category_row || { keys: ["大項目", "中項目", "小項目1", "小項目2"] };
         setElementValue('category-keys', categoryRow.keys ? categoryRow.keys.join(',') : "大項目,中項目,小項目1,小項目2");
         
-        const stepRow = currentSettings.step_row || { keys: ["手順"] };
-        setElementValue('step-keys', stepRow.keys ? stepRow.keys.join(',') : "手順");
+        const stepRow = currentSettings.step_row || { keys: ["手順"], ignores: [] };
+        // keysとignoresを統合して表示
+        const stepDisplay = [];
+        if (stepRow.keys) {
+            stepDisplay.push(...stepRow.keys);
+        }
+        if (stepRow.ignores) {
+            stepDisplay.push(...stepRow.ignores.map(ignore => `(${ignore})`));
+        }
+        setElementValue('step-keys', stepDisplay.join(',') || "手順");
         
-        const tobeRow = currentSettings.tobe_row || { keys: ["期待結果"], ignores: [] };
-        setElementValue('tobe-keys', tobeRow.keys ? tobeRow.keys.join(',') : "期待結果");
+        const tobeRow = currentSettings.tobe_row || { keys: ["結果"], ignores: ["実施結果"] };
+        // keysとignoresを統合して表示
+        const tobeDisplay = [];
+        if (tobeRow.keys) {
+            tobeDisplay.push(...tobeRow.keys);
+        }
+        if (tobeRow.ignores) {
+            tobeDisplay.push(...tobeRow.ignores.map(ignore => `(${ignore})`));
+        }
+        setElementValue('tobe-keys', tobeDisplay.join(',') || "結果,(実施結果)");
         
-        const testTypeRow = currentSettings.test_type_row || { keys: ["テスト種別"] };
-        setElementValue('test-type-keys', testTypeRow.keys ? testTypeRow.keys.join(',') : "テスト種別");
+        const testTypeRow = currentSettings.test_type_row || { keys: ["テスト種別"], ignores: [] };
+        // keysとignoresを統合して表示
+        const testTypeDisplay = [];
+        if (testTypeRow.keys) {
+            testTypeDisplay.push(...testTypeRow.keys);
+        }
+        if (testTypeRow.ignores) {
+            testTypeDisplay.push(...testTypeRow.ignores.map(ignore => `(${ignore})`));
+        }
+        setElementValue('test-type-keys', testTypeDisplay.join(',') || "テスト種別");
         
-        const priorityRow = currentSettings.priority_row || { keys: ["優先度"] };
-        setElementValue('priority-keys', priorityRow.keys ? priorityRow.keys.join(',') : "優先度");
+        const priorityRow = currentSettings.priority_row || { keys: ["優先度"], ignores: [] };
+        // keysとignoresを統合して表示
+        const priorityDisplay = [];
+        if (priorityRow.keys) {
+            priorityDisplay.push(...priorityRow.keys);
+        }
+        if (priorityRow.ignores) {
+            priorityDisplay.push(...priorityRow.ignores.map(ignore => `(${ignore})`));
+        }
+        setElementValue('priority-keys', priorityDisplay.join(',') || "優先度");
         
-        const preconditionRow = currentSettings.precondition_row || { keys: ["前提条件"] };
-        setElementValue('precondition-keys', preconditionRow.keys ? preconditionRow.keys.join(',') : "前提条件");
+        const preconditionRow = currentSettings.precondition_row || { keys: ["前提条件"], ignores: [] };
+        // keysとignoresを統合して表示
+        const preconditionDisplay = [];
+        if (preconditionRow.keys) {
+            preconditionDisplay.push(...preconditionRow.keys);
+        }
+        if (preconditionRow.ignores) {
+            preconditionDisplay.push(...preconditionRow.ignores.map(ignore => `(${ignore})`));
+        }
+        setElementValue('precondition-keys', preconditionDisplay.join(',') || "前提条件");
         
-        const noteRow = currentSettings.note_row || { keys: ["備考", "補足情報"] };
-        setElementValue('note-keys', noteRow.keys ? noteRow.keys.join(',') : "備考,補足情報");
+        const noteRow = currentSettings.note_row || { keys: ["備考", "補足情報"], ignores: [] };
+        // keysとignoresを統合して表示
+        const noteDisplay = [];
+        if (noteRow.keys) {
+            noteDisplay.push(...noteRow.keys);
+        }
+        if (noteRow.ignores) {
+            noteDisplay.push(...noteRow.ignores.map(ignore => `(${ignore})`));
+        }
+        setElementValue('note-keys', noteDisplay.join(',') || "備考,補足情報");
         
         
     } catch (error) {
@@ -202,6 +250,28 @@ function updateSettings() {
         function parseCommaSeparated(value) {
             if (!value || value.trim() === '') return [];
             return value.split(',').map(item => item.trim()).filter(item => item !== '');
+        }
+        
+        // 括弧付きの文字列をkeysとignoresに分離するヘルパー関数
+        function parseKeysAndIgnores(value) {
+            if (!value || value.trim() === '') return { keys: [], ignores: [] };
+            
+            const keys = [];
+            const ignores = [];
+            
+            value.split(',').forEach(item => {
+                item = item.trim();
+                if (item === '') return;
+                
+                // 括弧で囲まれている場合はignoresに追加
+                if (item.startsWith('(') && item.endsWith(')')) {
+                    ignores.push(item.slice(1, -1)); // 括弧を除去
+                } else {
+                    keys.push(item);
+                }
+            });
+            
+            return { keys, ignores };
         }
         
         
@@ -241,30 +311,12 @@ function updateSettings() {
                 keys: parseCommaSeparated(getElementValue('category-keys', '大項目,中項目,小項目1,小項目2')),
                 ignores: []
             },
-            step_row: {
-                keys: parseCommaSeparated(getElementValue('step-keys', '手順')),
-                ignores: []
-            },
-            tobe_row: {
-                keys: parseCommaSeparated(getElementValue('tobe-keys', '期待結果')),
-                ignores: []
-            },
-            test_type_row: {
-                keys: parseCommaSeparated(getElementValue('test-type-keys', 'テスト種別')),
-                ignores: []
-            },
-            priority_row: {
-                keys: parseCommaSeparated(getElementValue('priority-keys', '優先度')),
-                ignores: []
-            },
-            precondition_row: {
-                keys: parseCommaSeparated(getElementValue('precondition-keys', '前提条件')),
-                ignores: []
-            },
-            note_row: {
-                keys: parseCommaSeparated(getElementValue('note-keys', '備考,補足情報')),
-                ignores: []
-            },
+            step_row: parseKeysAndIgnores(getElementValue('step-keys', '手順')),
+            tobe_row: parseKeysAndIgnores(getElementValue('tobe-keys', '結果,(実施結果)')),
+            test_type_row: parseKeysAndIgnores(getElementValue('test-type-keys', 'テスト種別')),
+            priority_row: parseKeysAndIgnores(getElementValue('priority-keys', '優先度')),
+            precondition_row: parseKeysAndIgnores(getElementValue('precondition-keys', '前提条件')),
+            note_row: parseKeysAndIgnores(getElementValue('note-keys', '備考,補足情報')),
             
             // 処理設定
             trim_whitespaces: getElementChecked('trim-whitespaces', true),

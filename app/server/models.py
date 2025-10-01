@@ -50,7 +50,7 @@ class ConversionSettings(BaseModel):
     # 列設定
     category_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["大項目", "中項目", "小項目1", "小項目2"]))
     step_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["手順"]))
-    tobe_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["期待結果"], ignores=["実施"]))
+    tobe_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["期待結果"]))
     test_type_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト種別"]))
     priority_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["優先度"]))
     precondition_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["前提条件"]))

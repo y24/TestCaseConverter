@@ -259,12 +259,18 @@ class ExcelReader:
                 for key in config.keys:
                     if key in header_str:
                         # 除外チェック
-                        if header_str in config.ignores:
-                            continue
-                        mapping[config_name] = col
-                        break
+                        should_exclude = False
+                        for ignore_key in config.ignores:
+                            if ignore_key in header_str:
+                                should_exclude = True
+                                break
+                        
+                        if not should_exclude:
+                            mapping[config_name] = col
+                            break
         
         return mapping
+    
     
     def _get_data_rows(self, worksheet, header_row: int, column_mapping: Dict[str, int]) -> List[Dict]:
         """データ行を取得"""
