@@ -37,6 +37,7 @@ class ConversionSettings(BaseModel):
     split_mode: SplitMode = Field(default=SplitMode.PER_SHEET)
     id_prefix: str = Field(default="TC", description="IDプレフィックス")
     id_padding: int = Field(default=3, description="ID桁数")
+    id_start_number: int = Field(default=1, description="ID開始番号")
     force_id_regenerate: bool = Field(default=False, description="ID強制再生成")
     
     # シート設定

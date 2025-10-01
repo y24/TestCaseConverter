@@ -3,6 +3,7 @@
   "split_mode": "per_sheet",
   "id_prefix": "TC",
   "id_padding": 3,
+  "id_start_number": 1,
   "force_id_regenerate": false,
   "sheet_search_keys": [
     "テスト項目"

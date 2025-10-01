@@ -21,7 +21,7 @@ class ExcelReader:
     
     def __init__(self, settings: ConversionSettings):
         self.settings = settings
-        self.global_test_case_counter = 0  # グローバルなテストケースカウンター
+        self.global_test_case_counter = (settings.id_start_number or 1) - 1  # グローバルなテストケースカウンター（開始番号-1で初期化）
     
     def read_file(self, file_source: Union[Path, bytes], filename: str) -> FileData:
         """Excelファイルを読み取り（ファイルパスまたはバイトデータから）"""
