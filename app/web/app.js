@@ -125,23 +125,21 @@ async function loadDefaultSettings() {
 // 設定をUIに適用
 function applySettingsToUI() {
     try {
-        // 新しい構造に対応
-        const outputSettings = currentSettings.出力 || {};
-        const caseIdSettings = currentSettings.ケースID || {};
-        const stepSettings = currentSettings.手順 || {};
-        
         // 出力設定
-        setElementValue('output-format', outputSettings.output_format || currentSettings.output_format || 'markdown');
-        setElementValue('split-mode', outputSettings.split_mode || currentSettings.split_mode || 'per_sheet');
+        setElementValue('output-format', currentSettings.output_format || 'markdown');
+        setElementValue('split-mode', currentSettings.split_mode || 'per_sheet');
         
         // ケースID設定
-        setElementValue('id-prefix', caseIdSettings.id_prefix || currentSettings.id_prefix || 'TC');
-        setElementValue('id-padding', caseIdSettings.id_padding || currentSettings.id_padding || 3);
+        setElementValue('id-prefix', currentSettings.id_prefix || 'TC');
+        setElementValue('id-padding', currentSettings.id_padding || 3);
         
         // 文字列処理設定
         setElementChecked('trim-whitespaces', currentSettings.trim_whitespaces !== false);
         setElementChecked('forward-fill-category', currentSettings.forward_fill_category !== false);
         setElementChecked('normalize-zenkaku', currentSettings.normalize_zenkaku_numbers !== false);
+        
+        // シート名設定
+        setElementValue('sheet-search-keys', currentSettings.sheet_search_keys ? currentSettings.sheet_search_keys.join(',') : 'テスト項目');
         
         // 読み取り設定
         const header = currentSettings.header || { search_col: "A", search_key: "#" };
@@ -225,16 +223,12 @@ function updateSettings() {
         
         // 新しい構造で設定を構築
         currentSettings = {
-            出力: {
-                output_format: getElementValue('output-format', 'markdown'),
-                split_mode: getElementValue('split-mode', 'per_sheet')
-            },
-            ケースID: {
-                id_prefix: getElementValue('id-prefix', 'TC'),
-                id_padding: getElementNumber('id-padding', 3),
-                force_id_regenerate: false
-            },
-            sheet_search_keys: ["テスト項目"],
+            output_format: getElementValue('output-format', 'markdown'),
+            split_mode: getElementValue('split-mode', 'per_sheet'),
+            id_prefix: getElementValue('id-prefix', 'TC'),
+            id_padding: getElementNumber('id-padding', 3),
+            force_id_regenerate: false,
+            sheet_search_keys: parseCommaSeparated(getElementValue('sheet-search-keys', 'テスト項目')),
             sheet_search_ignores: [],
             
             // 読み取り設定
@@ -353,11 +347,11 @@ function updateFileList() {
         fileItem.className = 'file-item';
         fileItem.innerHTML = `
             <div class="file-info">
-                <span class="file-icon">📊</span>
+                <span class="file-icon">📗</span>
                 <span class="file-name">${file.name}</span>
                 <span class="file-size">(${formatFileSize(file.size)})</span>
             </div>
-            <button type="button" class="remove-btn" onclick="removeFile(${index})">削除</button>
+            <button type="button" class="remove-btn" onclick="removeFile(${index})">✖ 削除</button>
         `;
         fileList.appendChild(fileItem);
     });
@@ -464,7 +458,7 @@ function resetToInitialState() {
     // ダウンロードボタンのテキストを元に戻す
     const downloadBtn = document.querySelector('.preview-controls button');
     if (downloadBtn) {
-        downloadBtn.textContent = 'すべてダウンロード (ZIP)';
+        downloadBtn.textContent = '📥 すべてダウンロード (.zip)';
     }
     
     // プレビュー内容をクリア
@@ -668,7 +662,7 @@ function showPreview() {
             
             // ダウンロードボタンのテキストを変更
             const downloadBtn = previewControls.querySelector('button');
-            downloadBtn.textContent = 'ダウンロード';
+            downloadBtn.textContent = '📥 ダウンロード (.md)';
             
             // プレビュー内容を直接設定
             const previewContent = document.getElementById('preview-content');
@@ -699,7 +693,7 @@ function showPreview() {
             
             // ダウンロードボタンのテキストを元に戻す
             const downloadBtn = previewControls.querySelector('button');
-            downloadBtn.textContent = 'すべてダウンロード (ZIP)';
+            downloadBtn.textContent = '📥 すべてダウンロード (.zip)';
             
             // 最初のファイルを選択
             if (fileSelect.options.length > 1) {
