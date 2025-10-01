@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .models import (
     ConversionSettings, ConversionResult, ErrorResponse, HealthResponse,
-    OutputFormat, SplitMode
+    OutputFormat, SplitMode, FileData
 )
 from .settings import settings_manager
 from .excel_reader import ExcelReader
@@ -153,19 +153,36 @@ async def convert_files(
         
         for file in files:
             if not file.filename.endswith(('.xlsx', '.xls')):
+                logger.warning(f"Skipping non-Excel file: {file.filename}")
                 continue
                 
             try:
                 # ファイル内容をメモリに読み込み
                 content = await file.read()
                 
+                # ファイルサイズチェック
+                if len(content) == 0:
+                    logger.warning(f"Empty file: {file.filename}")
+                    continue
+                
                 # メモリ上でExcel読み取り（一時ファイルを使用しない）
                 file_data = excel_reader.read_file(content, file.filename)
                 file_data_list.append(file_data)
                 
+                # 警告がある場合はログに記録
+                if file_data.warnings:
+                    for warning in file_data.warnings:
+                        logger.warning(f"File {file.filename}: {warning}")
+                
             except Exception as e:
                 logger.error(f"File {file.filename} reading error: {e}")
-                continue
+                # エラーが発生したファイルも結果に含める（警告付きで）
+                error_file_data = FileData(
+                    filename=file.filename,
+                    sheets=[],
+                    warnings=[f"ファイル読み取りエラー: {str(e)}"]
+                )
+                file_data_list.append(error_file_data)
         
         # データ変換
         transformer = DataTransformer(settings)
@@ -174,8 +191,22 @@ async def convert_files(
         # 変換結果の検証
         total_items = sum(len(sheet.items) for file_data in transformed_data for sheet in file_data.sheets)
         if total_items == 0:
-            # 変換結果が空の場合はエラー
-            raise HTTPException(status_code=400, detail="変換結果が空です。設定を確認してください。")
+            # 変換結果が空の場合の詳細なエラー情報を提供
+            error_details = []
+            for file_data in transformed_data:
+                if not file_data.sheets:
+                    error_details.append(f"ファイル '{file_data.filename}': 対象シートが見つかりません")
+                else:
+                    for sheet in file_data.sheets:
+                        if not sheet.items:
+                            error_details.append(f"ファイル '{file_data.filename}' のシート '{sheet.sheet_name}': データが見つかりません")
+            
+            if error_details:
+                error_message = "変換結果が空です。以下の問題を確認してください：\n" + "\n".join(error_details)
+            else:
+                error_message = "変換結果が空です。設定を確認してください。"
+            
+            raise HTTPException(status_code=400, detail=error_message)
         
         # レンダリング
         if settings.output_format == OutputFormat.YAML:
@@ -206,6 +237,9 @@ async def convert_files(
         
         return result
         
+    except HTTPException:
+        # HTTPExceptionはそのまま再発生させる
+        raise
     except Exception as e:
         logger.error(f"Conversion error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

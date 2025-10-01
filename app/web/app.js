@@ -445,6 +445,7 @@ function resetToInitialState() {
     
     // エラーメッセージを非表示
     hideError();
+    hidePreviewError();
     
     // ローディングを非表示
     showLoading(false);
@@ -498,24 +499,47 @@ async function autoConvert() {
         formData.append('settings_json', JSON.stringify(currentSettings));
         
         // 変換実行
+        console.log('Starting conversion request...');
         const response = await fetch('/api/convert', {
             method: 'POST',
             body: formData
         });
         
+        console.log('Response received:', response.status, response.statusText);
+        console.log('Response ok:', response.ok);
+        
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || '変換に失敗しました');
+            console.log('Response not ok, processing error...');
+            let errorMessage = '変換に失敗しました';
+            try {
+                console.log('Attempting to parse error response as JSON...');
+                const errorData = await response.json();
+                console.error('Server error response:', errorData);
+                errorMessage = errorData.detail || errorMessage;
+                console.log('Error message extracted:', errorMessage);
+            } catch (jsonError) {
+                console.error('Failed to parse error response:', jsonError);
+                errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                console.log('Using fallback error message:', errorMessage);
+            }
+            console.log('Throwing error with message:', errorMessage);
+            throw new Error(errorMessage);
         }
         
+        console.log('Response ok, parsing JSON...');
         conversionResult = await response.json();
+        console.log('Conversion result received:', conversionResult);
         showPreview();
         
     } catch (error) {
-        showError('自動変換に失敗しました: ' + error.message);
+        console.error('Conversion error:', error);
+        // プレビューセクションを表示してエラーメッセージを表示
+        const previewSection = document.getElementById('preview-section');
+        previewSection.style.display = 'block';
+        showPreviewError('自動変換に失敗しました: ' + error.message);
+        
         // 変換に失敗した場合はプレビューをクリア
         conversionResult = null;
-        resetToInitialState();
     } finally {
         showLoading(false);
     }
@@ -583,15 +607,27 @@ async function convertFiles() {
         });
         
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || '変換に失敗しました');
+            let errorMessage = '変換に失敗しました';
+            try {
+                const errorData = await response.json();
+                console.error('Server error response:', errorData);
+                errorMessage = errorData.detail || errorMessage;
+            } catch (jsonError) {
+                console.error('Failed to parse error response:', jsonError);
+                errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
         }
         
         conversionResult = await response.json();
         showPreview();
         
     } catch (error) {
-        showError('変換に失敗しました: ' + error.message);
+        console.error('Conversion error:', error);
+        // プレビューセクションを表示してエラーメッセージを表示
+        const previewSection = document.getElementById('preview-section');
+        previewSection.style.display = 'block';
+        showPreviewError('変換に失敗しました: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -602,6 +638,9 @@ function showPreview() {
     const previewSection = document.getElementById('preview-section');
     const fileSelect = document.getElementById('preview-file-select');
     const previewControls = document.querySelector('.preview-controls');
+    
+    // プレビューエラーを非表示
+    hidePreviewError();
     
     if (conversionResult && conversionResult.rendered_text) {
         const fileKeys = Object.keys(conversionResult.rendered_text);
@@ -782,6 +821,32 @@ function showError(message) {
 function hideError() {
     const errorDiv = document.getElementById('error-message');
     errorDiv.style.display = 'none';
+}
+
+// プレビューエラー表示
+function showPreviewError(message) {
+    const previewErrorDiv = document.getElementById('preview-error-message');
+    const errorTextDiv = previewErrorDiv.querySelector('.error-text');
+    errorTextDiv.textContent = message;
+    previewErrorDiv.style.display = 'flex';
+    
+    // プレビュー内容を非表示
+    const previewContent = document.getElementById('preview-content');
+    if (previewContent) {
+        previewContent.style.display = 'none';
+    }
+}
+
+// プレビューエラー非表示
+function hidePreviewError() {
+    const previewErrorDiv = document.getElementById('preview-error-message');
+    previewErrorDiv.style.display = 'none';
+    
+    // プレビュー内容を表示
+    const previewContent = document.getElementById('preview-content');
+    if (previewContent) {
+        previewContent.style.display = 'block';
+    }
 }
 
 // デフォルト設定に戻す

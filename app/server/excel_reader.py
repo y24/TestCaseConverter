@@ -47,6 +47,16 @@ class ExcelReader:
                     )
                 
                 logger.info(f"Excel file reading started: {filename} (size: {file_size} bytes)")
+                
+                # ファイル形式の事前チェック
+                if not self._is_valid_excel_file(file_source):
+                    logger.error(f"Invalid Excel file format: {filename}")
+                    return FileData(
+                        filename=filename,
+                        sheets=[],
+                        warnings=[f"無効なExcelファイル形式です: {filename}"]
+                    )
+                
                 workbook = load_workbook(file_source, data_only=True)
                 
             else:
@@ -60,6 +70,16 @@ class ExcelReader:
                     )
                 
                 logger.info(f"Excel file reading started: {filename} (size: {len(file_source)} bytes)")
+                
+                # バイトデータの形式チェック
+                if not self._is_valid_excel_bytes(file_source):
+                    logger.error(f"Invalid Excel file format: {filename}")
+                    return FileData(
+                        filename=filename,
+                        sheets=[],
+                        warnings=[f"無効なExcelファイル形式です: {filename}"]
+                    )
+                
                 workbook = load_workbook(io.BytesIO(file_source), data_only=True)
             
             sheets_data = []
@@ -104,10 +124,19 @@ class ExcelReader:
             )
         except Exception as e:
             logger.error(f"File {filename} reading error: {e}")
+            # より詳細なエラー情報を提供
+            error_detail = str(e)
+            if "could not read worksheets from None" in error_detail:
+                error_detail = "Excelファイルの構造が破損しているか、無効なXMLが含まれています。ファイルを再保存してから再度お試しください。"
+            elif "Permission denied" in error_detail:
+                error_detail = "ファイルが他のアプリケーションで開かれている可能性があります。ファイルを閉じてから再度お試しください。"
+            elif "Invalid file format" in error_detail:
+                error_detail = "ファイル形式が正しくありません。.xlsxまたは.xlsファイルをアップロードしてください。"
+            
             return FileData(
                 filename=filename,
                 sheets=[],
-                warnings=[f"ファイル読み取りエラー: {str(e)}"]
+                warnings=[f"ファイル読み取りエラー: {error_detail}"]
             )
         finally:
             # ワークブックを明示的に閉じる
@@ -400,5 +429,37 @@ class ExcelReader:
         result = '\n'.join(normalized_lines)
         
         return result
+    
+    def _is_valid_excel_file(self, file_path: Path) -> bool:
+        """Excelファイルの形式を検証（ファイルパス版）"""
+        try:
+            # ファイルの先頭バイトをチェック
+            with open(file_path, 'rb') as f:
+                header = f.read(8)
+                # ZIPファイルのマジックナンバー（ExcelファイルはZIPベース）
+                if header[:4] == b'PK\x03\x04':
+                    return True
+                # 古いExcel形式のマジックナンバー
+                elif header[:8] == b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1':
+                    return True
+                return False
+        except Exception:
+            return False
+    
+    def _is_valid_excel_bytes(self, file_bytes: bytes) -> bool:
+        """Excelファイルの形式を検証（バイトデータ版）"""
+        try:
+            if len(file_bytes) < 8:
+                return False
+            
+            # ZIPファイルのマジックナンバー（ExcelファイルはZIPベース）
+            if file_bytes[:4] == b'PK\x03\x04':
+                return True
+            # 古いExcel形式のマジックナンバー
+            elif file_bytes[:8] == b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1':
+                return True
+            return False
+        except Exception:
+            return False
     
     
