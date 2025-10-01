@@ -124,7 +124,7 @@ class MarkdownRenderer:
             
             # 最後のケース以外は区切り線を追加
             if i < len(test_cases) - 1:
-                md_content += "\n---\n\n"
+                md_content += "---\n\n"
         
         # メタ情報を追加
         md_content += self._render_meta_info(filename, sheet_names)
