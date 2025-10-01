@@ -195,6 +195,13 @@
                 </div>
 
                 <div class="file-list" id="file-list"></div>
+                
+                <!-- 一括削除ボタン（複数ファイルがある場合のみ表示） -->
+                <div class="bulk-actions" id="bulk-actions" style="display: none;">
+                    <button type="button" class="bulk-delete-btn" onclick="removeAllFiles()">
+                        🗑️ すべて削除
+                    </button>
+                </div>
             </section>
 
             <!-- 変換ボタン（自動変換のため非表示） -->
@@ -212,7 +219,6 @@
 
             <!-- プレビュー -->
             <section class="preview-section" id="preview-section" style="display: none;">
-                <h2>プレビュー</h2>
                 <div class="preview-controls">
                     <select id="preview-file-select">
                         <option value="">ファイルを選択してください</option>

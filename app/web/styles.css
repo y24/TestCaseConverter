@@ -865,3 +865,30 @@ button:focus {
         letter-spacing: 0.2px;
     }
 }
+
+/* 一括削除ボタンのスタイル */
+.bulk-actions {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.bulk-delete-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    min-width: 80px;
+}
+
+.bulk-delete-btn:hover {
+    background: #c0392b;
+}
+
+.bulk-delete-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+}

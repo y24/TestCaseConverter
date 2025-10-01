@@ -391,6 +391,7 @@ function addFiles(files) {
 function updateFileList() {
     const fileList = document.getElementById('file-list');
     const uploadArea = document.getElementById('upload-area');
+    const bulkActions = document.getElementById('bulk-actions');
     
     fileList.innerHTML = '';
     
@@ -411,8 +412,15 @@ function updateFileList() {
     // ファイルが1件以上ある場合はドロップエリアを非表示、0件の場合は表示
     if (uploadedFiles.length > 0) {
         uploadArea.style.display = 'none';
+        // 複数ファイルがある場合のみ一括削除ボタンを表示
+        if (uploadedFiles.length > 1) {
+            bulkActions.style.display = 'block';
+        } else {
+            bulkActions.style.display = 'none';
+        }
     } else {
         uploadArea.style.display = 'block';
+        bulkActions.style.display = 'none';
     }
 }
 
@@ -463,6 +471,22 @@ function removeFile(index) {
     
     // ファイル削除時に自動変換実行
     autoConvert();
+}
+
+// すべてのファイルを一括削除
+function removeAllFiles() {
+    // ファイルが0件の場合は何もしない
+    if (uploadedFiles.length === 0) {
+        return;
+    }
+    
+    // すべてのファイルを削除
+    uploadedFiles = [];
+    updateFileList();
+    updateConvertButton();
+    
+    // 初期表示に戻す
+    resetToInitialState();
 }
 
 // ファイルサイズフォーマット
