@@ -44,10 +44,14 @@ class MarkdownRenderer:
                     [sheet_data.sheet_name]
                 )
                 
-                # ファイル名を生成
+                # ファイル名を生成（ID範囲を追加）
                 filename = self._sanitize_filename(file_data.filename)
                 sheet_name = self._sanitize_filename(sheet_data.sheet_name)
-                output_filename = f"{filename}_{sheet_name}.md"
+                id_range = self._get_id_range(sheet_data.items)
+                if id_range:
+                    output_filename = f"{filename}_{sheet_name}_{id_range}.md"
+                else:
+                    output_filename = f"{filename}_{sheet_name}.md"
                 
                 rendered_files[output_filename] = md_content
         
@@ -71,11 +75,15 @@ class MarkdownRenderer:
                         category
                     )
                     
-                    # ファイル名を生成
+                    # ファイル名を生成（ID範囲を追加）
                     filename = self._sanitize_filename(file_data.filename)
                     sheet_name = self._sanitize_filename(sheet_data.sheet_name)
                     category_name = self._sanitize_filename(category)
-                    output_filename = f"{filename}_{sheet_name}_{category_name}.md"
+                    id_range = self._get_id_range(test_cases)
+                    if id_range:
+                        output_filename = f"{filename}_{sheet_name}_{category_name}_{id_range}.md"
+                    else:
+                        output_filename = f"{filename}_{sheet_name}_{category_name}.md"
                     
                     rendered_files[output_filename] = md_content
         
@@ -95,7 +103,7 @@ class MarkdownRenderer:
                         [sheet_data.sheet_name]
                     )
                     
-                    # ファイル名を生成
+                    # ファイル名を生成（ケース単位ではID範囲は不要、単一IDのみ）
                     sheet_name = self._sanitize_filename(sheet_data.sheet_name)
                     output_filename = f"{test_case.id}_{sheet_name}.md"
                     
@@ -297,3 +305,27 @@ class MarkdownRenderer:
         import os
         base_name, extension = os.path.splitext(filename)
         return base_name, extension
+    
+    def _get_id_range(self, test_cases: List[TestCase]) -> str:
+        """テストケースIDの範囲を取得"""
+        if not test_cases:
+            return ""
+        
+        # IDから数値部分を抽出してソート
+        id_numbers = []
+        for test_case in test_cases:
+            # IDから数値部分を抽出（例: "TC001" -> 1）
+            import re
+            match = re.search(r'\d+', test_case.id)
+            if match:
+                id_numbers.append(int(match.group()))
+        
+        if not id_numbers:
+            return ""
+        
+        id_numbers.sort()
+        min_id = min(id_numbers)
+        max_id = max(id_numbers)
+        
+        # 3桁のゼロパディングで範囲を返す
+        return f"{min_id:03d}-{max_id:03d}"
