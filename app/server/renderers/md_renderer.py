@@ -36,6 +36,9 @@ class MarkdownRenderer:
         rendered_files = {}
         
         for file_data in file_data_list:
+            # シート数を取得
+            total_sheets = len(file_data.sheets)
+            
             for sheet_data in file_data.sheets:
                 # レンダリング
                 md_content = self._render_test_cases(
@@ -44,14 +47,23 @@ class MarkdownRenderer:
                     [sheet_data.sheet_name]
                 )
                 
-                # ファイル名を生成（ID範囲を追加）
+                # ファイル名を生成（シート数に応じてシート名を含めるかどうかを決定）
                 filename = self._sanitize_filename(file_data.filename)
-                sheet_name = self._sanitize_filename(sheet_data.sheet_name)
                 id_range = self._get_id_range(sheet_data.items)
-                if id_range:
-                    output_filename = f"{filename}_{sheet_name}_{id_range}.md"
+                
+                if total_sheets == 1:
+                    # シートが1つの場合はシート名は不要
+                    if id_range:
+                        output_filename = f"{filename}_{id_range}.md"
+                    else:
+                        output_filename = f"{filename}.md"
                 else:
-                    output_filename = f"{filename}_{sheet_name}.md"
+                    # シートが複数の場合はシート名を含める
+                    sheet_name = self._sanitize_filename(sheet_data.sheet_name)
+                    if id_range:
+                        output_filename = f"{filename}_{sheet_name}_{id_range}.md"
+                    else:
+                        output_filename = f"{filename}_{sheet_name}.md"
                 
                 rendered_files[output_filename] = md_content
         
@@ -62,6 +74,9 @@ class MarkdownRenderer:
         rendered_files = {}
         
         for file_data in file_data_list:
+            # シート数を取得
+            total_sheets = len(file_data.sheets)
+            
             for sheet_data in file_data.sheets:
                 # カテゴリごとにグループ化
                 category_groups = self._group_by_category(sheet_data.items)
@@ -75,15 +90,24 @@ class MarkdownRenderer:
                         category
                     )
                     
-                    # ファイル名を生成（ID範囲を追加）
+                    # ファイル名を生成（シート数に応じてシート名を含めるかどうかを決定）
                     filename = self._sanitize_filename(file_data.filename)
-                    sheet_name = self._sanitize_filename(sheet_data.sheet_name)
                     category_name = self._sanitize_filename(category)
                     id_range = self._get_id_range(test_cases)
-                    if id_range:
-                        output_filename = f"{filename}_{sheet_name}_{category_name}_{id_range}.md"
+                    
+                    if total_sheets == 1:
+                        # シートが1つの場合はシート名は不要
+                        if id_range:
+                            output_filename = f"{filename}_{category_name}_{id_range}.md"
+                        else:
+                            output_filename = f"{filename}_{category_name}.md"
                     else:
-                        output_filename = f"{filename}_{sheet_name}_{category_name}.md"
+                        # シートが複数の場合はシート名を含める
+                        sheet_name = self._sanitize_filename(sheet_data.sheet_name)
+                        if id_range:
+                            output_filename = f"{filename}_{sheet_name}_{category_name}_{id_range}.md"
+                        else:
+                            output_filename = f"{filename}_{sheet_name}_{category_name}.md"
                     
                     rendered_files[output_filename] = md_content
         
@@ -103,9 +127,8 @@ class MarkdownRenderer:
                         [sheet_data.sheet_name]
                     )
                     
-                    # ファイル名を生成（ケース単位ではID範囲は不要、単一IDのみ）
-                    sheet_name = self._sanitize_filename(sheet_data.sheet_name)
-                    output_filename = f"{test_case.id}_{sheet_name}.md"
+                    # ファイル名を生成（ケース単位ではテストケースIDと拡張子のみ）
+                    output_filename = f"{test_case.id}.md"
                     
                     rendered_files[output_filename] = md_content
         
@@ -119,7 +142,10 @@ class MarkdownRenderer:
         # ヘッダー生成（分割モードに応じて出し分け）
         sheet_name = sheet_names[0] if sheet_names else "テスト項目"
         header = self._generate_header(filename, sheet_name, category_name)
-        md_content = f"# {header}\n\n"
+        if header:
+            md_content = f"# {header}\n\n"
+        else:
+            md_content = ""
         
         # 共通source情報をヘッダー部分に表示（分割モードに応じて）
         common_source = self._get_common_source_info(filename, sheet_name, category_name)
@@ -145,17 +171,17 @@ class MarkdownRenderer:
         base_filename = filename.replace('.xlsx', '').replace('.xls', '')
         
         if self.settings.split_mode == SplitMode.PER_SHEET:
-            # シート単位：{ファイル名} ({シート名})
-            return f"{base_filename} ({sheet_name})"
+            # シート単位：# sample1
+            return base_filename
         elif self.settings.split_mode == SplitMode.PER_CATEGORY:
-            # カテゴリ単位：{ファイル名} ({シート名}) - {カテゴリ名}
+            # カテゴリ単位：# sample1 - カテゴリA
             if category_name:
-                return f"{base_filename} ({sheet_name}) - {category_name}"
+                return f"{base_filename} - {category_name}"
             else:
-                return f"{base_filename} ({sheet_name})"
+                return base_filename
         elif self.settings.split_mode == SplitMode.PER_CASE:
-            # ケース単位：{ファイル名} ({シート名})
-            return f"{base_filename} ({sheet_name})"
+            # ケース単位：なし（ヘッダーを削除）
+            return None
         else:
             # デフォルト
             return sheet_name

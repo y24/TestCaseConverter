@@ -39,6 +39,9 @@ class YamlRenderer:
         rendered_files = {}
         
         for file_data in file_data_list:
+            # シート数を取得
+            total_sheets = len(file_data.sheets)
+            
             for sheet_data in file_data.sheets:
                 # ヘッダー生成
                 header = self._generate_header(file_data.filename, sheet_data.sheet_name)
@@ -63,14 +66,23 @@ class YamlRenderer:
                 # レンダリング
                 yaml_content = self._render_test_cases(sheet_data.items, meta_info)
                 
-                # ファイル名を生成（ID範囲を追加）
+                # ファイル名を生成（シート数に応じてシート名を含めるかどうかを決定）
                 filename = self._sanitize_filename(file_data.filename)
-                sheet_name = self._sanitize_filename(sheet_data.sheet_name)
                 id_range = self._get_id_range(sheet_data.items)
-                if id_range:
-                    output_filename = f"{filename}_{sheet_name}_{id_range}.yaml"
+                
+                if total_sheets == 1:
+                    # シートが1つの場合はシート名は不要
+                    if id_range:
+                        output_filename = f"{filename}_{id_range}.yaml"
+                    else:
+                        output_filename = f"{filename}.yaml"
                 else:
-                    output_filename = f"{filename}_{sheet_name}.yaml"
+                    # シートが複数の場合はシート名を含める
+                    sheet_name = self._sanitize_filename(sheet_data.sheet_name)
+                    if id_range:
+                        output_filename = f"{filename}_{sheet_name}_{id_range}.yaml"
+                    else:
+                        output_filename = f"{filename}_{sheet_name}.yaml"
                 
                 rendered_files[output_filename] = yaml_content
         
@@ -81,6 +93,9 @@ class YamlRenderer:
         rendered_files = {}
         
         for file_data in file_data_list:
+            # シート数を取得
+            total_sheets = len(file_data.sheets)
+            
             for sheet_data in file_data.sheets:
                 # カテゴリごとにグループ化
                 category_groups = self._group_by_category(sheet_data.items)
@@ -109,15 +124,24 @@ class YamlRenderer:
                     # レンダリング
                     yaml_content = self._render_test_cases(test_cases, meta_info)
                     
-                    # ファイル名を生成（ID範囲を追加）
+                    # ファイル名を生成（シート数に応じてシート名を含めるかどうかを決定）
                     filename = self._sanitize_filename(file_data.filename)
-                    sheet_name = self._sanitize_filename(sheet_data.sheet_name)
                     category_name = self._sanitize_filename(category)
                     id_range = self._get_id_range(test_cases)
-                    if id_range:
-                        output_filename = f"{filename}_{sheet_name}_{category_name}_{id_range}.yaml"
+                    
+                    if total_sheets == 1:
+                        # シートが1つの場合はシート名は不要
+                        if id_range:
+                            output_filename = f"{filename}_{category_name}_{id_range}.yaml"
+                        else:
+                            output_filename = f"{filename}_{category_name}.yaml"
                     else:
-                        output_filename = f"{filename}_{sheet_name}_{category_name}.yaml"
+                        # シートが複数の場合はシート名を含める
+                        sheet_name = self._sanitize_filename(sheet_data.sheet_name)
+                        if id_range:
+                            output_filename = f"{filename}_{sheet_name}_{category_name}_{id_range}.yaml"
+                        else:
+                            output_filename = f"{filename}_{sheet_name}_{category_name}.yaml"
                     
                     rendered_files[output_filename] = yaml_content
         
@@ -153,9 +177,8 @@ class YamlRenderer:
                     # レンダリング
                     yaml_content = self._render_test_cases([test_case], meta_info)
                     
-                    # ファイル名を生成（ケース単位ではID範囲は不要、単一IDのみ）
-                    sheet_name = self._sanitize_filename(sheet_data.sheet_name)
-                    output_filename = f"{test_case.id}_{sheet_name}.yaml"
+                    # ファイル名を生成（ケース単位ではテストケースIDと拡張子のみ）
+                    output_filename = f"{test_case.id}.yaml"
                     
                     rendered_files[output_filename] = yaml_content
         
