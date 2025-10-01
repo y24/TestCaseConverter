@@ -65,7 +65,7 @@ echo Installation completed!
 echo.
 echo Usage:
 echo   1. Run run.bat to start the server
-echo   2. Access http://localhost:8000 in your browser
+echo   2. Access http://localhost:8765 in your browser
 echo.
 echo Note: Browser will open automatically on first startup.
 echo ================================================
