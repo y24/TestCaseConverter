@@ -253,7 +253,6 @@ class ExcelReader:
                 ('priority', self.settings.priority_row),
                 ('precondition', self.settings.precondition_row),
                 ('note', self.settings.note_row),
-                ('title', self.settings.title_row),
             ]
             
             for config_name, config in configs:
