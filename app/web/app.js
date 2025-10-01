@@ -168,8 +168,6 @@ function applySettingsToUI() {
         const noteRow = currentSettings.note_row || { keys: ["備考", "補足情報"] };
         setElementValue('note-keys', noteRow.keys ? noteRow.keys.join(',') : "備考,補足情報");
         
-        const titleRow = currentSettings.title_row || { keys: [] };
-        setElementValue('title-keys', titleRow.keys ? titleRow.keys.join(',') : "");
         
     } catch (error) {
         console.error('設定のUI適用中にエラーが発生しました:', error);
@@ -265,10 +263,6 @@ function updateSettings() {
             },
             note_row: {
                 keys: parseCommaSeparated(getElementValue('note-keys', '備考,補足情報')),
-                ignores: []
-            },
-            title_row: {
-                keys: parseCommaSeparated(getElementValue('title-keys', '')),
                 ignores: []
             },
             
