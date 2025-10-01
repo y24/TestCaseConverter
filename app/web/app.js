@@ -35,6 +35,9 @@ function setupEventListeners() {
     
     // プレビューファイル選択
     document.getElementById('preview-file-select').addEventListener('change', handlePreviewFileChange);
+    
+    // プレビューエリアのCtrl+A全選択機能
+    setupPreviewSelectAll();
 }
 
 // 自動変換用のイベントリスナー設定
@@ -1067,6 +1070,42 @@ function closeSettingsModal(event) {
         modal.classList.remove('show');
         // ボディのスクロールを有効化
         document.body.style.overflow = '';
+    }
+}
+
+// プレビューエリアのCtrl+A全選択機能を設定
+function setupPreviewSelectAll() {
+    const previewContent = document.getElementById('preview-content');
+    if (!previewContent) return;
+    
+    // プレビューエリアにキーボードイベントリスナーを追加
+    previewContent.addEventListener('keydown', function(event) {
+        // Ctrl+A または Cmd+A (Mac) が押された場合
+        if ((event.ctrlKey || event.metaKey) && event.key === 'a') {
+            event.preventDefault(); // デフォルトの動作を防ぐ
+            
+            // テキストを全選択
+            selectAllText(previewContent);
+        }
+    });
+    
+    // プレビューエリアをクリック可能にする（フォーカス可能にするため）
+    previewContent.setAttribute('tabindex', '0');
+    previewContent.style.cursor = 'text';
+}
+
+// テキストを全選択する関数
+function selectAllText(element) {
+    if (window.getSelection && document.createRange) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    } else if (document.selection && document.selection.createRange) {
+        // IE用のフォールバック
+        const range = document.selection.createRange();
+        range.selectNodeContents(element);
     }
 }
 
