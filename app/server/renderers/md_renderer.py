@@ -113,9 +113,14 @@ class MarkdownRenderer:
         header = self._generate_header(filename, sheet_name, category_name)
         md_content = f"# {header}\n\n"
         
+        # 共通source情報をヘッダー部分に表示（分割モードに応じて）
+        common_source = self._get_common_source_info(filename, sheet_name, category_name)
+        if common_source:
+            md_content += f"<sub>source: {common_source}</sub>\n\n"
+        
         # 各テストケースをレンダリング
         for i, test_case in enumerate(test_cases):
-            md_content += self._render_single_test_case(test_case, filename)
+            md_content += self._render_single_test_case(test_case, filename, sheet_name)
             
             # 最後のケース以外は区切り線を追加
             if i < len(test_cases) - 1:
@@ -147,7 +152,7 @@ class MarkdownRenderer:
             # デフォルト
             return sheet_name
     
-    def _render_single_test_case(self, test_case: TestCase, filename: str) -> str:
+    def _render_single_test_case(self, test_case: TestCase, filename: str, sheet_name: str = None) -> str:
         """単一テストケースをレンダリング"""
         md_content = f"## {test_case.id}: {test_case.title}\n\n"
         
@@ -162,6 +167,12 @@ class MarkdownRenderer:
         # 優先度
         if test_case.priority:
             md_content += f"- priority: {test_case.priority}\n"
+        
+        # ソース情報（分割モードに応じて簡略化、priorityの下に表示）
+        source_info = test_case.source
+        individual_source = self._get_individual_source_info(source_info, filename, sheet_name)
+        if individual_source:
+            md_content += f"- source: {individual_source}\n"
         
         md_content += "\n"
         
@@ -185,10 +196,6 @@ class MarkdownRenderer:
         if test_case.notes:
             md_content += "### 備考\n"
             md_content += f"{test_case.notes}\n\n"
-        
-        # ソース情報
-        source_info = test_case.source
-        md_content += f"<sub>source: {filename} / {source_info.get('sheet', '')} / row {source_info.get('row', '')}</sub>\n\n"
         
         return md_content
     
@@ -255,6 +262,35 @@ class MarkdownRenderer:
                 filename_counts[filename] = 1
         
         return resolved_files
+    
+    def _get_common_source_info(self, filename: str, sheet_name: str, category_name: str = None) -> str:
+        """分割モードに応じた共通source情報を取得"""
+        if self.settings.split_mode == SplitMode.PER_SHEET:
+            # シート単位：ファイル名とシート名が共通
+            return f"{filename} / {sheet_name}"
+        elif self.settings.split_mode == SplitMode.PER_CATEGORY:
+            # カテゴリ単位：ファイル名が共通
+            return filename
+        elif self.settings.split_mode == SplitMode.PER_CASE:
+            # ケース単位：共通情報なし（各ケースで完全な情報を表示）
+            return None
+        else:
+            return None
+    
+    def _get_individual_source_info(self, source_info: dict, filename: str, sheet_name: str = None) -> str:
+        """分割モードに応じた個別source情報を取得"""
+        if self.settings.split_mode == SplitMode.PER_SHEET:
+            # シート単位：行番号のみ
+            return f"row {source_info.get('row', '')}"
+        elif self.settings.split_mode == SplitMode.PER_CATEGORY:
+            # カテゴリ単位：シート名と行番号
+            return f"{source_info.get('sheet', '')} / row {source_info.get('row', '')}"
+        elif self.settings.split_mode == SplitMode.PER_CASE:
+            # ケース単位：完全な情報
+            return f"{filename} / {source_info.get('sheet', '')} / row {source_info.get('row', '')}"
+        else:
+            # デフォルト：完全な情報
+            return f"{filename} / {source_info.get('sheet', '')} / row {source_info.get('row', '')}"
     
     def _split_filename(self, filename: str) -> tuple:
         """ファイル名をベース名と拡張子に分割"""

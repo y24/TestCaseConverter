@@ -43,6 +43,9 @@ class YamlRenderer:
                 # ヘッダー生成
                 header = self._generate_header(file_data.filename, sheet_data.sheet_name)
                 
+                # 共通source情報を取得
+                common_source = self._get_common_source_info(file_data.filename, sheet_data.sheet_name)
+                
                 meta_info = {
                     'output_format': 'yaml',
                     'split_mode': 'per_sheet',
@@ -51,7 +54,10 @@ class YamlRenderer:
                     'settings_profile': 'default',
                     'source_files': [file_data.filename],
                     'sheets_included': [sheet_data.sheet_name],
-                    'header': header
+                    'header': header,
+                    'filename': file_data.filename,
+                    'sheet_name': sheet_data.sheet_name,
+                    'common_source': common_source
                 }
                 
                 # レンダリング
@@ -79,6 +85,9 @@ class YamlRenderer:
                     # ヘッダー生成
                     header = self._generate_header(file_data.filename, sheet_data.sheet_name, category)
                     
+                    # 共通source情報を取得
+                    common_source = self._get_common_source_info(file_data.filename, sheet_data.sheet_name, category)
+                    
                     meta_info = {
                         'output_format': 'yaml',
                         'split_mode': 'per_category',
@@ -87,7 +96,10 @@ class YamlRenderer:
                         'settings_profile': 'default',
                         'source_files': [file_data.filename],
                         'sheets_included': [sheet_data.sheet_name],
-                        'header': header
+                        'header': header,
+                        'filename': file_data.filename,
+                        'sheet_name': sheet_data.sheet_name,
+                        'common_source': common_source
                     }
                     
                     # レンダリング
@@ -113,6 +125,9 @@ class YamlRenderer:
                     # ヘッダー生成
                     header = self._generate_header(file_data.filename, sheet_data.sheet_name)
                     
+                    # 共通source情報を取得（ケース単位では共通情報なし）
+                    common_source = self._get_common_source_info(file_data.filename, sheet_data.sheet_name)
+                    
                     meta_info = {
                         'output_format': 'yaml',
                         'split_mode': 'per_case',
@@ -121,7 +136,10 @@ class YamlRenderer:
                         'settings_profile': 'default',
                         'source_files': [file_data.filename],
                         'sheets_included': [sheet_data.sheet_name],
-                        'header': header
+                        'header': header,
+                        'filename': file_data.filename,
+                        'sheet_name': sheet_data.sheet_name,
+                        'common_source': common_source
                     }
                     
                     # レンダリング
@@ -139,22 +157,39 @@ class YamlRenderer:
         """テストケースをYAML形式でレンダリング"""
         yaml_data = []
         
+        # 共通source情報をメタ情報に追加
+        if 'common_source' in meta_info and meta_info['common_source']:
+            yaml_data.append({'common_source': meta_info['common_source']})
+        
         for test_case in test_cases:
             case_data = {
                 'id': test_case.id,
                 'title': test_case.title,
-                'category': test_case.category,
-                'priority': test_case.priority,
-                'preconditions': test_case.preconditions,
-                'steps': test_case.steps,  # 文字列をそのまま使用
-                'expect': test_case.expect,  # 期待結果を追加
-                'notes': test_case.notes,
-                'source': test_case.source
+                'category': test_case.category
             }
             
             # テスト種別が空でない場合のみ追加
             if test_case.type and test_case.type.strip():
                 case_data['type'] = test_case.type
+            
+            # 優先度
+            if test_case.priority:
+                case_data['priority'] = test_case.priority
+            
+            # 個別source情報を追加（分割モードに応じて簡略化、priorityの下に配置）
+            individual_source = self._get_individual_source_info(test_case.source, meta_info.get('filename', ''), meta_info.get('sheet_name', ''))
+            if individual_source:
+                case_data['source'] = individual_source
+            
+            # その他のフィールドを追加
+            if test_case.preconditions:
+                case_data['preconditions'] = test_case.preconditions
+            if test_case.steps:
+                case_data['steps'] = test_case.steps
+            if test_case.expect:
+                case_data['expect'] = test_case.expect
+            if test_case.notes:
+                case_data['notes'] = test_case.notes
             
             yaml_data.append(case_data)
         
@@ -266,6 +301,35 @@ class YamlRenderer:
                 filename_counts[filename] = 1
         
         return resolved_files
+    
+    def _get_common_source_info(self, filename: str, sheet_name: str, category_name: str = None) -> str:
+        """分割モードに応じた共通source情報を取得"""
+        if self.settings.split_mode == SplitMode.PER_SHEET:
+            # シート単位：ファイル名とシート名が共通
+            return f"{filename} / {sheet_name}"
+        elif self.settings.split_mode == SplitMode.PER_CATEGORY:
+            # カテゴリ単位：ファイル名が共通
+            return filename
+        elif self.settings.split_mode == SplitMode.PER_CASE:
+            # ケース単位：共通情報なし（各ケースで完全な情報を表示）
+            return None
+        else:
+            return None
+    
+    def _get_individual_source_info(self, source_info: dict, filename: str, sheet_name: str = None) -> str:
+        """分割モードに応じた個別source情報を取得"""
+        if self.settings.split_mode == SplitMode.PER_SHEET:
+            # シート単位：行番号のみ
+            return f"row {source_info.get('row', '')}"
+        elif self.settings.split_mode == SplitMode.PER_CATEGORY:
+            # カテゴリ単位：シート名と行番号
+            return f"{source_info.get('sheet', '')} / row {source_info.get('row', '')}"
+        elif self.settings.split_mode == SplitMode.PER_CASE:
+            # ケース単位：完全な情報
+            return f"{filename} / {source_info.get('sheet', '')} / row {source_info.get('row', '')}"
+        else:
+            # デフォルト：完全な情報
+            return f"{filename} / {source_info.get('sheet', '')} / row {source_info.get('row', '')}"
     
     def _split_filename(self, filename: str) -> tuple:
         """ファイル名をベース名と拡張子に分割"""

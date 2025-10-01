@@ -75,6 +75,10 @@ class DataTransformer:
         # 前提条件正規化（文字列として処理）
         normalized_preconditions = self._normalize_string(test_case.preconditions)
         
+        # タイトルにキーワード置換を適用
+        if self.settings.title_row.keys:
+            normalized_title = self._apply_keyword_replacement(normalized_title, self.settings.title_row.keys)
+        
         return TestCase(
             id=test_case.id,
             title=normalized_title,
@@ -132,6 +136,22 @@ class DataTransformer:
             text = text.replace(zenkaku, hankaku)
         
         return text
+    
+    def _apply_keyword_replacement(self, text: str, keywords: List[str]) -> str:
+        """キーワード置換を適用"""
+        if not text or not keywords:
+            return text
+        
+        result = text
+        # キーワードリストを辞書形式に変換（キーワード:置換後）
+        # 例: ["キーワード1:置換後1", "キーワード2:置換後2"]
+        for keyword_mapping in keywords:
+            if ':' in keyword_mapping:
+                keyword, replacement = keyword_mapping.split(':', 1)
+                if keyword.strip() in result:
+                    result = result.replace(keyword.strip(), replacement.strip())
+        
+        return result
     
     
     def _regenerate_ids(self, test_cases: List[TestCase]) -> List[TestCase]:

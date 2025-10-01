@@ -205,6 +205,7 @@ function updateSettings() {
             return value.split(',').map(item => item.trim()).filter(item => item !== '');
         }
         
+        
         // 要素の値を安全に取得するヘルパー関数
         function getElementValue(elementId, defaultValue = '') {
             const element = document.getElementById(elementId);
