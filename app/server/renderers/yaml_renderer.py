@@ -192,6 +192,24 @@ class YamlRenderer:
         if 'common_source' in meta_info and meta_info['common_source']:
             yaml_data.append({'common_source': meta_info['common_source']})
         
+        # 新しい項目をタイトルセクションの下に追加
+        if test_cases:
+            # 最初のテストケースから新しい項目の情報を取得
+            first_case = test_cases[0]
+            additional_info = {}
+            
+            if first_case.backlog_id:
+                additional_info['backlog_id'] = first_case.backlog_id
+            if first_case.test_type:
+                additional_info['test_type'] = first_case.test_type
+            if first_case.test_target:
+                additional_info['test_target'] = first_case.test_target
+            if first_case.target_version:
+                additional_info['target_version'] = first_case.target_version
+            
+            if additional_info:
+                yaml_data.append(additional_info)
+        
         for test_case in test_cases:
             case_data = {
                 'id': test_case.id,

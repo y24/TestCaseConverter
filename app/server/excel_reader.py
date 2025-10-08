@@ -188,6 +188,9 @@ class ExcelReader:
                 warnings=warnings
             )
         
+        # 新しいセル情報を取得
+        cell_info = self._get_cell_info(worksheet, header_row)
+        
         # データ行を取得
         data_rows = self._get_data_rows(worksheet, header_row, column_mapping)
         
@@ -195,7 +198,7 @@ class ExcelReader:
         test_cases = []
         for row_data in data_rows:
             try:
-                test_case = self._create_test_case(row_data, column_mapping, sheet_name)
+                test_case = self._create_test_case(row_data, column_mapping, sheet_name, cell_info)
                 if test_case:
                     test_cases.append(test_case)
             except Exception as e:
@@ -271,6 +274,67 @@ class ExcelReader:
         
         return mapping
     
+    def _get_cell_info(self, worksheet, header_row: int) -> Dict[str, str]:
+        """検索列から新しいセル情報を取得"""
+        cell_info = {}
+        search_col = self.settings.header.search_col
+        
+        # 列番号に変換
+        if search_col.isalpha():
+            col_num = ord(search_col.upper()) - ord('A') + 1
+        else:
+            col_num = int(search_col)
+        
+        logger.info(f"Searching for cell info in column {search_col} (col_num: {col_num})")
+        
+        # 検索対象の設定
+        cell_configs = [
+            ('backlog_id', self.settings.backlog_id_cell),
+            ('test_type', self.settings.test_type_cell),
+            ('test_target', self.settings.test_target_cell),
+            ('target_version', self.settings.target_version_cell),
+        ]
+        
+        logger.info(f"Cell configs: {[(name, config.keys) for name, config in cell_configs]}")
+        
+        # 最大50行まで検索
+        for row in range(1, min(51, worksheet.max_row + 1)):
+            cell_value = worksheet.cell(row=row, column=col_num).value
+            if not cell_value:
+                continue
+                
+            cell_str = str(cell_value).strip()
+            logger.debug(f"Row {row}, Column {col_num}: '{cell_str}'")
+            
+            # 各設定のキーと照合
+            for info_name, config in cell_configs:
+                if info_name in cell_info:  # 既に見つかっている場合はスキップ
+                    continue
+                    
+                for key in config.keys:
+                    if key in cell_str:
+                        logger.info(f"Found key '{key}' in cell '{cell_str}' at row {row}")
+                        # 除外チェック
+                        should_exclude = False
+                        for ignore_key in config.ignores:
+                            if ignore_key in cell_str:
+                                should_exclude = True
+                                break
+                        
+                        if not should_exclude:
+                            # 2つ右隣のセルを取得
+                            target_col = col_num + 2
+                            target_cell_value = worksheet.cell(row=row, column=target_col).value
+                            if target_cell_value is not None:
+                                cell_info[info_name] = str(target_cell_value).strip()
+                                logger.info(f"Found {info_name}: '{cell_info[info_name]}' at row {row}, column {target_col}")
+                            else:
+                                cell_info[info_name] = ""
+                                logger.info(f"Found {info_name} but target cell is empty at row {row}, column {target_col}")
+                            break
+        
+        logger.info(f"Final cell_info: {cell_info}")
+        return cell_info
     
     def _get_data_rows(self, worksheet, header_row: int, column_mapping: Dict[str, int]) -> List[Dict]:
         """データ行を取得"""
@@ -369,7 +433,7 @@ class ExcelReader:
         
         return filled_category
     
-    def _create_test_case(self, row_data: Dict, column_mapping: Dict[str, int], sheet_name: str) -> Optional[TestCase]:
+    def _create_test_case(self, row_data: Dict, column_mapping: Dict[str, int], sheet_name: str, cell_info: Dict[str, str] = None) -> Optional[TestCase]:
         """テストケースを作成"""
         # カテゴリを取得（既にリスト形式で統合済み）
         category = row_data.get('category', [])
@@ -390,6 +454,12 @@ class ExcelReader:
         self.global_test_case_counter += 1
         test_id = f"{self.settings.id_prefix}-{self.global_test_case_counter:0{self.settings.id_padding}d}"
         
+        # 新しいフィールドの値を取得
+        backlog_id = cell_info.get('backlog_id', '') if cell_info else ''
+        test_type = cell_info.get('test_type', '') if cell_info else ''
+        test_target = cell_info.get('test_target', '') if cell_info else ''
+        target_version = cell_info.get('target_version', '') if cell_info else ''
+        
         return TestCase(
             id=test_id,
             title=title,
@@ -404,7 +474,12 @@ class ExcelReader:
                 'file': sheet_name,
                 'sheet': sheet_name,
                 'row': row_data['row']
-            }
+            },
+            # 新しいフィールド
+            backlog_id=backlog_id,
+            test_type=test_type,
+            test_target=test_target,
+            target_version=target_version
         )
     
     

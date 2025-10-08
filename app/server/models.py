@@ -56,6 +56,12 @@ class ConversionSettings(BaseModel):
     precondition_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["前提条件"]))
     note_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["備考", "補足情報"]))
     
+    # 新しいセル設定
+    backlog_id_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["案件チケットID"]))
+    test_type_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト種別", "テストフェーズ"]))
+    test_target_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト対象(機能/モジュール)", "対象モジュール"]))
+    target_version_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト対象バージョン", "対象バージョン"]))
+    
     # 処理設定
     trim_whitespaces: bool = Field(default=True, description="空白トリム")
     normalize_zenkaku_numbers: bool = Field(default=True, description="全角数字正規化")
@@ -79,6 +85,12 @@ class TestCase(BaseModel):
     expect: str = Field(default="", description="期待結果")
     notes: str = Field(default="", description="備考")
     source: Dict[str, Any] = Field(description="ソース情報")
+    
+    # 新しいフィールド
+    backlog_id: str = Field(default="", description="Backlog ID")
+    test_type: str = Field(default="", description="テストタイプ")
+    test_target: str = Field(default="", description="テスト対象")
+    target_version: str = Field(default="", description="対象バージョン")
 
 
 class SheetData(BaseModel):

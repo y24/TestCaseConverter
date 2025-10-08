@@ -59,6 +59,33 @@
     ],
     "ignores": []
   },
+  "backlog_id_cell": {
+    "keys": [
+      "案件チケットID"
+    ],
+    "ignores": []
+  },
+  "test_type_cell": {
+    "keys": [
+      "テスト種別",
+      "テストフェーズ"
+    ],
+    "ignores": []
+  },
+  "test_target_cell": {
+    "keys": [
+      "テスト対象(機能/モジュール)",
+      "対象モジュール"
+    ],
+    "ignores": []
+  },
+  "target_version_cell": {
+    "keys": [
+      "テスト対象バージョン",
+      "対象バージョン"
+    ],
+    "ignores": []
+  },
   "trim_whitespaces": false,
   "normalize_zenkaku_numbers": true,
   "normalize_step_numbers": true,

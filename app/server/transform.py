@@ -88,6 +88,12 @@ class DataTransformer:
         # 前提条件正規化（文字列として処理）
         normalized_preconditions = self._normalize_string(test_case.preconditions)
         
+        # 新しいフィールドの正規化
+        normalized_backlog_id = self._normalize_string(test_case.backlog_id)
+        normalized_test_type = self._normalize_string(test_case.test_type)
+        normalized_test_target = self._normalize_string(test_case.test_target)
+        normalized_target_version = self._normalize_string(test_case.target_version)
+        
         
         return TestCase(
             id=test_case.id,
@@ -99,7 +105,12 @@ class DataTransformer:
             steps=normalized_steps,
             expect=normalized_expect,
             notes=normalized_notes,
-            source=test_case.source
+            source=test_case.source,
+            # 新しいフィールド
+            backlog_id=normalized_backlog_id,
+            test_type=normalized_test_type,
+            test_target=normalized_test_target,
+            target_version=normalized_target_version
         )
     
     def _normalize_category(self, category: List[str]) -> List[str]:
@@ -203,7 +214,12 @@ class DataTransformer:
                 steps=test_case.steps,
                 expect=test_case.expect,
                 notes=test_case.notes,
-                source=test_case.source
+                source=test_case.source,
+                # 新しいフィールド
+                backlog_id=test_case.backlog_id,
+                test_type=test_case.test_type,
+                test_target=test_case.test_target,
+                target_version=test_case.target_version
             ))
         
         return regenerated_cases
@@ -236,7 +252,12 @@ class DataTransformer:
                 steps=test_case.steps,
                 expect=test_case.expect,
                 notes=test_case.notes,
-                source=test_case.source
+                source=test_case.source,
+                # 新しいフィールド
+                backlog_id=test_case.backlog_id,
+                test_type=test_case.test_type,
+                test_target=test_case.test_target,
+                target_version=test_case.target_version
             ))
             
             last_category = current_category

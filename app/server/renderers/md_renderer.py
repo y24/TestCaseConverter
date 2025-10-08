@@ -147,10 +147,33 @@ class MarkdownRenderer:
         else:
             md_content = ""
         
-        # 共通source情報をヘッダー部分に表示（分割モードに応じて）
-        common_source = self._get_common_source_info(filename, sheet_name, category_name)
-        if common_source:
-            md_content += f"<sub>source: {common_source}</sub>\n\n"
+        # 新しい項目をタイトルセクションの下に追加
+        if test_cases:
+            # 最初のテストケースから新しい項目の情報を取得
+            first_case = test_cases[0]
+            additional_info = []
+            
+            # 共通source情報を情報セクションに統合
+            common_source = self._get_common_source_info(filename, sheet_name, category_name)
+            if common_source:
+                additional_info.append(f"- source: {common_source}")
+            
+            logger.info(f"First test case new fields - backlog_id: '{first_case.backlog_id}', test_type: '{first_case.test_type}', test_target: '{first_case.test_target}', target_version: '{first_case.target_version}'")
+            
+            if first_case.backlog_id:
+                additional_info.append(f"- backlog_id: {first_case.backlog_id}")
+            if first_case.test_type:
+                additional_info.append(f"- test_type: {first_case.test_type}")
+            if first_case.test_target:
+                additional_info.append(f"- test_target: {first_case.test_target}")
+            if first_case.target_version:
+                additional_info.append(f"- target_version: {first_case.target_version}")
+            
+            if additional_info:
+                md_content += "\n".join(additional_info) + "\n\n"
+                logger.info(f"Added additional info: {additional_info}")
+            else:
+                logger.info("No additional info to add")
         
         # 各テストケースをレンダリング
         for i, test_case in enumerate(test_cases):
