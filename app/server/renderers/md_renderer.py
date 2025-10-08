@@ -172,18 +172,23 @@ class MarkdownRenderer:
             # 共通source情報を情報セクションに統合
             common_source = self._get_common_source_info(filename, sheet_name, category_name)
             if common_source:
-                additional_info.append(f"- source: {common_source}")
+                source_label = get_string('output.source', 'ソース')
+                additional_info.append(f"- {source_label}: {common_source}")
             
             logger.info(f"First test case new fields - backlog_id: '{first_case.backlog_id}', test_type: '{first_case.test_type}', test_target: '{first_case.test_target}', target_version: '{first_case.target_version}'")
             
             if first_case.backlog_id:
-                additional_info.append(f"- backlog_id: {first_case.backlog_id}")
+                backlog_id_label = get_string('output.backlog_id', '案件ID')
+                additional_info.append(f"- {backlog_id_label}: {first_case.backlog_id}")
             if first_case.test_type:
-                additional_info.append(f"- test_type: {first_case.test_type}")
+                test_type_label = get_string('output.test_type', 'テスト種別')
+                additional_info.append(f"- {test_type_label}: {first_case.test_type}")
             if first_case.test_target:
-                additional_info.append(f"- test_target: {first_case.test_target}")
+                test_target_label = get_string('output.test_target', 'テスト対象')
+                additional_info.append(f"- {test_target_label}: {first_case.test_target}")
             if first_case.target_version:
-                additional_info.append(f"- target_version: {first_case.target_version}")
+                target_version_label = get_string('output.target_version', '対象バージョン')
+                additional_info.append(f"- {target_version_label}: {first_case.target_version}")
             
             if additional_info:
                 test_info_label = get_string('output.test_info', 'テスト情報')
@@ -268,45 +273,45 @@ class MarkdownRenderer:
         
         # カテゴリ（階層表示）
         category_str = " > ".join([cat for cat in test_case.category if cat])
-        category_label = get_string('output.category')
+        category_label = get_string('output.category', 'カテゴリ')
         logger.info(f"Using category label: '{category_label}' for category: '{category_str}'")
         md_content += f"- {category_label}: {category_str}\n"
         
         # テスト種別が空でない場合のみ追加
         if test_case.type and test_case.type.strip():
-            md_content += f"- {get_string('output.type')}: {test_case.type}\n"
+            md_content += f"- {get_string('output.type', '種別')}: {test_case.type}\n"
         
         # 優先度
         if test_case.priority:
-            md_content += f"- {get_string('output.priority')}: {test_case.priority}\n"
+            md_content += f"- {get_string('output.priority', '優先度')}: {test_case.priority}\n"
         
         # ソース情報（分割モードに応じて簡略化、priorityの下に表示）
         source_info = test_case.source
         individual_source = self._get_individual_source_info(source_info, filename, sheet_name)
         if individual_source:
-            md_content += f"- {get_string('output.source')}: {individual_source}\n"
+            md_content += f"- {get_string('output.source', 'ソース')}: {individual_source}\n"
         
         md_content += "\n"
         
         # 前提条件
         if test_case.preconditions:
-            md_content += f"### {get_string('output.preconditions')}\n"
+            md_content += f"### {get_string('output.preconditions', '前提条件')}\n"
             md_content += f"{test_case.preconditions}\n\n"
         
         # 手順
         if test_case.steps:
-            md_content += f"### {get_string('output.steps')}\n"
+            md_content += f"### {get_string('output.steps', '手順')}\n"
             # stepsは文字列として処理
             md_content += f"{test_case.steps}\n\n"
         
         # 期待結果
         if test_case.expect:
-            md_content += f"### {get_string('output.expected_result')}\n"
+            md_content += f"### {get_string('output.expected_result', '期待結果')}\n"
             md_content += f"{test_case.expect}\n\n"
         
         # 備考
         if test_case.notes:
-            md_content += f"### {get_string('output.notes')}\n"
+            md_content += f"### {get_string('output.notes', '備考')}\n"
             md_content += f"{test_case.notes}\n\n"
         
         return md_content
