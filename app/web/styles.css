@@ -317,6 +317,15 @@ section h2 {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
+.setting-group input:disabled,
+.setting-group select:disabled {
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    border-color: var(--border-light);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .setting-group input[type="checkbox"] {
     width: auto;
     margin-right: 8px;

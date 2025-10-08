@@ -55,6 +55,10 @@ function setupAutoConvertListeners() {
     const checkboxElements = document.querySelectorAll('.sidebar-content input[type="checkbox"]');
     checkboxElements.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
+            // 「ケースIDを採番」チェックボックスの場合は特別処理
+            if (checkbox.id === 'output-case-id') {
+                toggleCaseIdInputs(checkbox.checked);
+            }
             updateSettings();
             autoConvert();
         });
@@ -137,6 +141,9 @@ function applySettingsToUI() {
         setElementValue('id-padding', currentSettings.id_padding || 3);
         setElementValue('id-start-number', currentSettings.id_start_number || 1);
         setElementChecked('output-case-id', currentSettings.output_case_id !== false);
+        
+        // ケースID関連のテキストボックスの有効/無効を設定
+        toggleCaseIdInputs(currentSettings.output_case_id !== false);
         
         // 文字列処理設定
         setElementChecked('trim-whitespaces', currentSettings.trim_whitespaces !== false);
@@ -245,6 +252,23 @@ function setElementChecked(elementId, checked) {
         element.checked = checked;
     } else {
         console.warn(`要素が見つかりません: ${elementId}`);
+    }
+}
+
+// ケースID関連のテキストボックスの有効/無効を切り替える関数
+function toggleCaseIdInputs(enabled) {
+    const idPrefixInput = document.getElementById('id-prefix');
+    const idPaddingInput = document.getElementById('id-padding');
+    const idStartNumberInput = document.getElementById('id-start-number');
+    
+    if (idPrefixInput) {
+        idPrefixInput.disabled = !enabled;
+    }
+    if (idPaddingInput) {
+        idPaddingInput.disabled = !enabled;
+    }
+    if (idStartNumberInput) {
+        idStartNumberInput.disabled = !enabled;
     }
 }
 
