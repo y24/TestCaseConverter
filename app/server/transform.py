@@ -81,9 +81,9 @@ class DataTransformer:
         # 期待結果正規化（文字列として処理）
         normalized_expect = self._normalize_string(test_case.expect)
         
-        # 文字列正規化
-        normalized_title = self._normalize_string(test_case.title)
-        normalized_type = self._normalize_string(test_case.type)
+        # 文字列正規化（フィールドタイプを指定）
+        normalized_title = self._normalize_string(test_case.title, "title_row")
+        normalized_type = self._normalize_string(test_case.type, "test_type_row")
         normalized_notes = self._normalize_string(test_case.notes)
         
         # 前提条件正規化（文字列として処理）
@@ -91,7 +91,7 @@ class DataTransformer:
         
         # 新しいフィールドの正規化
         normalized_backlog_id = self._normalize_string(test_case.backlog_id)
-        normalized_test_type = self._normalize_string(test_case.test_type)
+        normalized_test_type = self._normalize_string(test_case.test_type, "test_type_row")
         normalized_test_target = self._normalize_string(test_case.test_target)
         normalized_target_version = self._normalize_string(test_case.target_version)
         
@@ -99,12 +99,15 @@ class DataTransformer:
         normalized_test_environments = [self._normalize_string(env) for env in test_case.test_environments if self._normalize_string(env)]
         
         
+        # 優先度の正規化（1行データとして扱う）
+        normalized_priority = self._normalize_string(test_case.priority, "priority_row")
+        
         return TestCase(
             id=test_case.id,
             title=normalized_title,
             category=normalized_category,
             type=normalized_type,
-            priority=test_case.priority,
+            priority=normalized_priority,
             preconditions=normalized_preconditions,
             steps=normalized_steps,
             expect=normalized_expect,
@@ -123,8 +126,8 @@ class DataTransformer:
         if not category:
             return [""] * len(self.settings.category_row.keys)
         
-        # 文字列正規化
-        normalized = [self._normalize_string(cat) for cat in category]
+        # 文字列正規化（カテゴリは1行データとして扱う）
+        normalized = [self._normalize_string(cat, "category_row") for cat in category]
         
         # 階層数に合わせてパディング
         if self.settings.pad_category_levels:
@@ -135,7 +138,7 @@ class DataTransformer:
         return normalized
     
     
-    def _normalize_string(self, text: str) -> str:
+    def _normalize_string(self, text: str, field_type: str = None) -> str:
         """文字列を正規化"""
         if not text:
             return ""
@@ -144,11 +147,31 @@ class DataTransformer:
         if self.settings.trim_whitespaces:
             text = text.strip()
         
+        # 1行データの改行変換
+        if (self.settings.convert_linebreaks_to_spaces and 
+            field_type and 
+            self.settings.single_line_fields.get(field_type, False)):
+            text = self._convert_linebreaks_to_spaces(text)
+        
         # 全角英数字正規化
         if self.settings.normalize_zenkaku_alphanumeric:
             text = self._normalize_zenkaku_alphanumeric(text)
         
         return text
+    
+    def _convert_linebreaks_to_spaces(self, text: str) -> str:
+        """セル内改行を半角スペースに変換"""
+        if not text:
+            return ""
+        
+        # 改行文字（\n、\r\n、\r）を半角スペースに変換
+        import re
+        text = re.sub(r'\r\n|\r|\n', ' ', text)
+        
+        # 連続するスペースを1つにまとめる
+        text = re.sub(r'\s+', ' ', text)
+        
+        return text.strip()
     
     def _normalize_zenkaku_alphanumeric(self, text: str) -> str:
         """全角英数字を半角に正規化"""

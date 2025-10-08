@@ -95,5 +95,12 @@
   "normalize_step_numbers": true,
   "category_display_compress": false,
   "pad_category_levels": true,
-  "forward_fill_category": true
+  "forward_fill_category": true,
+  "single_line_fields": {
+    "category_row": true,
+    "title_row": true,
+    "test_type_row": true,
+    "priority_row": true
+  },
+  "convert_linebreaks_to_spaces": true
 }

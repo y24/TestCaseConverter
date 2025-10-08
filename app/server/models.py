@@ -71,6 +71,15 @@ class ConversionSettings(BaseModel):
     pad_category_levels: bool = Field(default=True, description="カテゴリレベルパディング")
     forward_fill_category: bool = Field(default=True, description="カテゴリの空の値を前の行から埋める")
     output_case_id: bool = Field(default=True, description="ケースIDを出力する")
+    
+    # 1行データの改行変換設定
+    single_line_fields: Dict[str, bool] = Field(default_factory=lambda: {
+        "category_row": True,
+        "title_row": True,
+        "test_type_row": True,
+        "priority_row": True
+    }, description="1行データとして扱うフィールド")
+    convert_linebreaks_to_spaces: bool = Field(default=True, description="セル内改行を半角スペースに変換")
 
 
 
