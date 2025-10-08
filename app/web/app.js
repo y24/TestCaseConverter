@@ -141,6 +141,7 @@ function applySettingsToUI() {
         setElementChecked('trim-whitespaces', currentSettings.trim_whitespaces !== false);
         setElementChecked('forward-fill-category', currentSettings.forward_fill_category !== false);
         setElementChecked('normalize-zenkaku', currentSettings.normalize_zenkaku_numbers !== false);
+        setElementChecked('normalize-step-numbers', currentSettings.normalize_step_numbers !== false);
         
         // シート名設定
         setElementValue('sheet-search-keys', currentSettings.sheet_search_keys ? currentSettings.sheet_search_keys.join(',') : 'テスト項目');
@@ -324,6 +325,7 @@ function updateSettings() {
             // 処理設定
             trim_whitespaces: getElementChecked('trim-whitespaces', true),
             normalize_zenkaku_numbers: getElementChecked('normalize-zenkaku', true),
+            normalize_step_numbers: getElementChecked('normalize-step-numbers', true),
             category_display_compress: false,
             pad_category_levels: true,
             forward_fill_category: getElementChecked('forward-fill-category', true)

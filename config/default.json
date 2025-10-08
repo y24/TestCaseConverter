@@ -61,6 +61,7 @@
   },
   "trim_whitespaces": false,
   "normalize_zenkaku_numbers": true,
+  "normalize_step_numbers": true,
   "category_display_compress": false,
   "pad_category_levels": true,
   "forward_fill_category": true

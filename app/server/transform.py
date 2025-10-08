@@ -63,8 +63,19 @@ class DataTransformer:
         # カテゴリ正規化
         normalized_category = self._normalize_category(test_case.category)
         
-        # ステップ正規化（文字列として処理）
-        normalized_steps = self._normalize_string(test_case.steps)
+        # ステップ正規化
+        if self.settings.normalize_step_numbers and test_case.steps:
+            # 改行で分割してリストに変換
+            step_lines = [line.strip() for line in test_case.steps.split('\n') if line.strip()]
+            if step_lines:
+                # ステップ数正規化を適用
+                normalized_step_lines = self.normalize_step_numbers(step_lines)
+                normalized_steps = '\n'.join(normalized_step_lines)
+            else:
+                normalized_steps = test_case.steps
+        else:
+            # ステップ数正規化が無効な場合は通常の文字列正規化のみ
+            normalized_steps = self._normalize_string(test_case.steps)
         
         # 期待結果正規化（文字列として処理）
         normalized_expect = self._normalize_string(test_case.expect)
@@ -135,6 +146,42 @@ class DataTransformer:
             text = text.replace(zenkaku, hankaku)
         
         return text
+    
+    def normalize_step_numbers(self, steps: List[str], delimiter: str = '.') -> List[str]:
+        """
+        ステップ配列の先頭が非番号付きならそのまま残し、
+        2番目以降を 1<delimiter> 内容 の形式に正規化する。
+
+        :param steps: ステップ文字列のリスト
+        :param delimiter: 番号の後に使う区切り文字（デフォルトは '.'）
+        :return: 正規化されたステップリスト
+        """
+        if not steps:
+            return []
+        
+        normalized_steps = []
+
+        # 番号付きステップの判定用正規表現
+        step_prefix_re = re.compile(r'^\s*[0-9０-９]{1,2}(?:[\.:、．：]?)\s*')
+
+        # 1つ目の要素の処理
+        first = steps[0]
+        if step_prefix_re.match(first):
+            normalized_steps.append(f"1{delimiter} {step_prefix_re.sub('', first).strip()}")
+            start_index = 1
+            step_num = 2
+        else:
+            normalized_steps.append(first)
+            start_index = 1
+            step_num = 1
+
+        # 2つ目以降
+        for step in steps[start_index:]:
+            body = step_prefix_re.sub('', step).strip()
+            normalized_steps.append(f"{step_num}{delimiter} {body}")
+            step_num += 1
+
+        return normalized_steps
     
     
     
