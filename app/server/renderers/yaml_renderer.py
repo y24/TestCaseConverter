@@ -209,6 +209,11 @@ class YamlRenderer:
             
             if additional_info:
                 yaml_data.append(additional_info)
+            
+            # テスト環境セクションを追加
+            if first_case.test_environments:
+                test_environments_info = {'test_environments': first_case.test_environments}
+                yaml_data.append(test_environments_info)
         
         for test_case in test_cases:
             case_data = {

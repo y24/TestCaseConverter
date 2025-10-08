@@ -86,6 +86,10 @@
     ],
     "ignores": []
   },
+  "test_environments_cell": {
+    "keys": [],
+    "ignores": ["テスト環境", "テスト環境情報"]
+  },
   "trim_whitespaces": false,
   "normalize_zenkaku_alphanumeric": true,
   "normalize_step_numbers": true,

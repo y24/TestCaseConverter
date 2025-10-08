@@ -216,6 +216,9 @@ class ExcelReader:
         # 新しいセル情報を取得
         cell_info = self._get_cell_info(worksheet, header_row)
         
+        # テスト環境情報を取得
+        test_environments = self._get_test_environments(worksheet)
+        
         # データ行を取得
         data_rows = self._get_data_rows(worksheet, header_row, column_mapping)
         
@@ -223,7 +226,7 @@ class ExcelReader:
         test_cases = []
         for row_data in data_rows:
             try:
-                test_case = self._create_test_case(row_data, column_mapping, sheet_name, cell_info)
+                test_case = self._create_test_case(row_data, column_mapping, sheet_name, cell_info, test_environments)
                 if test_case:
                     test_cases.append(test_case)
             except Exception as e:
@@ -365,6 +368,35 @@ class ExcelReader:
         logger.info(f"Final cell_info: {cell_info}")
         return cell_info
     
+    def _get_test_environments(self, worksheet) -> List[str]:
+        """1行目からテスト環境情報を取得（A列を除外、除外設定を適用）"""
+        test_environments = []
+        
+        # 1行目を検索（A列は除外）
+        for col in range(2, worksheet.max_column + 1):  # B列から開始
+            cell_value = worksheet.cell(row=1, column=col).value
+            if cell_value is not None:
+                cell_str = str(cell_value).strip()
+                if cell_str:  # 空でない文字列の場合
+                    # セル内改行を半角スペースに置換
+                    import re
+                    cell_str = re.sub(r'\r\n|\r|\n', ' ', cell_str)
+                    
+                    # 除外チェック
+                    should_exclude = False
+                    for ignore_key in self.settings.test_environments_cell.ignores:
+                        if ignore_key in cell_str:
+                            should_exclude = True
+                            logger.info(f"Excluding test environment '{cell_str}' due to ignore key '{ignore_key}'")
+                            break
+                    
+                    if not should_exclude:
+                        test_environments.append(cell_str)
+                        logger.info(f"Found test environment: '{cell_str}' at row 1, column {col}")
+        
+        logger.info(f"Found test environments: {test_environments}")
+        return test_environments
+    
     def _get_data_rows(self, worksheet, header_row: int, column_mapping: Dict[str, int]) -> List[Dict]:
         """データ行を取得"""
         data_rows = []
@@ -462,7 +494,7 @@ class ExcelReader:
         
         return filled_category
     
-    def _create_test_case(self, row_data: Dict, column_mapping: Dict[str, int], sheet_name: str, cell_info: Dict[str, str] = None) -> Optional[TestCase]:
+    def _create_test_case(self, row_data: Dict, column_mapping: Dict[str, int], sheet_name: str, cell_info: Dict[str, str] = None, test_environments: List[str] = None) -> Optional[TestCase]:
         """テストケースを作成"""
         # カテゴリを取得（既にリスト形式で統合済み）
         category = row_data.get('category', [])
@@ -489,6 +521,9 @@ class ExcelReader:
         test_target = cell_info.get('test_target', '') if cell_info else ''
         target_version = cell_info.get('target_version', '') if cell_info else ''
         
+        # テスト環境情報を取得
+        test_envs = test_environments if test_environments else []
+        
         return TestCase(
             id=test_id,
             title=title,
@@ -508,7 +543,8 @@ class ExcelReader:
             backlog_id=backlog_id,
             test_type=test_type,
             test_target=test_target,
-            target_version=target_version
+            target_version=target_version,
+            test_environments=test_envs
         )
     
     

@@ -61,6 +61,7 @@ class ConversionSettings(BaseModel):
     test_type_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト種別", "テストフェーズ"]))
     test_target_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト対象(機能/モジュール)", "対象モジュール"]))
     target_version_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト対象バージョン", "対象バージョン"]))
+    test_environments_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=[], ignores=["テスト環境", "テスト環境情報"]))
     
     # 処理設定
     trim_whitespaces: bool = Field(default=True, description="空白トリム")
@@ -92,6 +93,7 @@ class TestCase(BaseModel):
     test_type: str = Field(default="", description="テストタイプ")
     test_target: str = Field(default="", description="テスト対象")
     target_version: str = Field(default="", description="対象バージョン")
+    test_environments: List[str] = Field(default_factory=list, description="テスト環境")
 
 
 class SheetData(BaseModel):

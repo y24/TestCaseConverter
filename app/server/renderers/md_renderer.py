@@ -188,6 +188,14 @@ class MarkdownRenderer:
                 logger.info(f"Added additional info: {additional_info}")
             else:
                 logger.info("No additional info to add")
+            
+            # テスト環境セクションを追加
+            if first_case.test_environments:
+                md_content += "## テスト環境\n\n"
+                for env in first_case.test_environments:
+                    md_content += f"- {env}\n"
+                md_content += "\n"
+                logger.info(f"Added test environments: {first_case.test_environments}")
         
         # テスト情報とテストケースの間に水平線を追加
         if test_cases and additional_info:

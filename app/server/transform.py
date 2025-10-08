@@ -95,6 +95,9 @@ class DataTransformer:
         normalized_test_target = self._normalize_string(test_case.test_target)
         normalized_target_version = self._normalize_string(test_case.target_version)
         
+        # テスト環境の正規化
+        normalized_test_environments = [self._normalize_string(env) for env in test_case.test_environments if self._normalize_string(env)]
+        
         
         return TestCase(
             id=test_case.id,
@@ -111,7 +114,8 @@ class DataTransformer:
             backlog_id=normalized_backlog_id,
             test_type=normalized_test_type,
             test_target=normalized_test_target,
-            target_version=normalized_target_version
+            target_version=normalized_target_version,
+            test_environments=normalized_test_environments
         )
     
     def _normalize_category(self, category: List[str]) -> List[str]:
@@ -245,7 +249,8 @@ class DataTransformer:
                 backlog_id=test_case.backlog_id,
                 test_type=test_case.test_type,
                 test_target=test_case.test_target,
-                target_version=test_case.target_version
+                target_version=test_case.target_version,
+                test_environments=test_case.test_environments
             ))
         
         return regenerated_cases
@@ -283,7 +288,8 @@ class DataTransformer:
                 backlog_id=test_case.backlog_id,
                 test_type=test_case.test_type,
                 test_target=test_case.test_target,
-                target_version=test_case.target_version
+                target_version=test_case.target_version,
+                test_environments=test_case.test_environments
             ))
             
             last_category = current_category
