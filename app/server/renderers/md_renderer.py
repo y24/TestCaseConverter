@@ -201,6 +201,10 @@ class MarkdownRenderer:
             if i < len(test_cases) - 1:
                 md_content += "---\n\n"
         
+        # 最後のテストケースとmetaセクションの間に水平線を追加
+        if test_cases:
+            md_content += "---\n\n"
+        
         # メタ情報を追加
         md_content += self._render_meta_info(filename, sheet_names)
         
