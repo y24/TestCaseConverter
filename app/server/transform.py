@@ -140,18 +140,31 @@ class DataTransformer:
         if self.settings.trim_whitespaces:
             text = text.strip()
         
-        # 全角数字正規化
-        if self.settings.normalize_zenkaku_numbers:
-            text = self._normalize_zenkaku_numbers(text)
+        # 全角英数字正規化
+        if self.settings.normalize_zenkaku_alphanumeric:
+            text = self._normalize_zenkaku_alphanumeric(text)
         
         return text
     
-    def _normalize_zenkaku_numbers(self, text: str) -> str:
-        """全角数字を半角に正規化"""
-        # 全角数字を半角に変換
+    def _normalize_zenkaku_alphanumeric(self, text: str) -> str:
+        """全角英数字を半角に正規化"""
+        # 全角英数字を半角に変換
         zenkaku_to_hankaku = {
+            # 全角数字
             '０': '0', '１': '1', '２': '2', '３': '3', '４': '4',
-            '５': '5', '６': '6', '７': '7', '８': '8', '９': '9'
+            '５': '5', '６': '6', '７': '7', '８': '8', '９': '9',
+            # 全角英字（大文字）
+            'Ａ': 'A', 'Ｂ': 'B', 'Ｃ': 'C', 'Ｄ': 'D', 'Ｅ': 'E',
+            'Ｆ': 'F', 'Ｇ': 'G', 'Ｈ': 'H', 'Ｉ': 'I', 'Ｊ': 'J',
+            'Ｋ': 'K', 'Ｌ': 'L', 'Ｍ': 'M', 'Ｎ': 'N', 'Ｏ': 'O',
+            'Ｐ': 'P', 'Ｑ': 'Q', 'Ｒ': 'R', 'Ｓ': 'S', 'Ｔ': 'T',
+            'Ｕ': 'U', 'Ｖ': 'V', 'Ｗ': 'W', 'Ｘ': 'X', 'Ｙ': 'Y', 'Ｚ': 'Z',
+            # 全角英字（小文字）
+            'ａ': 'a', 'ｂ': 'b', 'ｃ': 'c', 'ｄ': 'd', 'ｅ': 'e',
+            'ｆ': 'f', 'ｇ': 'g', 'ｈ': 'h', 'ｉ': 'i', 'ｊ': 'j',
+            'ｋ': 'k', 'ｌ': 'l', 'ｍ': 'm', 'ｎ': 'n', 'ｏ': 'o',
+            'ｐ': 'p', 'ｑ': 'q', 'ｒ': 'r', 'ｓ': 's', 'ｔ': 't',
+            'ｕ': 'u', 'ｖ': 'v', 'ｗ': 'w', 'ｘ': 'x', 'ｙ': 'y', 'ｚ': 'z'
         }
         
         for zenkaku, hankaku in zenkaku_to_hankaku.items():
@@ -179,10 +192,17 @@ class DataTransformer:
         # 1つ目の要素の処理
         first = steps[0]
         if step_prefix_re.match(first):
-            normalized_steps.append(f"1{delimiter} {step_prefix_re.sub('', first).strip()}")
+            body = step_prefix_re.sub('', first).strip()
+            # 全角英数字正規化を適用
+            if self.settings.normalize_zenkaku_alphanumeric:
+                body = self._normalize_zenkaku_alphanumeric(body)
+            normalized_steps.append(f"1{delimiter} {body}")
             start_index = 1
             step_num = 2
         else:
+            # 番号付きでない場合も全角英数字正規化を適用
+            if self.settings.normalize_zenkaku_alphanumeric:
+                first = self._normalize_zenkaku_alphanumeric(first)
             normalized_steps.append(first)
             start_index = 1
             step_num = 1
@@ -190,6 +210,9 @@ class DataTransformer:
         # 2つ目以降
         for step in steps[start_index:]:
             body = step_prefix_re.sub('', step).strip()
+            # 全角英数字正規化を適用
+            if self.settings.normalize_zenkaku_alphanumeric:
+                body = self._normalize_zenkaku_alphanumeric(body)
             normalized_steps.append(f"{step_num}{delimiter} {body}")
             step_num += 1
 

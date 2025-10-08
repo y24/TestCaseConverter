@@ -64,7 +64,7 @@ class ConversionSettings(BaseModel):
     
     # 処理設定
     trim_whitespaces: bool = Field(default=True, description="空白トリム")
-    normalize_zenkaku_numbers: bool = Field(default=True, description="全角数字正規化")
+    normalize_zenkaku_alphanumeric: bool = Field(default=True, description="全角英数字正規化")
     normalize_step_numbers: bool = Field(default=True, description="ステップ数正規化")
     category_display_compress: bool = Field(default=False, description="カテゴリ表示圧縮")
     pad_category_levels: bool = Field(default=True, description="カテゴリレベルパディング")

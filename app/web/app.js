@@ -324,7 +324,7 @@ function updateSettings() {
             
             // 処理設定
             trim_whitespaces: getElementChecked('trim-whitespaces', true),
-            normalize_zenkaku_numbers: getElementChecked('normalize-zenkaku', true),
+            normalize_zenkaku_alphanumeric: getElementChecked('normalize-zenkaku', true),
             normalize_step_numbers: getElementChecked('normalize-step-numbers', true),
             category_display_compress: false,
             pad_category_levels: true,
