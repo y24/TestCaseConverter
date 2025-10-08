@@ -164,29 +164,54 @@ class ExcelReader:
         
         return target_sheets
     
+    def _get_a1_cell_value(self, worksheet) -> str:
+        """A1セルの値を取得"""
+        try:
+            a1_cell = worksheet.cell(row=1, column=1)
+            if a1_cell.value is not None:
+                value = str(a1_cell.value).strip()
+                logger.info(f"A1セルの値を取得: '{value}'")
+                return value
+            logger.info("A1セルが空です")
+            return ""
+        except Exception as e:
+            logger.warning(f"A1セルの取得に失敗: {e}")
+            return ""
+    
     def _read_sheet(self, worksheet, sheet_name: str) -> SheetData:
         """シートを読み取り"""
         warnings = []
+        
+        # A1セルの値を取得
+        a1_cell_value = self._get_a1_cell_value(worksheet)
         
         # ヘッダー行を検索
         header_row = self._find_header_row(worksheet)
         if header_row is None:
             warnings.append("ヘッダー行が見つかりません")
-            return SheetData(
+            logger.info(f"Creating SheetData (no header) - sheet_name: '{sheet_name}', a1_cell_value: '{a1_cell_value}'")
+            sheet_data = SheetData(
                 sheet_name=sheet_name,
                 items=[],
-                warnings=warnings
+                warnings=warnings,
+                a1_cell_value=a1_cell_value
             )
+            logger.info(f"SheetData created (no header) - a1_cell_value: '{sheet_data.a1_cell_value}'")
+            return sheet_data
         
         # 列マッピングを取得
         column_mapping = self._get_column_mapping(worksheet, header_row)
         if not column_mapping:
             warnings.append("必須列が見つかりません")
-            return SheetData(
+            logger.info(f"Creating SheetData (no mapping) - sheet_name: '{sheet_name}', a1_cell_value: '{a1_cell_value}'")
+            sheet_data = SheetData(
                 sheet_name=sheet_name,
                 items=[],
-                warnings=warnings
+                warnings=warnings,
+                a1_cell_value=a1_cell_value
             )
+            logger.info(f"SheetData created (no mapping) - a1_cell_value: '{sheet_data.a1_cell_value}'")
+            return sheet_data
         
         # 新しいセル情報を取得
         cell_info = self._get_cell_info(worksheet, header_row)
@@ -205,11 +230,15 @@ class ExcelReader:
                 logger.error(f"Test case creation error (row {row_data.get('row', '?')}): {e}")
                 warnings.append(f"行 {row_data.get('row', '?')} の処理に失敗: {str(e)}")
         
-        return SheetData(
+        logger.info(f"Creating SheetData - sheet_name: '{sheet_name}', a1_cell_value: '{a1_cell_value}'")
+        sheet_data = SheetData(
             sheet_name=sheet_name,
             items=test_cases,
-            warnings=warnings
+            warnings=warnings,
+            a1_cell_value=a1_cell_value
         )
+        logger.info(f"SheetData created - a1_cell_value: '{sheet_data.a1_cell_value}'")
+        return sheet_data
     
     def _find_header_row(self, worksheet) -> Optional[int]:
         """ヘッダー行を検索"""

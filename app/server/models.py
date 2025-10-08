@@ -98,6 +98,7 @@ class SheetData(BaseModel):
     sheet_name: str = Field(description="シート名")
     items: List[TestCase] = Field(description="テストケース一覧")
     warnings: List[str] = Field(default_factory=list, description="警告一覧")
+    a1_cell_value: str = Field(default="", description="A1セルの値（タイトル用）")
 
 
 class FileData(BaseModel):

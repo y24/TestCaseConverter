@@ -55,7 +55,8 @@ class DataTransformer:
         return type(sheet_data)(
             sheet_name=sheet_data.sheet_name,
             items=transformed_items,
-            warnings=sheet_data.warnings
+            warnings=sheet_data.warnings,
+            a1_cell_value=sheet_data.a1_cell_value
         )
     
     def _transform_test_case(self, test_case: TestCase) -> TestCase:

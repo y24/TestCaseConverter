@@ -16,6 +16,12 @@ class MarkdownRenderer:
     
     def render(self, file_data_list: List[FileData]) -> Dict[str, str]:
         """Markdown形式でレンダリング"""
+        logger.info(f"MarkdownRenderer.render called with {len(file_data_list)} files")
+        for i, file_data in enumerate(file_data_list):
+            logger.info(f"File {i}: {file_data.filename}, sheets: {len(file_data.sheets)}")
+            for j, sheet_data in enumerate(file_data.sheets):
+                logger.info(f"  Sheet {j}: '{sheet_data.sheet_name}', a1_cell_value: '{sheet_data.a1_cell_value}'")
+        
         rendered_files = {}
         
         if self.settings.split_mode == SplitMode.PER_SHEET:
@@ -40,11 +46,14 @@ class MarkdownRenderer:
             total_sheets = len(file_data.sheets)
             
             for sheet_data in file_data.sheets:
+                logger.info(f"Processing sheet: '{sheet_data.sheet_name}', a1_cell_value: '{sheet_data.a1_cell_value}'")
                 # レンダリング
                 md_content = self._render_test_cases(
                     sheet_data.items, 
                     file_data.filename, 
-                    [sheet_data.sheet_name]
+                    [sheet_data.sheet_name],
+                    category_name=None,
+                    a1_cell_value=sheet_data.a1_cell_value
                 )
                 
                 # ファイル名を生成（シート数に応じてシート名を含めるかどうかを決定）
@@ -87,7 +96,8 @@ class MarkdownRenderer:
                         test_cases, 
                         file_data.filename, 
                         [sheet_data.sheet_name],
-                        category
+                        category_name=category,
+                        a1_cell_value=sheet_data.a1_cell_value
                     )
                     
                     # ファイル名を生成（シート数に応じてシート名を含めるかどうかを決定）
@@ -124,7 +134,9 @@ class MarkdownRenderer:
                     md_content = self._render_test_cases(
                         [test_case], 
                         file_data.filename, 
-                        [sheet_data.sheet_name]
+                        [sheet_data.sheet_name],
+                        category_name=None,
+                        a1_cell_value=sheet_data.a1_cell_value
                     )
                     
                     # ファイル名を生成（ケース単位ではテストケースIDと拡張子のみ）
@@ -134,20 +146,21 @@ class MarkdownRenderer:
         
         return rendered_files
     
-    def _render_test_cases(self, test_cases: List[TestCase], filename: str, sheet_names: List[str], category_name: str = None) -> str:
+    def _render_test_cases(self, test_cases: List[TestCase], filename: str, sheet_names: List[str], category_name: str = None, a1_cell_value: str = "") -> str:
         """テストケースをMarkdown形式でレンダリング"""
+        logger.info(f"_render_test_cases called - filename: '{filename}', a1_cell_value: '{a1_cell_value}', category_name: '{category_name}'")
         if not test_cases:
             return ""
         
         # ヘッダー生成（分割モードに応じて出し分け）
         sheet_name = sheet_names[0] if sheet_names else "テスト項目"
-        header = self._generate_header(filename, sheet_name, category_name)
+        header = self._generate_header(filename, sheet_name, category_name, a1_cell_value)
         if header:
             md_content = f"# {header}\n\n"
         else:
             md_content = ""
         
-        # 新しい項目をタイトルセクションの下に追加
+        # テスト情報セクションを追加
         if test_cases:
             # 最初のテストケースから新しい項目の情報を取得
             first_case = test_cases[0]
@@ -170,10 +183,15 @@ class MarkdownRenderer:
                 additional_info.append(f"- target_version: {first_case.target_version}")
             
             if additional_info:
+                md_content += "## テスト情報\n\n"
                 md_content += "\n".join(additional_info) + "\n\n"
                 logger.info(f"Added additional info: {additional_info}")
             else:
                 logger.info("No additional info to add")
+        
+        # テスト情報とテストケースの間に水平線を追加
+        if test_cases and additional_info:
+            md_content += "---\n\n"
         
         # 各テストケースをレンダリング
         for i, test_case in enumerate(test_cases):
@@ -188,26 +206,32 @@ class MarkdownRenderer:
         
         return md_content
     
-    def _generate_header(self, filename: str, sheet_name: str, category_name: str = None) -> str:
+    def _generate_header(self, filename: str, sheet_name: str, category_name: str = None, a1_cell_value: str = "") -> str:
         """分割モードに応じたヘッダーを生成"""
-        # ファイル名から拡張子を除去
-        base_filename = filename.replace('.xlsx', '').replace('.xls', '')
+        # A1セルの値が存在する場合はそれを使用、なければファイル名から拡張子を除去
+        logger.info(f"Generating header - filename: '{filename}', a1_cell_value: '{a1_cell_value}', category_name: '{category_name}'")
+        if a1_cell_value and a1_cell_value.strip():
+            base_title = a1_cell_value.strip()
+            logger.info(f"Using A1 cell value as title: '{base_title}'")
+        else:
+            base_title = filename.replace('.xlsx', '').replace('.xls', '')
+            logger.info(f"Using filename as title: '{base_title}'")
         
         if self.settings.split_mode == SplitMode.PER_SHEET:
-            # シート単位：# sample1
-            return base_filename
+            # シート単位：A1セルの値またはファイル名
+            return base_title
         elif self.settings.split_mode == SplitMode.PER_CATEGORY:
-            # カテゴリ単位：# sample1 - カテゴリA
+            # カテゴリ単位：A1セルの値またはファイル名 - カテゴリA
             if category_name:
-                return f"{base_filename} - {category_name}"
+                return f"{base_title} - {category_name}"
             else:
-                return base_filename
+                return base_title
         elif self.settings.split_mode == SplitMode.PER_CASE:
             # ケース単位：なし（ヘッダーを削除）
             return None
         else:
             # デフォルト
-            return sheet_name
+            return base_title
     
     def _render_single_test_case(self, test_case: TestCase, filename: str, sheet_name: str = None) -> str:
         """単一テストケースをレンダリング"""
