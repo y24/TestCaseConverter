@@ -69,6 +69,7 @@ class ConversionSettings(BaseModel):
     category_display_compress: bool = Field(default=False, description="カテゴリ表示圧縮")
     pad_category_levels: bool = Field(default=True, description="カテゴリレベルパディング")
     forward_fill_category: bool = Field(default=True, description="カテゴリの空の値を前の行から埋める")
+    output_case_id: bool = Field(default=True, description="ケースIDを出力する")
 
 
 

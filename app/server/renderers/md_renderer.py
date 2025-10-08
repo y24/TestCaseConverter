@@ -239,7 +239,19 @@ class MarkdownRenderer:
     
     def _render_single_test_case(self, test_case: TestCase, filename: str, sheet_name: str = None) -> str:
         """単一テストケースをレンダリング"""
-        md_content = f"## {test_case.id}: {test_case.title}\n\n"
+        md_content = ""
+        
+        # セクションヘッダーの出力判定
+        if self.settings.output_case_id and test_case.id:
+            # ケースID出力がONでIDが存在する場合
+            if test_case.title:
+                md_content = f"## {test_case.id}: {test_case.title}\n\n"
+            else:
+                md_content = f"## {test_case.id}\n\n"
+        elif test_case.title:
+            # ケースID出力がOFFでタイトルが存在する場合
+            md_content = f"## {test_case.title}\n\n"
+        # どちらも存在しない場合はセクションヘッダーを出力しない
         
         # カテゴリ（階層表示）
         category_str = " > ".join([cat for cat in test_case.category if cat])

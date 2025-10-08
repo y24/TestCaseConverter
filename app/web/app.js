@@ -136,6 +136,7 @@ function applySettingsToUI() {
         setElementValue('id-prefix', currentSettings.id_prefix || 'TC');
         setElementValue('id-padding', currentSettings.id_padding || 3);
         setElementValue('id-start-number', currentSettings.id_start_number || 1);
+        setElementChecked('output-case-id', currentSettings.output_case_id !== false);
         
         // 文字列処理設定
         setElementChecked('trim-whitespaces', currentSettings.trim_whitespaces !== false);
@@ -302,6 +303,7 @@ function updateSettings() {
             id_prefix: getElementValue('id-prefix', 'TC'),
             id_padding: getElementNumber('id-padding', 3),
             id_start_number: getElementNumber('id-start-number', 1),
+            output_case_id: getElementChecked('output-case-id', true),
             force_id_regenerate: false,
             sheet_search_keys: parseCommaSeparated(getElementValue('sheet-search-keys', 'テスト項目')),
             sheet_search_ignores: [],

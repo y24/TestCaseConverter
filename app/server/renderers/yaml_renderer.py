@@ -212,10 +212,13 @@ class YamlRenderer:
         
         for test_case in test_cases:
             case_data = {
-                'id': test_case.id,
                 'title': test_case.title,
                 'category': test_case.category
             }
+            
+            # ケースID出力設定に応じてIDを追加
+            if self.settings.output_case_id:
+                case_data['id'] = test_case.id
             
             # テスト種別が空でない場合のみ追加
             if test_case.type and test_case.type.strip():

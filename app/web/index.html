@@ -26,9 +26,6 @@
             
             <!-- サイドメニュー -->
             <aside class="sidebar" id="sidebar">
-                <div class="sidebar-header">
-                    <h2>🔧 設定</h2>
-                </div>
                 <div class="sidebar-content">
                     <!-- 読み取り設定セクション -->
                     <div class="setting-section">
@@ -102,7 +99,7 @@
                     <div class="setting-section">
                         <h3 class="section-title collapsible" onclick="toggleSection(this)">
                             <span class="section-toggle-icon">▼</span>
-                            処理
+                            処理設定
                         </h3>
                         <div class="section-content">
                             <h4 class="subsection-title">カテゴリ</h4>
@@ -134,6 +131,14 @@
                             </div>
                             
                             <h4 class="subsection-title">ケースID</h4>
+
+                            <div class="setting-group">
+                                <label>
+                                    <input type="checkbox" id="output-case-id" checked>
+                                    ケースIDを採番
+                                </label>
+                            </div>
+
                             <div class="setting-group">
                                 <label for="id-prefix">IDプレフィックス:</label>
                                 <input type="text" id="id-prefix" value="TC" maxlength="10">
