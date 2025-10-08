@@ -20,6 +20,7 @@ from .excel_reader import ExcelReader
 from .transform import DataTransformer
 from .renderers.yaml_renderer import YamlRenderer
 from .renderers.md_renderer import MarkdownRenderer
+from .i18n import i18n_manager, get_string, set_language, get_current_language, get_available_languages
 
 # ログ設定
 logging.basicConfig(
@@ -97,13 +98,51 @@ async def list_config_profiles():
     return {"profiles": profiles}
 
 
+@app.get("/api/i18n/languages")
+async def get_languages():
+    """利用可能な言語一覧を取得"""
+    return {"languages": get_available_languages()}
+
+
+@app.get("/api/i18n/current")
+async def get_current_lang():
+    """現在の言語を取得"""
+    return {"language": get_current_language()}
+
+
+@app.post("/api/i18n/set")
+async def set_lang(language: str = Form(...)):
+    """言語を設定"""
+    try:
+        set_language(language)
+        return {"status": "success", "language": get_current_language()}
+    except Exception as e:
+        logger.error(f"Language setting error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/i18n/strings")
+async def get_strings():
+    """現在の言語の文字列を取得"""
+    return {
+        "output": i18n_manager.get_output_strings()
+    }
+
+
 @app.post("/api/convert", response_model=ConversionResult)
 async def convert_files(
     files: List[UploadFile] = File(...),
-    settings_json: str = Form(...)
+    settings_json: str = Form(...),
+    language: str = Form(default="ja")
 ):
     """ファイル変換"""
     try:
+        # 言語設定
+        logger.info(f"Received language parameter: {language}")
+        set_language(language)
+        logger.info(f"Current language after setting: {get_current_language()}")
+        logger.info(f"Test string (category): {get_string('output.category')}")
+        
         # 設定解析
         import json
         settings_data = json.loads(settings_json)
@@ -182,6 +221,7 @@ async def convert_files(
             raise HTTPException(status_code=400, detail=error_message)
         
         # レンダリング
+        logger.info(f"Creating renderer with current language: {get_current_language()}")
         if settings.output_format == OutputFormat.YAML:
             renderer = YamlRenderer(settings)
         else:

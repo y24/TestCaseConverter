@@ -5,6 +5,7 @@ import yaml
 import logging
 from typing import Dict, List, Any
 from ..models import ConversionSettings, FileData, TestCase, SplitMode
+from ..i18n import get_string
 
 
 
@@ -199,26 +200,26 @@ class YamlRenderer:
             additional_info = {}
             
             if first_case.backlog_id:
-                additional_info['backlog_id'] = first_case.backlog_id
+                additional_info[get_string('output.backlog_id')] = first_case.backlog_id
             if first_case.test_type:
-                additional_info['test_type'] = first_case.test_type
+                additional_info[get_string('output.test_type')] = first_case.test_type
             if first_case.test_target:
-                additional_info['test_target'] = first_case.test_target
+                additional_info[get_string('output.test_target')] = first_case.test_target
             if first_case.target_version:
-                additional_info['target_version'] = first_case.target_version
+                additional_info[get_string('output.target_version')] = first_case.target_version
             
             if additional_info:
                 yaml_data.append(additional_info)
             
             # テスト環境セクションを追加
             if first_case.test_environments:
-                test_environments_info = {'test_environments': first_case.test_environments}
+                test_environments_info = {get_string('output.test_environments'): first_case.test_environments}
                 yaml_data.append(test_environments_info)
         
         for test_case in test_cases:
             case_data = {
                 'title': test_case.title,
-                'category': test_case.category
+                get_string('output.category'): test_case.category
             }
             
             # ケースID出力設定に応じてIDを追加
@@ -227,26 +228,26 @@ class YamlRenderer:
             
             # テスト種別が空でない場合のみ追加
             if test_case.type and test_case.type.strip():
-                case_data['type'] = test_case.type
+                case_data[get_string('output.type')] = test_case.type
             
             # 優先度
             if test_case.priority:
-                case_data['priority'] = test_case.priority
+                case_data[get_string('output.priority')] = test_case.priority
             
             # 個別source情報を追加（分割モードに応じて簡略化、priorityの下に配置）
             individual_source = self._get_individual_source_info(test_case.source, meta_info.get('filename', ''), meta_info.get('sheet_name', ''))
             if individual_source:
-                case_data['source'] = individual_source
+                case_data[get_string('output.source')] = individual_source
             
             # その他のフィールドを追加
             if test_case.preconditions:
-                case_data['preconditions'] = test_case.preconditions
+                case_data[get_string('output.preconditions')] = test_case.preconditions
             if test_case.steps:
-                case_data['steps'] = test_case.steps
+                case_data[get_string('output.steps')] = test_case.steps
             if test_case.expect:
-                case_data['expect'] = test_case.expect
+                case_data[get_string('output.expected_result')] = test_case.expect
             if test_case.notes:
-                case_data['notes'] = test_case.notes
+                case_data[get_string('output.notes')] = test_case.notes
             
             yaml_data.append(case_data)
         

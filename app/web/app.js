@@ -135,6 +135,7 @@ function applySettingsToUI() {
         // 出力設定
         setElementValue('output-format', currentSettings.output_format || 'markdown');
         setElementValue('split-mode', currentSettings.split_mode || 'per_sheet');
+        setElementValue('output-language', currentSettings.output_language || 'ja');
         
         // ケースID設定
         setElementValue('id-prefix', currentSettings.id_prefix || 'TC');
@@ -272,58 +273,59 @@ function toggleCaseIdInputs(enabled) {
     }
 }
 
+// カンマ区切りの文字列を配列に変換するヘルパー関数
+function parseCommaSeparated(value) {
+    if (!value || value.trim() === '') return [];
+    return value.split(',').map(item => item.trim()).filter(item => item !== '');
+}
+
+// 括弧付きの文字列をkeysとignoresに分離するヘルパー関数
+function parseKeysAndIgnores(value) {
+    if (!value || value.trim() === '') return { keys: [], ignores: [] };
+    
+    const keys = [];
+    const ignores = [];
+    
+    value.split(',').forEach(item => {
+        item = item.trim();
+        if (item === '') return;
+        
+        // 括弧で囲まれている場合はignoresに追加
+        if (item.startsWith('(') && item.endsWith(')')) {
+            ignores.push(item.slice(1, -1)); // 括弧を除去
+        } else {
+            keys.push(item);
+        }
+    });
+    
+    return { keys, ignores };
+}
+
+// 要素の値を安全に取得するヘルパー関数
+function getElementValue(elementId, defaultValue = '') {
+    const element = document.getElementById(elementId);
+    return element ? element.value : defaultValue;
+}
+
+function getElementChecked(elementId, defaultValue = false) {
+    const element = document.getElementById(elementId);
+    return element ? element.checked : defaultValue;
+}
+
+function getElementNumber(elementId, defaultValue = 0) {
+    const element = document.getElementById(elementId);
+    return element ? parseInt(element.value) || defaultValue : defaultValue;
+}
+
 // 設定更新
 function updateSettings() {
     try {
-        // カンマ区切りの文字列を配列に変換するヘルパー関数
-        function parseCommaSeparated(value) {
-            if (!value || value.trim() === '') return [];
-            return value.split(',').map(item => item.trim()).filter(item => item !== '');
-        }
-        
-        // 括弧付きの文字列をkeysとignoresに分離するヘルパー関数
-        function parseKeysAndIgnores(value) {
-            if (!value || value.trim() === '') return { keys: [], ignores: [] };
-            
-            const keys = [];
-            const ignores = [];
-            
-            value.split(',').forEach(item => {
-                item = item.trim();
-                if (item === '') return;
-                
-                // 括弧で囲まれている場合はignoresに追加
-                if (item.startsWith('(') && item.endsWith(')')) {
-                    ignores.push(item.slice(1, -1)); // 括弧を除去
-                } else {
-                    keys.push(item);
-                }
-            });
-            
-            return { keys, ignores };
-        }
-        
-        
-        // 要素の値を安全に取得するヘルパー関数
-        function getElementValue(elementId, defaultValue = '') {
-            const element = document.getElementById(elementId);
-            return element ? element.value : defaultValue;
-        }
-        
-        function getElementChecked(elementId, defaultValue = false) {
-            const element = document.getElementById(elementId);
-            return element ? element.checked : defaultValue;
-        }
-        
-        function getElementNumber(elementId, defaultValue = 0) {
-            const element = document.getElementById(elementId);
-            return element ? parseInt(element.value) || defaultValue : defaultValue;
-        }
         
         // 新しい構造で設定を構築
         currentSettings = {
             output_format: getElementValue('output-format', 'markdown'),
             split_mode: getElementValue('split-mode', 'per_sheet'),
+            output_language: getElementValue('output-language', 'ja'),
             id_prefix: getElementValue('id-prefix', 'TC'),
             id_padding: getElementNumber('id-padding', 3),
             id_start_number: getElementNumber('id-start-number', 1),
@@ -595,6 +597,9 @@ async function autoConvert() {
             formData.append('files', file);
         });
         formData.append('settings_json', JSON.stringify(currentSettings));
+        const selectedLanguage = getElementValue('output-language', 'ja');
+        console.log('Selected language:', selectedLanguage);
+        formData.append('language', selectedLanguage);
         
         // 変換実行
         console.log('Starting conversion request...');

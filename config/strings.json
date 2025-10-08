@@ -1,0 +1,38 @@
+{
+  "ja": {
+    "output": {
+      "category": "カテゴリ",
+      "type": "種別",
+      "priority": "優先度",
+      "source": "ソース",
+      "test_type": "テスト種別",
+      "test_target": "テスト対象",
+      "target_version": "対象バージョン",
+      "test_environments": "テスト環境",
+      "test_info": "テスト情報",
+      "backlog_id": "案件ID",
+      "preconditions": "前提条件",
+      "steps": "手順",
+      "expected_result": "期待結果",
+      "notes": "備考"
+    }
+  },
+  "en": {
+    "output": {
+      "category": "Category",
+      "type": "Type",
+      "priority": "Priority",
+      "source": "Source",
+      "test_type": "Test Type",
+      "test_target": "Test Target",
+      "target_version": "Target Version",
+      "test_environments": "Test Environments",
+      "test_info": "Test Information",
+      "backlog_id": "Backlog ID",
+      "preconditions": "Preconditions",
+      "steps": "Steps",
+      "expected_result": "Expected Result",
+      "notes": "Notes"
+    }
+  }
+}

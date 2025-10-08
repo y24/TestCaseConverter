@@ -4,6 +4,7 @@ Markdownレンダラー
 import logging
 from typing import Dict, List, Any
 from ..models import ConversionSettings, FileData, TestCase, SplitMode
+from ..i18n import get_string
 
 logger = logging.getLogger(__name__)
 
@@ -13,10 +14,12 @@ class MarkdownRenderer:
     
     def __init__(self, settings: ConversionSettings):
         self.settings = settings
+        logger.info(f"MarkdownRenderer initialized with language: {get_string('output.category')}")
     
     def render(self, file_data_list: List[FileData]) -> Dict[str, str]:
         """Markdown形式でレンダリング"""
         logger.info(f"MarkdownRenderer.render called with {len(file_data_list)} files")
+        logger.info(f"Current language in renderer: {get_string('output.category')}")
         for i, file_data in enumerate(file_data_list):
             logger.info(f"File {i}: {file_data.filename}, sheets: {len(file_data.sheets)}")
             for j, sheet_data in enumerate(file_data.sheets):
@@ -183,7 +186,8 @@ class MarkdownRenderer:
                 additional_info.append(f"- target_version: {first_case.target_version}")
             
             if additional_info:
-                md_content += "## テスト情報\n\n"
+                test_info_label = get_string('output.test_info', 'テスト情報')
+                md_content += f"## {test_info_label}\n\n"
                 md_content += "\n".join(additional_info) + "\n\n"
                 logger.info(f"Added additional info: {additional_info}")
             else:
@@ -191,7 +195,8 @@ class MarkdownRenderer:
             
             # テスト環境セクションを追加
             if first_case.test_environments:
-                md_content += "## テスト環境\n\n"
+                test_env_label = get_string('output.test_environments', 'テスト環境')
+                md_content += f"## {test_env_label}\n\n"
                 for env in first_case.test_environments:
                     md_content += f"- {env}\n"
                 md_content += "\n"
@@ -263,43 +268,45 @@ class MarkdownRenderer:
         
         # カテゴリ（階層表示）
         category_str = " > ".join([cat for cat in test_case.category if cat])
-        md_content += f"- category: {category_str}\n"
+        category_label = get_string('output.category')
+        logger.info(f"Using category label: '{category_label}' for category: '{category_str}'")
+        md_content += f"- {category_label}: {category_str}\n"
         
         # テスト種別が空でない場合のみ追加
         if test_case.type and test_case.type.strip():
-            md_content += f"- type: {test_case.type}\n"
+            md_content += f"- {get_string('output.type')}: {test_case.type}\n"
         
         # 優先度
         if test_case.priority:
-            md_content += f"- priority: {test_case.priority}\n"
+            md_content += f"- {get_string('output.priority')}: {test_case.priority}\n"
         
         # ソース情報（分割モードに応じて簡略化、priorityの下に表示）
         source_info = test_case.source
         individual_source = self._get_individual_source_info(source_info, filename, sheet_name)
         if individual_source:
-            md_content += f"- source: {individual_source}\n"
+            md_content += f"- {get_string('output.source')}: {individual_source}\n"
         
         md_content += "\n"
         
         # 前提条件
         if test_case.preconditions:
-            md_content += "### 前提条件\n"
+            md_content += f"### {get_string('output.preconditions')}\n"
             md_content += f"{test_case.preconditions}\n\n"
         
         # 手順
         if test_case.steps:
-            md_content += "### 手順\n"
+            md_content += f"### {get_string('output.steps')}\n"
             # stepsは文字列として処理
             md_content += f"{test_case.steps}\n\n"
         
         # 期待結果
         if test_case.expect:
-            md_content += "### 期待結果\n"
+            md_content += f"### {get_string('output.expected_result')}\n"
             md_content += f"{test_case.expect}\n\n"
         
         # 備考
         if test_case.notes:
-            md_content += "### 備考\n"
+            md_content += f"### {get_string('output.notes')}\n"
             md_content += f"{test_case.notes}\n\n"
         
         return md_content
