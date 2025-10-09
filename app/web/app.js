@@ -297,10 +297,13 @@ function toggleOutputLanguageSelect() {
     
     if (outputFormatSelect && outputLanguageSelect) {
         const isYamlFormat = outputFormatSelect.value === 'yaml';
-        outputLanguageSelect.disabled = isYamlFormat;
+        const isCsvFormat = outputFormatSelect.value === 'csv';
+        const shouldDisableLanguage = isYamlFormat || isCsvFormat;
         
-        // YAMLフォーマットの場合は視覚的に無効化されたことを示す
-        if (isYamlFormat) {
+        outputLanguageSelect.disabled = shouldDisableLanguage;
+        
+        // YAMLまたはCSVフォーマットの場合は視覚的に無効化されたことを示す
+        if (shouldDisableLanguage) {
             outputLanguageSelect.style.opacity = '0.6';
             outputLanguageSelect.style.cursor = 'not-allowed';
         } else {

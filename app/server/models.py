@@ -10,6 +10,7 @@ class OutputFormat(str, Enum):
     """出力形式"""
     YAML = "yaml"
     MARKDOWN = "markdown"
+    CSV = "csv"
 
 
 class SplitMode(str, Enum):

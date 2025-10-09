@@ -20,6 +20,7 @@ from .excel_reader import ExcelReader
 from .transform import DataTransformer
 from .renderers.yaml_renderer import YamlRenderer
 from .renderers.md_renderer import MarkdownRenderer
+from .renderers.csv_renderer import CsvRenderer
 from .i18n import i18n_manager, get_string, set_language, get_current_language, get_available_languages
 
 # ログ設定
@@ -230,6 +231,8 @@ async def convert_files(
         logger.info(f"Creating renderer with current language: {get_current_language()}")
         if settings.output_format == OutputFormat.YAML:
             renderer = YamlRenderer(settings)
+        elif settings.output_format == OutputFormat.CSV:
+            renderer = CsvRenderer(settings)
         else:
             renderer = MarkdownRenderer(settings)
         
@@ -284,6 +287,8 @@ async def download_files(
         # 再レンダリング
         if settings.output_format == OutputFormat.YAML:
             renderer = YamlRenderer(settings)
+        elif settings.output_format == OutputFormat.CSV:
+            renderer = CsvRenderer(settings)
         else:
             renderer = MarkdownRenderer(settings)
         
