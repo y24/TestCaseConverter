@@ -433,6 +433,16 @@ function updateSettings() {
             precondition_row: parseKeysAndIgnores(getElementValue('precondition-keys', '前提条件')),
             note_row: parseKeysAndIgnores(getElementValue('note-keys', '備考,補足情報')),
             
+            // 新しいセル設定
+            backlog_id_cell: parseKeysAndIgnores(getElementValue('backlog-id-keys', '案件チケットID')),
+            test_type_cell: parseKeysAndIgnores(getElementValue('test-type-cell-keys', 'テスト種別,テストフェーズ')),
+            test_target_cell: parseKeysAndIgnores(getElementValue('test-target-keys', 'テスト対象(機能/モジュール),対象モジュール')),
+            target_version_cell: parseKeysAndIgnores(getElementValue('target-version-keys', 'テスト対象バージョン,対象バージョン')),
+            test_environments_cell: {
+                keys: [],
+                ignores: ['テスト環境', 'テスト環境情報']
+            },
+            
             // 処理設定
             trim_whitespaces: getElementChecked('trim-whitespaces', true),
             normalize_zenkaku_alphanumeric: getElementChecked('normalize-zenkaku', true),
