@@ -472,7 +472,17 @@ class ExcelReader:
         # 左側のカテゴリが変わったかどうかをチェック
         independent_branch = False
         for i, current_value in enumerate(current_category):
-            if current_value.strip():  # 現在の値が空でない場合
+            # ダッシュ文字（- や －）を無視する
+            if self._is_dash_character(current_value):
+                # ダッシュ文字の場合は前の行の値を使用（独立ブランチでない場合）
+                if independent_branch:
+                    filled_category.append("")
+                else:
+                    if i < len(last_category):
+                        filled_category.append(last_category[i])
+                    else:
+                        filled_category.append("")
+            elif current_value.strip():  # 現在の値が空でない場合
                 filled_category.append(current_value)
                 # このレベルで値が変わった場合、それより右側は独立ブランチ
                 if i < len(last_category) and current_value != last_category[i]:
@@ -493,6 +503,19 @@ class ExcelReader:
             filled_category.append("")
         
         return filled_category
+    
+    def _is_dash_character(self, value: str) -> bool:
+        """ダッシュ文字（- や －）かどうかを判定"""
+        if not value:
+            return False
+        
+        # 前後の空白を削除
+        trimmed_value = value.strip()
+        
+        # ダッシュ文字のパターンをチェック
+        dash_patterns = ['-', '－', 'ー', '―', '—', '–']
+        
+        return trimmed_value in dash_patterns
     
     def _create_test_case(self, row_data: Dict, column_mapping: Dict[str, int], sheet_name: str, cell_info: Dict[str, str] = None, test_environments: List[str] = None) -> Optional[TestCase]:
         """テストケースを作成"""

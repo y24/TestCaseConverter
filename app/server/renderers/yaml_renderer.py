@@ -189,42 +189,52 @@ class YamlRenderer:
         """テストケースをYAML形式でレンダリング"""
         yaml_data = []
         
-        # 共通source情報をメタ情報に追加
-        if 'common_source' in meta_info and meta_info['common_source']:
-            yaml_data.append({'common_source': meta_info['common_source']})
+        # basic_infoセクションを作成（output_basic_infoがONの場合のみ）
+        if self.settings.output_basic_info:
+            basic_info = {}
+            
+            # 共通source情報をbasic_infoに追加
+            if 'common_source' in meta_info and meta_info['common_source']:
+                basic_info['common_source'] = meta_info['common_source']
+            
+            # 新しい項目をbasic_infoに追加
+            if test_cases:
+                # 最初のテストケースから新しい項目の情報を取得
+                first_case = test_cases[0]
+                
+                if first_case.backlog_id:
+                    basic_info[get_string('output.backlog_id', '案件チケットID')] = first_case.backlog_id
+                if first_case.test_type:
+                    basic_info[get_string('output.test_type', 'テスト種別')] = first_case.test_type
+                if first_case.test_target:
+                    basic_info[get_string('output.test_target', 'テスト対象')] = first_case.test_target
+                if first_case.target_version:
+                    basic_info[get_string('output.target_version', '対象バージョン')] = first_case.target_version
+                
+                # テスト環境をbasic_infoに追加（既に統合済み）
+                if first_case.test_environments:
+                    basic_info[get_string('output.test_environments', 'テスト環境')] = first_case.test_environments
+            
+            # basic_infoが空でない場合のみ追加
+            if basic_info:
+                yaml_data.append({'basic_info': basic_info})
         
-        # 新しい項目をタイトルセクションの下に追加
-        if test_cases:
-            # 最初のテストケースから新しい項目の情報を取得
-            first_case = test_cases[0]
-            additional_info = {}
-            
-            if first_case.backlog_id:
-                additional_info[get_string('output.backlog_id', '案件ID')] = first_case.backlog_id
-            if first_case.test_type:
-                additional_info[get_string('output.test_type', 'テスト種別')] = first_case.test_type
-            if first_case.test_target:
-                additional_info[get_string('output.test_target', 'テスト対象')] = first_case.test_target
-            if first_case.target_version:
-                additional_info[get_string('output.target_version', '対象バージョン')] = first_case.target_version
-            
-            if additional_info:
-                yaml_data.append(additional_info)
-            
-            # テスト環境セクションを追加
-            if first_case.test_environments:
-                test_environments_info = {get_string('output.test_environments', 'テスト環境'): first_case.test_environments}
-                yaml_data.append(test_environments_info)
-        
+        # テストケースを配列として格納
+        test_case_list = []
         for test_case in test_cases:
-            case_data = {
-                'title': test_case.title,
-                get_string('output.category', 'カテゴリ'): test_case.category
-            }
+            case_data = {}
             
-            # ケースID出力設定に応じてIDを追加
+            # ケースID出力設定に応じてIDを最初に追加
             if self.settings.output_case_id:
                 case_data['id'] = test_case.id
+            
+            # titleとカテゴリを追加
+            case_data['title'] = test_case.title
+            # カテゴリが空でない場合のみ追加（空文字列を除外）
+            if test_case.category:
+                filtered_category = [cat for cat in test_case.category if cat.strip()]
+                if filtered_category:
+                    case_data[get_string('output.category', 'カテゴリ')] = filtered_category
             
             # テスト種別が空でない場合のみ追加
             if test_case.type and test_case.type.strip():
@@ -249,10 +259,15 @@ class YamlRenderer:
             if test_case.notes:
                 case_data[get_string('output.notes', '備考')] = test_case.notes
             
-            yaml_data.append(case_data)
+            test_case_list.append(case_data)
         
-        # メタ情報を最後に追加
-        yaml_data.append({'meta': meta_info})
+        # test_caseキーに配列として格納
+        if test_case_list:
+            yaml_data.append({'test_case': test_case_list})
+        
+        # メタ情報を最後に追加（output_meta_infoがONの場合のみ）
+        if self.settings.output_meta_info:
+            yaml_data.append({'meta': meta_info})
         
         # YAML文字列に変換
         yaml_content = yaml.dump(

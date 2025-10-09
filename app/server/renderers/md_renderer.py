@@ -163,8 +163,8 @@ class MarkdownRenderer:
         else:
             md_content = ""
         
-        # テスト情報セクションを追加
-        if test_cases:
+        # 基本情報セクションを追加（output_basic_infoがONの場合のみ）
+        if test_cases and self.settings.output_basic_info:
             # 最初のテストケースから新しい項目の情報を取得
             first_case = test_cases[0]
             additional_info = []
@@ -189,26 +189,23 @@ class MarkdownRenderer:
             if first_case.target_version:
                 target_version_label = get_string('output.target_version', '対象バージョン')
                 additional_info.append(f"- {target_version_label}: {first_case.target_version}")
+            if first_case.test_environments:
+                test_env_label = get_string('output.test_environments', 'テスト環境')
+                additional_info.append(f"- {test_env_label}")
+                for env in first_case.test_environments:
+                    additional_info.append(f"    - {env}")
+                logger.info(f"Added test environments to test info: {first_case.test_environments}")
             
             if additional_info:
-                test_info_label = get_string('output.test_info', 'テスト情報')
-                md_content += f"## {test_info_label}\n\n"
+                basic_info_label = get_string('output.basic_info', '基本情報')
+                md_content += f"## {basic_info_label}\n\n"
                 md_content += "\n".join(additional_info) + "\n\n"
                 logger.info(f"Added additional info: {additional_info}")
             else:
                 logger.info("No additional info to add")
-            
-            # テスト環境セクションを追加
-            if first_case.test_environments:
-                test_env_label = get_string('output.test_environments', 'テスト環境')
-                md_content += f"## {test_env_label}\n\n"
-                for env in first_case.test_environments:
-                    md_content += f"- {env}\n"
-                md_content += "\n"
-                logger.info(f"Added test environments: {first_case.test_environments}")
         
-        # テスト情報とテストケースの間に水平線を追加
-        if test_cases and additional_info:
+        # 基本情報とテストケースの間に水平線を追加
+        if test_cases and self.settings.output_basic_info and additional_info:
             md_content += "---\n\n"
         
         # 各テストケースをレンダリング
@@ -220,11 +217,12 @@ class MarkdownRenderer:
                 md_content += "---\n\n"
         
         # 最後のテストケースとmetaセクションの間に水平線を追加
-        if test_cases:
+        if test_cases and self.settings.output_meta_info:
             md_content += "---\n\n"
         
-        # メタ情報を追加
-        md_content += self._render_meta_info(filename, sheet_names)
+        # メタ情報を追加（output_meta_infoがONの場合のみ）
+        if self.settings.output_meta_info:
+            md_content += self._render_meta_info(filename, sheet_names)
         
         return md_content
     
