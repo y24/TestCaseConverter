@@ -195,7 +195,8 @@ class YamlRenderer:
             
             # 共通source情報をbasic_infoに追加（常に出力）
             if 'common_source' in meta_info and meta_info['common_source']:
-                basic_info['common_source'] = meta_info['common_source']
+                source_book_key = get_string('output.source_book', '変換元ブック')
+                basic_info[source_book_key] = meta_info['common_source']
             
             # 新しい項目をbasic_infoに追加
             if test_cases:
@@ -385,8 +386,8 @@ class YamlRenderer:
             # カテゴリ単位：ファイル名が共通
             return filename
         elif self.settings.split_mode == SplitMode.PER_CASE:
-            # ケース単位：共通情報なし（各ケースで完全な情報を表示）
-            return None
+            # ケース単位：ファイル名とシート名が共通（基本情報として表示）
+            return f"{filename} / {sheet_name}"
         else:
             return None
     

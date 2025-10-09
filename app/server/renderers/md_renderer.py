@@ -172,7 +172,7 @@ class MarkdownRenderer:
             # 共通source情報を情報セクションに統合（常に出力）
             common_source = self._get_common_source_info(filename, sheet_name, category_name)
             if common_source:
-                source_label = get_string('output.source', 'ソース')
+                source_label = get_string('output.source_book', '変換元ブック')
                 additional_info.append(f"- {source_label}: {common_source}")
             
             logger.info(f"First test case new fields - backlog_id: '{first_case.backlog_id}', test_type: '{first_case.test_type}', test_target: '{first_case.test_target}', target_version: '{first_case.target_version}'")
@@ -387,8 +387,8 @@ class MarkdownRenderer:
             # カテゴリ単位：ファイル名が共通
             return filename
         elif self.settings.split_mode == SplitMode.PER_CASE:
-            # ケース単位：共通情報なし（各ケースで完全な情報を表示）
-            return None
+            # ケース単位：ファイル名とシート名が共通（基本情報として表示）
+            return f"{filename} / {sheet_name}"
         else:
             return None
     
