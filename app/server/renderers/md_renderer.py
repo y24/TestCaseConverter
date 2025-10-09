@@ -265,7 +265,7 @@ class MarkdownRenderer:
             else:
                 md_content = f"## {test_case.id}\n\n"
         elif test_case.title:
-            # ケースID出力がOFFでタイトルが存在する場合
+            # ケースID出力がOFFで概要が存在する場合
             md_content = f"## {test_case.title}\n\n"
         # どちらも存在しない場合はセクションヘッダーを出力しない
         
