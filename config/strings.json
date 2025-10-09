@@ -4,7 +4,7 @@
       "category": "カテゴリ",
       "type": "種別",
       "priority": "優先度",
-      "source": "Source",
+      "source": "変換元",
       "test_type": "テスト種別",
       "test_target": "テスト対象",
       "target_version": "対象バージョン",

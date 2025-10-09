@@ -203,17 +203,17 @@ class YamlRenderer:
                 first_case = test_cases[0]
                 
                 if first_case.backlog_id:
-                    basic_info[get_string('output.backlog_id', '案件チケットID')] = first_case.backlog_id
+                    basic_info['backlog_id'] = first_case.backlog_id
                 if first_case.test_type:
-                    basic_info[get_string('output.test_type', 'テスト種別')] = first_case.test_type
+                    basic_info['test_type'] = first_case.test_type
                 if first_case.test_target:
-                    basic_info[get_string('output.test_target', 'テスト対象')] = first_case.test_target
+                    basic_info['test_target'] = first_case.test_target
                 if first_case.target_version:
-                    basic_info[get_string('output.target_version', '対象バージョン')] = first_case.target_version
+                    basic_info['target_version'] = first_case.target_version
                 
                 # テスト環境をbasic_infoに追加（既に統合済み）
                 if first_case.test_environments:
-                    basic_info[get_string('output.test_environments', 'テスト環境')] = first_case.test_environments
+                    basic_info['test_environments'] = first_case.test_environments
             
             # basic_infoが空でない場合のみ追加
             if basic_info:
@@ -234,30 +234,30 @@ class YamlRenderer:
             if test_case.category:
                 filtered_category = [cat for cat in test_case.category if cat.strip()]
                 if filtered_category:
-                    case_data[get_string('output.category', 'カテゴリ')] = filtered_category
+                    case_data['category'] = filtered_category
             
             # テスト種別が空でない場合のみ追加
             if test_case.type and test_case.type.strip():
-                case_data[get_string('output.type', '種別')] = test_case.type
+                case_data['type'] = test_case.type
             
             # 優先度
             if test_case.priority:
-                case_data[get_string('output.priority', '優先度')] = test_case.priority
+                case_data['priority'] = test_case.priority
             
             # 個別source情報を追加（分割モードに応じて簡略化、priorityの下に配置）
             individual_source = self._get_individual_source_info(test_case.source, meta_info.get('filename', ''), meta_info.get('sheet_name', ''))
             if individual_source:
-                case_data[get_string('output.source', 'ソース')] = individual_source
+                case_data['source'] = individual_source
             
             # その他のフィールドを追加
             if test_case.preconditions:
-                case_data[get_string('output.preconditions', '前提条件')] = test_case.preconditions
+                case_data['preconditions'] = test_case.preconditions
             if test_case.steps:
-                case_data[get_string('output.steps', '手順')] = test_case.steps
+                case_data['steps'] = test_case.steps
             if test_case.expect:
-                case_data[get_string('output.expected_result', '期待結果')] = test_case.expect
+                case_data['expected_result'] = test_case.expect
             if test_case.notes:
-                case_data[get_string('output.notes', '備考')] = test_case.notes
+                case_data['notes'] = test_case.notes
             
             test_case_list.append(case_data)
         
