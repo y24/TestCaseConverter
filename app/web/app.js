@@ -310,6 +310,41 @@ function toggleOutputLanguageSelect() {
             outputLanguageSelect.style.cursor = 'default';
         }
     }
+    
+    // CSVフォーマットの場合のチェックボックス制御
+    toggleCsvCheckboxes();
+}
+
+// CSVフォーマットの場合のチェックボックス制御関数
+function toggleCsvCheckboxes() {
+    const outputFormatSelect = document.getElementById('output-format');
+    const metaInfoCheckbox = document.getElementById('output-meta-info');
+    const sourceInfoCheckbox = document.getElementById('output-source-info');
+    
+    if (outputFormatSelect && metaInfoCheckbox && sourceInfoCheckbox) {
+        const isCsvFormat = outputFormatSelect.value === 'csv';
+        
+        // CSVフォーマットの場合はメタ情報と変換元情報のチェックボックスを無効化
+        metaInfoCheckbox.disabled = isCsvFormat;
+        sourceInfoCheckbox.disabled = isCsvFormat;
+        
+        // 視覚的に無効化されたことを示す
+        if (isCsvFormat) {
+            metaInfoCheckbox.style.opacity = '0.6';
+            metaInfoCheckbox.style.cursor = 'not-allowed';
+            sourceInfoCheckbox.style.opacity = '0.6';
+            sourceInfoCheckbox.style.cursor = 'not-allowed';
+            
+            // CSVフォーマットの場合は強制的にチェックを外す
+            metaInfoCheckbox.checked = false;
+            sourceInfoCheckbox.checked = false;
+        } else {
+            metaInfoCheckbox.style.opacity = '1';
+            metaInfoCheckbox.style.cursor = 'default';
+            sourceInfoCheckbox.style.opacity = '1';
+            sourceInfoCheckbox.style.cursor = 'default';
+        }
+    }
 }
 
 // カンマ区切りの文字列を配列に変換するヘルパー関数

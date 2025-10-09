@@ -135,13 +135,18 @@ class CsvRenderer:
                 test_case.preconditions,
                 test_case.steps,
                 test_case.expect,
-                test_case.notes,
-                test_case.backlog_id,
-                test_case.test_type,
-                test_case.test_target,
-                test_case.target_version,
-                environments_str
+                test_case.notes
             ])
+            
+            # 基本情報が有効な場合のみBacklog ID以降の列を追加
+            if self.settings.output_basic_info:
+                row.extend([
+                    test_case.backlog_id,
+                    test_case.test_type,
+                    test_case.test_target,
+                    test_case.target_version,
+                    environments_str
+                ])
             
             writer.writerow(row)
         
@@ -196,29 +201,34 @@ class CsvRenderer:
         
         # 基本ヘッダー
         headers = [
-            get_string("output.id", "ID"),
-            get_string("output.title", "タイトル")
+            get_string("output.id"),
+            get_string("output.title")
         ]
         
         # カテゴリ列を動的に追加（設定に基づいて連番で生成）
         category_count = len(self.settings.category_row.keys)
-        category_base = get_string("output.category", "カテゴリ")
+        category_base = get_string("output.category")
         for i in range(category_count):
             headers.append(f"{category_base}{i+1}")
         
         # その他のヘッダー
         headers.extend([
-            get_string("output.test_type", "テスト種別"),
-            get_string("output.priority", "優先度"),
-            get_string("output.preconditions", "前提条件"),
-            get_string("output.test_steps", "テストステップ"),
-            get_string("output.expected_result", "期待結果"),
-            get_string("output.notes", "備考"),
-            get_string("output.backlog_id", "Backlog ID"),
-            get_string("output.test_type", "テスト種別"),
-            get_string("output.test_target", "テスト対象"),
-            get_string("output.target_version", "対象バージョン"),
-            get_string("output.test_environments", "テスト環境")
+            get_string("output.test_type"),
+            get_string("output.priority"),
+            get_string("output.preconditions"),
+            get_string("output.test_steps"),
+            get_string("output.expected_result"),
+            get_string("output.notes")
         ])
+        
+        # 基本情報が有効な場合のみBacklog ID以降の列を追加
+        if self.settings.output_basic_info:
+            headers.extend([
+                get_string("output.backlog_id"),
+                get_string("output.test_type"),
+                get_string("output.test_target"),
+                get_string("output.target_version"),
+                get_string("output.test_environments")
+            ])
         
         return headers
