@@ -46,6 +46,10 @@ function setupAutoConvertListeners() {
     const selectElements = document.querySelectorAll('.sidebar-content select');
     selectElements.forEach(select => {
         select.addEventListener('change', () => {
+            // 出力フォーマット変更時は特別処理
+            if (select.id === 'output-format') {
+                toggleOutputLanguageSelect();
+            }
             updateSettings();
             autoConvert();
         });
@@ -148,6 +152,9 @@ function applySettingsToUI() {
         
         // ケースID関連のテキストボックスの有効/無効を設定
         toggleCaseIdInputs(currentSettings.output_case_id !== false);
+        
+        // 出力言語プルダウンの有効/無効を設定
+        toggleOutputLanguageSelect();
         
         // 文字列処理設定
         setElementChecked('trim-whitespaces', currentSettings.trim_whitespaces !== false);
@@ -280,6 +287,26 @@ function toggleCaseIdInputs(enabled) {
     }
     if (idStartNumberInput) {
         idStartNumberInput.disabled = !enabled;
+    }
+}
+
+// 出力言語プルダウンの有効/無効を切り替える関数
+function toggleOutputLanguageSelect() {
+    const outputFormatSelect = document.getElementById('output-format');
+    const outputLanguageSelect = document.getElementById('output-language');
+    
+    if (outputFormatSelect && outputLanguageSelect) {
+        const isYamlFormat = outputFormatSelect.value === 'yaml';
+        outputLanguageSelect.disabled = isYamlFormat;
+        
+        // YAMLフォーマットの場合は視覚的に無効化されたことを示す
+        if (isYamlFormat) {
+            outputLanguageSelect.style.opacity = '0.6';
+            outputLanguageSelect.style.cursor = 'not-allowed';
+        } else {
+            outputLanguageSelect.style.opacity = '1';
+            outputLanguageSelect.style.cursor = 'default';
+        }
     }
 }
 
