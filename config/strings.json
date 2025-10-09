@@ -14,7 +14,10 @@
       "preconditions": "前提条件",
       "steps": "手順",
       "expected_result": "期待結果",
-      "notes": "備考"
+      "notes": "備考",
+      "id": "ID",
+      "title": "タイトル",
+      "test_steps": "テストステップ"
     }
   },
   "en": {
@@ -32,7 +35,10 @@
       "preconditions": "Preconditions",
       "steps": "Steps",
       "expected_result": "Expected Result",
-      "notes": "Notes"
+      "notes": "Notes",
+      "id": "ID",
+      "title": "Title",
+      "test_steps": "Test Steps"
     }
   }
 }

@@ -6,7 +6,7 @@ import io
 import logging
 from typing import Dict, List, Any
 from ..models import ConversionSettings, FileData, TestCase, SplitMode
-from ..i18n import get_string
+from ..i18n import get_string, set_language
 
 logger = logging.getLogger(__name__)
 
@@ -101,50 +101,35 @@ class CsvRenderer:
         # CSVライター作成（UTF-8 BOM付きでExcel対応）
         writer = csv.writer(output, lineterminator='\n')
         
-        # ヘッダー行（カテゴリを個別列として追加）
-        headers = [
-            "ID",
-            "タイトル", 
-            "大項目",
-            "中項目",
-            "小項目1",
-            "小項目2",
-            "テスト種別",
-            "優先度",
-            "前提条件",
-            "テストステップ",
-            "期待結果",
-            "備考",
-            "Backlog ID",
-            "テストタイプ",
-            "テスト対象",
-            "対象バージョン",
-            "テスト環境"
-        ]
+        # 言語設定に基づいてヘッダーを生成
+        headers = self._get_csv_headers()
         writer.writerow(headers)
         
         # データ行
         for test_case in test_cases:
-            # カテゴリを個別の列に分割
+            # カテゴリを個別の列に分割（設定に基づいて動的に処理）
             category_items = test_case.category if test_case.category else []
-            # カテゴリの各レベルを取得（最大4レベルまで対応）
-            category_levels = [
-                category_items[0] if len(category_items) > 0 else "",  # 大項目
-                category_items[1] if len(category_items) > 1 else "",  # 中項目
-                category_items[2] if len(category_items) > 2 else "",  # 小項目1
-                category_items[3] if len(category_items) > 3 else ""   # 小項目2
-            ]
+            category_count = len(self.settings.category_row.keys)
+            
+            # カテゴリの各レベルを取得（設定の列数に合わせて動的に生成）
+            category_levels = []
+            for i in range(category_count):
+                category_levels.append(category_items[i] if i < len(category_items) else "")
             
             # テスト環境を文字列に変換
             environments_str = ", ".join(test_case.test_environments) if test_case.test_environments else ""
             
+            # 行データを構築
             row = [
                 test_case.id,
-                test_case.title,
-                category_levels[0],  # 大項目
-                category_levels[1],  # 中項目
-                category_levels[2],  # 小項目1
-                category_levels[3],  # 小項目2
+                test_case.title
+            ]
+            
+            # カテゴリ列を追加
+            row.extend(category_levels)
+            
+            # その他の列を追加
+            row.extend([
                 test_case.type,
                 test_case.priority,
                 test_case.preconditions,
@@ -156,7 +141,8 @@ class CsvRenderer:
                 test_case.test_target,
                 test_case.target_version,
                 environments_str
-            ]
+            ])
+            
             writer.writerow(row)
         
         # BOM付きUTF-8で返す（Excel対応）
@@ -202,3 +188,37 @@ class CsvRenderer:
                 resolved_files[filename] = content
         
         return resolved_files
+    
+    def _get_csv_headers(self) -> List[str]:
+        """言語設定に基づいてCSVヘッダーを取得"""
+        # 言語を設定
+        set_language(self.settings.output_language)
+        
+        # 基本ヘッダー
+        headers = [
+            get_string("output.id", "ID"),
+            get_string("output.title", "タイトル")
+        ]
+        
+        # カテゴリ列を動的に追加（設定に基づいて連番で生成）
+        category_count = len(self.settings.category_row.keys)
+        category_base = get_string("output.category", "カテゴリ")
+        for i in range(category_count):
+            headers.append(f"{category_base}{i+1}")
+        
+        # その他のヘッダー
+        headers.extend([
+            get_string("output.test_type", "テスト種別"),
+            get_string("output.priority", "優先度"),
+            get_string("output.preconditions", "前提条件"),
+            get_string("output.test_steps", "テストステップ"),
+            get_string("output.expected_result", "期待結果"),
+            get_string("output.notes", "備考"),
+            get_string("output.backlog_id", "Backlog ID"),
+            get_string("output.test_type", "テスト種別"),
+            get_string("output.test_target", "テスト対象"),
+            get_string("output.target_version", "対象バージョン"),
+            get_string("output.test_environments", "テスト環境")
+        ])
+        
+        return headers

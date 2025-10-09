@@ -297,12 +297,11 @@ function toggleOutputLanguageSelect() {
     
     if (outputFormatSelect && outputLanguageSelect) {
         const isYamlFormat = outputFormatSelect.value === 'yaml';
-        const isCsvFormat = outputFormatSelect.value === 'csv';
-        const shouldDisableLanguage = isYamlFormat || isCsvFormat;
+        const shouldDisableLanguage = isYamlFormat;
         
         outputLanguageSelect.disabled = shouldDisableLanguage;
         
-        // YAMLまたはCSVフォーマットの場合は視覚的に無効化されたことを示す
+        // YAMLフォーマットの場合は視覚的に無効化されたことを示す
         if (shouldDisableLanguage) {
             outputLanguageSelect.style.opacity = '0.6';
             outputLanguageSelect.style.cursor = 'not-allowed';
@@ -835,7 +834,16 @@ function showPreview() {
             
             // ダウンロードボタンのテキストを変更
             const downloadBtn = previewControls.querySelector('button');
-            downloadBtn.textContent = '📥 ダウンロード (.md)';
+            const outputFormat = currentSettings.出力?.output_format || currentSettings.output_format || 'markdown';
+            let buttonText;
+            if (outputFormat === 'yaml') {
+                buttonText = '📥 ダウンロード (.yaml)';
+            } else if (outputFormat === 'csv') {
+                buttonText = '📥 ダウンロード (.csv)';
+            } else {
+                buttonText = '📥 ダウンロード (.md)';
+            }
+            downloadBtn.textContent = buttonText;
             
             // プレビュー内容を直接設定
             const previewContent = document.getElementById('preview-content');
@@ -939,13 +947,26 @@ async function downloadAll() {
             
             // ファイル拡張子を取得
             const outputFormat = currentSettings.出力?.output_format || currentSettings.output_format || 'markdown';
-            const extension = outputFormat === 'yaml' ? 'yaml' : 'md';
+            let extension;
+            if (outputFormat === 'yaml') {
+                extension = 'yaml';
+            } else if (outputFormat === 'csv') {
+                extension = 'csv';
+            } else {
+                extension = 'md';
+            }
             const downloadFileName = fileName.endsWith(`.${extension}`) ? fileName : `${fileName}.${extension}`;
             
             // Blobを作成してダウンロード
-            const blob = new Blob([fileContent], { 
-                type: outputFormat === 'yaml' ? 'text/yaml' : 'text/markdown' 
-            });
+            let mimeType;
+            if (outputFormat === 'yaml') {
+                mimeType = 'text/yaml';
+            } else if (outputFormat === 'csv') {
+                mimeType = 'text/csv';
+            } else {
+                mimeType = 'text/markdown';
+            }
+            const blob = new Blob([fileContent], { type: mimeType });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;

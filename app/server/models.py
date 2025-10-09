@@ -36,6 +36,7 @@ class ConversionSettings(BaseModel):
     """変換設定"""
     output_format: OutputFormat = Field(default=OutputFormat.MARKDOWN)
     split_mode: SplitMode = Field(default=SplitMode.PER_SHEET)
+    output_language: str = Field(default="ja", description="出力言語")
     id_prefix: str = Field(default="TC", description="IDプレフィックス")
     id_padding: int = Field(default=3, description="ID桁数")
     id_start_number: int = Field(default=1, description="ID開始番号")
