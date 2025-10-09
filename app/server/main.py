@@ -213,14 +213,14 @@ async def convert_files(
             error_details = []
             for file_data in transformed_data:
                 if not file_data.sheets:
-                    error_details.append(f"ファイル '{file_data.filename}': 対象シートが見つかりません")
+                    error_details.append(f"- ファイル '{file_data.filename}': 対象シートが見つかりません")
                 else:
                     for sheet in file_data.sheets:
                         if not sheet.items:
-                            error_details.append(f"ファイル '{file_data.filename}' のシート '{sheet.sheet_name}': データが見つかりません")
+                            error_details.append(f"- ファイル '{file_data.filename}' のシート '{sheet.sheet_name}': データが見つかりません")
             
             if error_details:
-                error_message = "変換結果が空です。以下の問題を確認してください：\n" + "\n".join(error_details)
+                error_message = "変換結果が空です。以下の問題を確認してください。\n" + "\n".join(error_details)
             else:
                 error_message = "変換結果が空です。設定を確認してください。"
             

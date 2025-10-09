@@ -658,7 +658,7 @@ async function autoConvert() {
         // プレビューセクションを表示してエラーメッセージを表示
         const previewSection = document.getElementById('preview-section');
         previewSection.style.display = 'block';
-        showPreviewError('自動変換に失敗しました: ' + error.message);
+        showPreviewError('Conversion Error: ' + error.message);
         
         // 変換に失敗した場合はプレビューをクリア
         conversionResult = null;
