@@ -51,6 +51,7 @@ class ConversionSettings(BaseModel):
     
     # 列設定
     category_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["大項目", "中項目", "小項目1", "小項目2"]))
+    title_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["タイトル", "概要"]))
     step_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["手順"]))
     tobe_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["期待結果"]))
     test_type_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト種別"]))
@@ -92,7 +93,7 @@ class ConversionSettings(BaseModel):
 class TestCase(BaseModel):
     """テストケース"""
     id: str = Field(description="テストケースID")
-    title: str = Field(default="", description="タイトル")
+    title: str = Field(default="", description="概要")
     category: List[str] = Field(description="カテゴリ階層")
     type: str = Field(default="", description="テスト種別")
     priority: str = Field(default="", description="優先度")

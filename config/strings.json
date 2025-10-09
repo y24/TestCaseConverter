@@ -17,7 +17,7 @@
       "expected_result": "期待結果",
       "notes": "備考",
       "id": "ID",
-      "title": "タイトル",
+      "title": "概要",
       "test_steps": "テストステップ"
     }
   },

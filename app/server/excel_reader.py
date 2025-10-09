@@ -305,6 +305,7 @@ class ExcelReader:
             
             # その他の設定のキーと照合
             configs = [
+                ('title', self.settings.title_row),
                 ('step', self.settings.step_row),
                 ('tobe', self.settings.tobe_row),
                 ('test_type', self.settings.test_type_row),
