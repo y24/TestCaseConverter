@@ -19,7 +19,13 @@ class SettingsManager:
     
     def get_default_settings(self) -> ConversionSettings:
         """デフォルト設定を取得"""
-        return ConversionSettings()
+        if self.default_config_path.exists():
+            with open(self.default_config_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return ConversionSettings.model_validate(data)
+        else:
+            # default.jsonが存在しない場合は空の設定を返す
+            return ConversionSettings()
     
     def save_settings(self, settings: ConversionSettings, profile_name: str = "default") -> None:
         """設定を保存"""

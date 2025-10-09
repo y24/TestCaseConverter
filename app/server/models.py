@@ -43,28 +43,28 @@ class ConversionSettings(BaseModel):
     force_id_regenerate: bool = Field(default=False, description="ID強制再生成")
     
     # シート設定
-    sheet_search_keys: List[str] = Field(default_factory=lambda: ["テスト項目"])
+    sheet_search_keys: List[str] = Field(default_factory=list)
     sheet_search_ignores: List[str] = Field(default_factory=list)
     
     # ヘッダー設定
     header: HeaderConfig = Field(default_factory=HeaderConfig)
     
-    # 列設定
-    category_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["大項目", "中項目", "小項目1", "小項目2"]))
-    title_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["タイトル", "概要"]))
-    step_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["手順"]))
-    tobe_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["期待結果"]))
-    test_type_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト種別"]))
-    priority_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["優先度"]))
-    precondition_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["前提条件"]))
-    note_row: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["備考", "補足情報"]))
+    # 列設定（デフォルト値はdefault.jsonから読み込まれる）
+    category_row: ColumnConfig = Field(default_factory=ColumnConfig)
+    title_row: ColumnConfig = Field(default_factory=ColumnConfig)
+    step_row: ColumnConfig = Field(default_factory=ColumnConfig)
+    tobe_row: ColumnConfig = Field(default_factory=ColumnConfig)
+    test_type_row: ColumnConfig = Field(default_factory=ColumnConfig)
+    priority_row: ColumnConfig = Field(default_factory=ColumnConfig)
+    precondition_row: ColumnConfig = Field(default_factory=ColumnConfig)
+    note_row: ColumnConfig = Field(default_factory=ColumnConfig)
     
-    # 新しいセル設定
-    backlog_id_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["案件チケットID"]))
-    test_type_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト種別", "テストフェーズ"]))
-    test_target_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト対象(機能/モジュール)", "対象モジュール"]))
-    target_version_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=["テスト対象バージョン", "対象バージョン"]))
-    test_environments_cell: ColumnConfig = Field(default_factory=lambda: ColumnConfig(keys=[], ignores=["テスト環境", "テスト環境情報"]))
+    # 新しいセル設定（デフォルト値はdefault.jsonから読み込まれる）
+    backlog_id_cell: ColumnConfig = Field(default_factory=ColumnConfig)
+    test_type_cell: ColumnConfig = Field(default_factory=ColumnConfig)
+    test_target_cell: ColumnConfig = Field(default_factory=ColumnConfig)
+    target_version_cell: ColumnConfig = Field(default_factory=ColumnConfig)
+    test_environments_cell: ColumnConfig = Field(default_factory=ColumnConfig)
     
     # 処理設定
     trim_whitespaces: bool = Field(default=True, description="空白トリム")
