@@ -147,8 +147,14 @@ async def convert_files(
         import json
         settings_data = json.loads(settings_json)
         
+        logger.info(f"Received settings data: {settings_data}")
+        logger.info(f"Sheet search keys in received data: {settings_data.get('sheet_search_keys', 'NOT_FOUND')}")
+        
         # 設定を直接使用（フラット構造）
         settings = ConversionSettings.model_validate(settings_data)
+        
+        logger.info(f"Validated settings - sheet_search_keys: {settings.sheet_search_keys}")
+        logger.info(f"Validated settings - sheet_search_ignores: {settings.sheet_search_ignores}")
         
         # ファイル数制限チェック
         if len(files) > 20:

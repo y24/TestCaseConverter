@@ -336,6 +336,35 @@ section h2 {
     margin-right: 8px;
 }
 
+/* シート検索オプション */
+.sheet-search-options {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+}
+
+.option-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option-btn:hover {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.option-btn:active {
+    transform: translateY(1px);
+}
+
 .settings-actions {
     display: flex;
     flex-direction: column;

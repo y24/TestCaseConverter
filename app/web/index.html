@@ -36,8 +36,12 @@
                         <div class="section-content">
                         
                         <div class="setting-group">
-                            <label for="sheet-search-keys">シート名:</label>
+                            <label for="sheet-search-keys">対象シート名:</label>
                             <input type="text" id="sheet-search-keys" value="テスト項目" placeholder="カンマ区切りで入力">
+                            <div class="sheet-search-options">
+                                <button type="button" class="option-btn" onclick="setSheetSearchKey('*')" title="すべてのシートを対象にする">すべてのシート (*)</button>
+                                <button type="button" class="option-btn" onclick="setSheetSearchKey('テスト項目')" title="テスト項目シートのみ">テスト項目</button>
+                            </div>
                         </div>
                         
                         <h4 class="subsection-title">ヘッダー行</h4>

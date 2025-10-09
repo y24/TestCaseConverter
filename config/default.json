@@ -6,7 +6,8 @@
   "id_start_number": 1,
   "force_id_regenerate": false,
   "sheet_search_keys": [
-    "テスト項目"
+    "テスト項目",
+    "*"
   ],
   "sheet_search_ignores": [],
   "header": {
@@ -24,7 +25,8 @@
   },
   "step_row": {
     "keys": [
-      "手順"
+      "手順",
+      "実施手順"
     ],
     "ignores": []
   },

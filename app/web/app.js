@@ -249,6 +249,13 @@ function setElementValue(elementId, value) {
     }
 }
 
+// シート検索キーを設定する関数
+function setSheetSearchKey(key) {
+    setElementValue('sheet-search-keys', key);
+    updateSettings();
+    autoConvert();
+}
+
 // チェックボックスの値を安全に設定するヘルパー関数
 function setElementChecked(elementId, checked) {
     const element = document.getElementById(elementId);
@@ -337,7 +344,13 @@ function updateSettings() {
             id_start_number: getElementNumber('id-start-number', 1),
             output_case_id: getElementChecked('output-case-id', true),
             force_id_regenerate: false,
-            sheet_search_keys: parseCommaSeparated(getElementValue('sheet-search-keys', 'テスト項目')),
+            sheet_search_keys: (() => {
+                const value = getElementValue('sheet-search-keys', 'テスト項目');
+                const parsed = parseCommaSeparated(value);
+                console.log('Sheet search keys - raw value:', value);
+                console.log('Sheet search keys - parsed:', parsed);
+                return parsed;
+            })(),
             sheet_search_ignores: [],
             
             // 読み取り設定

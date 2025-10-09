@@ -151,17 +151,40 @@ class ExcelReader:
         """対象シートを検索"""
         target_sheets = []
         
+        logger.info(f"Sheet search keys: {self.settings.sheet_search_keys}")
+        logger.info(f"Sheet search ignores: {self.settings.sheet_search_ignores}")
+        logger.info(f"Available sheets: {workbook.sheetnames}")
+        
+        # 検索キーに*が含まれている場合はすべてのシートを対象にする
+        if "*" in self.settings.sheet_search_keys:
+            logger.info("Found '*' in search keys, selecting all sheets")
+            # *のみが設定されている場合、または*が含まれている場合はすべてのシートを対象にする
+            for sheet_name in workbook.sheetnames:
+                # 除外シートチェック
+                if sheet_name in self.settings.sheet_search_ignores:
+                    logger.info(f"Excluding sheet: {sheet_name}")
+                    continue
+                target_sheets.append(sheet_name)
+                logger.info(f"Added sheet: {sheet_name}")
+            logger.info(f"Final target sheets (with *): {target_sheets}")
+            return target_sheets
+        
+        # 通常の検索キーによる検索
+        logger.info("Using normal search keys")
         for sheet_name in workbook.sheetnames:
             # 除外シートチェック
             if sheet_name in self.settings.sheet_search_ignores:
+                logger.info(f"Excluding sheet: {sheet_name}")
                 continue
             
             # 検索キーチェック
             for search_key in self.settings.sheet_search_keys:
                 if search_key in sheet_name:
                     target_sheets.append(sheet_name)
+                    logger.info(f"Added sheet: {sheet_name} (matched key: {search_key})")
                     break
         
+        logger.info(f"Final target sheets (normal): {target_sheets}")
         return target_sheets
     
     def _get_a1_cell_value(self, worksheet) -> str:
