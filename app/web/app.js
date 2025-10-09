@@ -756,9 +756,24 @@ function showPreview() {
         console.log('showPreview - fileKeys:', fileKeys);
         console.log('showPreview - conversionResult.rendered_text:', conversionResult.rendered_text);
         
-        if (fileKeys.length === 1) {
+        // 空でないコンテンツを持つファイルのみをフィルタリング
+        const validFileKeys = fileKeys.filter(filename => {
+            const content = conversionResult.rendered_text[filename];
+            return content && content.trim() !== '';
+        });
+        
+        console.log('showPreview - validFileKeys:', validFileKeys);
+        
+        // 表示すべきファイルがない場合はプレビューセクションを非表示にする
+        if (validFileKeys.length === 0) {
+            console.log('showPreview - no valid files to display, hiding preview section');
+            previewSection.style.display = 'none';
+            return;
+        }
+        
+        if (validFileKeys.length === 1) {
             // 最初のファイルの内容を表示（非表示にする前に設定）
-            fileSelect.value = fileKeys[0];
+            fileSelect.value = validFileKeys[0];
             console.log('showPreview - fileSelect.value set to:', fileSelect.value);
             
             // ファイルが1件の場合：プルダウンを非表示にしてファイル名を直接表示
@@ -772,7 +787,7 @@ function showPreview() {
                 fileNameDisplay.className = 'file-name-display';
                 previewControls.insertBefore(fileNameDisplay, fileSelect);
             }
-            fileNameDisplay.textContent = fileKeys[0];
+            fileNameDisplay.textContent = validFileKeys[0];
             fileNameDisplay.style.display = 'block';
             
             // ダウンロードボタンのテキストを変更
@@ -781,8 +796,8 @@ function showPreview() {
             
             // プレビュー内容を直接設定
             const previewContent = document.getElementById('preview-content');
-            if (previewContent && conversionResult.rendered_text[fileKeys[0]]) {
-                previewContent.textContent = conversionResult.rendered_text[fileKeys[0]];
+            if (previewContent && conversionResult.rendered_text[validFileKeys[0]]) {
+                previewContent.textContent = conversionResult.rendered_text[validFileKeys[0]];
                 console.log('showPreview - preview content set directly');
             } else {
                 console.log('showPreview - preview content not set, previewContent:', previewContent);
@@ -797,9 +812,9 @@ function showPreview() {
                 fileNameDisplay.style.display = 'none';
             }
             
-            // ファイル選択肢を更新
+            // ファイル選択肢を更新（有効なファイルのみ）
             fileSelect.innerHTML = '<option value="">ファイルを選択してください</option>';
-            fileKeys.forEach(filename => {
+            validFileKeys.forEach(filename => {
                 const option = document.createElement('option');
                 option.value = filename;
                 option.textContent = filename;
@@ -816,9 +831,14 @@ function showPreview() {
                 handlePreviewFileChange();
             }
         }
+        
+        // プレビューセクションを表示
+        previewSection.style.display = 'block';
+    } else {
+        // conversionResultまたはrendered_textが存在しない場合はプレビューセクションを非表示
+        console.log('showPreview - no conversion result or rendered text, hiding preview section');
+        previewSection.style.display = 'none';
     }
-    
-    previewSection.style.display = 'block';
 }
 
 // プレビューファイル変更
@@ -831,8 +851,16 @@ function handlePreviewFileChange() {
     console.log('handlePreviewFileChange - conversionResult:', conversionResult);
     
     if (selectedFile && conversionResult && conversionResult.rendered_text) {
-        console.log('handlePreviewFileChange - setting content for:', selectedFile);
-        previewContent.textContent = conversionResult.rendered_text[selectedFile];
+        const content = conversionResult.rendered_text[selectedFile];
+        console.log('handlePreviewFileChange - setting content for:', selectedFile, 'content length:', content ? content.length : 0);
+        
+        // コンテンツが存在し、空でない場合のみ表示
+        if (content && content.trim() !== '') {
+            previewContent.textContent = content;
+        } else {
+            console.log('handlePreviewFileChange - content is empty, showing message');
+            previewContent.textContent = 'このファイルには表示可能なコンテンツがありません。';
+        }
     } else {
         console.log('handlePreviewFileChange - clearing content');
         previewContent.textContent = '';
@@ -849,9 +877,21 @@ async function downloadAll() {
     try {
         const fileKeys = Object.keys(conversionResult.rendered_text || {});
         
-        if (fileKeys.length === 1) {
+        // 空でないコンテンツを持つファイルのみをフィルタリング
+        const validFileKeys = fileKeys.filter(filename => {
+            const content = conversionResult.rendered_text[filename];
+            return content && content.trim() !== '';
+        });
+        
+        // 表示すべきファイルがない場合はエラーメッセージを表示
+        if (validFileKeys.length === 0) {
+            showError('ダウンロード可能なファイルがありません');
+            return;
+        }
+        
+        if (validFileKeys.length === 1) {
             // ファイルが1件の場合：単体ファイルダウンロード
-            const fileName = fileKeys[0];
+            const fileName = validFileKeys[0];
             const fileContent = conversionResult.rendered_text[fileName];
             
             // ファイル拡張子を取得
