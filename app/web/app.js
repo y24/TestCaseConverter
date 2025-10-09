@@ -1122,9 +1122,15 @@ function initializeCollapsibleSections() {
         const sectionContent = sectionTitle.nextElementSibling;
         const toggleIcon = sectionTitle.querySelector('.section-toggle-icon');
         
-        // デフォルトで折りたたみ状態に設定
-        sectionContent.classList.remove('expanded');
-        toggleIcon.classList.remove('expanded');
+        // 「アウトプット設定」セクションは初期表示時に展開
+        if (sectionTitle.textContent.includes('アウトプット設定')) {
+            sectionContent.classList.add('expanded');
+            toggleIcon.classList.add('expanded');
+        } else {
+            // その他のセクションはデフォルトで折りたたみ状態に設定
+            sectionContent.classList.remove('expanded');
+            toggleIcon.classList.remove('expanded');
+        }
     });
 }
 
