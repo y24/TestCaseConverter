@@ -272,7 +272,6 @@ class MarkdownRenderer:
         # カテゴリ（階層表示）
         category_str = " > ".join([cat for cat in test_case.category if cat])
         category_label = get_string('output.category', 'カテゴリ')
-        logger.info(f"Using category label: '{category_label}' for category: '{category_str}'")
         md_content += f"- {category_label}: {category_str}\n"
         
         # テスト種別が空でない場合のみ追加
