@@ -185,9 +185,13 @@ header {
 .main-content {
     flex: 1;
     padding: 20px;
-    overflow-y: auto;
+    overflow: hidden;
     background: var(--bg-primary);
     transition: background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 48px);
+    max-height: calc(100vh - 48px);
 }
 
 /* セクション */
@@ -198,6 +202,7 @@ section {
     border-radius: 8px;
     box-shadow: 0 2px 4px var(--shadow);
     transition: background-color 0.3s ease;
+    flex-shrink: 0;
 }
 
 section h2 {
@@ -499,11 +504,22 @@ section h2 {
 }
 
 /* プレビュー */
+.preview-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: calc(100vh - 200px);
+    margin-bottom: 0;
+    overflow: hidden;
+}
+
 .preview-controls {
     display: flex;
     gap: 15px;
     margin-bottom: 20px;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .preview-controls select {
@@ -546,8 +562,11 @@ section h2 {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    max-height: 500px;
-    overflow: auto;
+    flex: 1;
+    min-height: 0;
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+    overflow-x: hidden;
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -561,6 +580,8 @@ section h2 {
     line-height: 1.4;
     color: var(--text-primary);
     transition: color 0.3s ease;
+    overflow: visible;
+    height: auto;
 }
 
 /* エラーメッセージ */
@@ -646,6 +667,9 @@ button:focus {
     .main-content {
         padding: 10px;
         margin-top: 0;
+        height: calc(100vh - 48px);
+        max-height: calc(100vh - 48px);
+        overflow: hidden;
     }
     
     .preview-controls {
