@@ -162,7 +162,7 @@
                     <div class="setting-section">
                         <h3 class="section-title collapsible" onclick="toggleSection(this)">
                             <span class="section-toggle-icon">▼</span>
-                            出力設定
+                            アウトプット設定
                         </h3>
                         <div class="section-content">
                             <div class="setting-group">
@@ -190,17 +190,23 @@
                                 </select>
                             </div>
 
-                            <h4 class="subsection-title">セクション</h4>
+                            <h4 class="subsection-title">出力内容</h4>
                             <div class="setting-group">
                                 <label>
                                     <input type="checkbox" id="output-basic-info" checked>
-                                    基本情報を出力
+                                    基本情報セクションを出力
                                 </label>
                             </div>
                             <div class="setting-group">
                                 <label>
                                     <input type="checkbox" id="output-meta-info">
-                                    メタ情報を出力
+                                    メタ情報セクションを出力
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label>
+                                    <input type="checkbox" id="output-source-info" checked>
+                                    変換元情報を出力
                                 </label>
                             </div>
                         </div>

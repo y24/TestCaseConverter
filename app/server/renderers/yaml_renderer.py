@@ -193,8 +193,8 @@ class YamlRenderer:
         if self.settings.output_basic_info:
             basic_info = {}
             
-            # 共通source情報をbasic_infoに追加
-            if 'common_source' in meta_info and meta_info['common_source']:
+            # 共通source情報をbasic_infoに追加（output_source_infoがONの場合のみ）
+            if self.settings.output_source_info and 'common_source' in meta_info and meta_info['common_source']:
                 basic_info['common_source'] = meta_info['common_source']
             
             # 新しい項目をbasic_infoに追加
@@ -244,10 +244,11 @@ class YamlRenderer:
             if test_case.priority:
                 case_data['priority'] = test_case.priority
             
-            # 個別source情報を追加（分割モードに応じて簡略化、priorityの下に配置）
-            individual_source = self._get_individual_source_info(test_case.source, meta_info.get('filename', ''), meta_info.get('sheet_name', ''))
-            if individual_source:
-                case_data['source'] = individual_source
+            # 個別source情報を追加（分割モードに応じて簡略化、priorityの下に配置、output_source_infoがONの場合のみ）
+            if self.settings.output_source_info:
+                individual_source = self._get_individual_source_info(test_case.source, meta_info.get('filename', ''), meta_info.get('sheet_name', ''))
+                if individual_source:
+                    case_data['source'] = individual_source
             
             # その他のフィールドを追加
             if test_case.preconditions:

@@ -82,6 +82,7 @@ class ConversionSettings(BaseModel):
         "priority_row": True
     }, description="1行データとして扱うフィールド")
     convert_linebreaks_to_spaces: bool = Field(default=True, description="セル内改行を半角スペースに変換")
+    output_source_info: bool = Field(default=True, description="変換元情報を出力する")
 
 
 

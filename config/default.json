@@ -102,5 +102,6 @@
     "test_type_row": true,
     "priority_row": true
   },
-  "convert_linebreaks_to_spaces": true
+  "convert_linebreaks_to_spaces": true,
+  "output_source_info": true
 }

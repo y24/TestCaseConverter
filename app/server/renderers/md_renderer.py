@@ -169,11 +169,12 @@ class MarkdownRenderer:
             first_case = test_cases[0]
             additional_info = []
             
-            # 共通source情報を情報セクションに統合
-            common_source = self._get_common_source_info(filename, sheet_name, category_name)
-            if common_source:
-                source_label = get_string('output.source', 'ソース')
-                additional_info.append(f"- {source_label}: {common_source}")
+            # 共通source情報を情報セクションに統合（output_source_infoがONの場合のみ）
+            if self.settings.output_source_info:
+                common_source = self._get_common_source_info(filename, sheet_name, category_name)
+                if common_source:
+                    source_label = get_string('output.source', 'ソース')
+                    additional_info.append(f"- {source_label}: {common_source}")
             
             logger.info(f"First test case new fields - backlog_id: '{first_case.backlog_id}', test_type: '{first_case.test_type}', test_target: '{first_case.test_target}', target_version: '{first_case.target_version}'")
             
@@ -283,11 +284,12 @@ class MarkdownRenderer:
         if test_case.priority:
             md_content += f"- {get_string('output.priority', '優先度')}: {test_case.priority}\n"
         
-        # ソース情報（分割モードに応じて簡略化、priorityの下に表示）
-        source_info = test_case.source
-        individual_source = self._get_individual_source_info(source_info, filename, sheet_name)
-        if individual_source:
-            md_content += f"- {get_string('output.source', 'ソース')}: {individual_source}\n"
+        # ソース情報（分割モードに応じて簡略化、priorityの下に表示、output_source_infoがONの場合のみ）
+        if self.settings.output_source_info:
+            source_info = test_case.source
+            individual_source = self._get_individual_source_info(source_info, filename, sheet_name)
+            if individual_source:
+                md_content += f"- {get_string('output.source', 'ソース')}: {individual_source}\n"
         
         md_content += "\n"
         
