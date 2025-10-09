@@ -72,7 +72,7 @@ class ConversionSettings(BaseModel):
     forward_fill_category: bool = Field(default=True, description="カテゴリの空の値を前の行から埋める")
     output_case_id: bool = Field(default=True, description="ケースIDを出力する")
     output_basic_info: bool = Field(default=True, description="基本情報を出力する")
-    output_meta_info: bool = Field(default=False, description="メタ情報を出力する")
+    output_meta_info: bool = Field(default=True, description="メタ情報を出力する")
     
     # 1行データの改行変換設定
     single_line_fields: Dict[str, bool] = Field(default_factory=lambda: {

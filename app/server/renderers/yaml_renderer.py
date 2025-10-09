@@ -193,8 +193,8 @@ class YamlRenderer:
         if self.settings.output_basic_info:
             basic_info = {}
             
-            # 共通source情報をbasic_infoに追加（output_source_infoがONの場合のみ）
-            if self.settings.output_source_info and 'common_source' in meta_info and meta_info['common_source']:
+            # 共通source情報をbasic_infoに追加（常に出力）
+            if 'common_source' in meta_info and meta_info['common_source']:
                 basic_info['common_source'] = meta_info['common_source']
             
             # 新しい項目をbasic_infoに追加

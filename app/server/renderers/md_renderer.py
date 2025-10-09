@@ -169,12 +169,11 @@ class MarkdownRenderer:
             first_case = test_cases[0]
             additional_info = []
             
-            # 共通source情報を情報セクションに統合（output_source_infoがONの場合のみ）
-            if self.settings.output_source_info:
-                common_source = self._get_common_source_info(filename, sheet_name, category_name)
-                if common_source:
-                    source_label = get_string('output.source', 'ソース')
-                    additional_info.append(f"- {source_label}: {common_source}")
+            # 共通source情報を情報セクションに統合（常に出力）
+            common_source = self._get_common_source_info(filename, sheet_name, category_name)
+            if common_source:
+                source_label = get_string('output.source', 'ソース')
+                additional_info.append(f"- {source_label}: {common_source}")
             
             logger.info(f"First test case new fields - backlog_id: '{first_case.backlog_id}', test_type: '{first_case.test_type}', test_target: '{first_case.test_target}', target_version: '{first_case.target_version}'")
             

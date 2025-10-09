@@ -137,7 +137,7 @@ function applySettingsToUI() {
         setElementValue('split-mode', currentSettings.split_mode || 'per_sheet');
         setElementValue('output-language', currentSettings.output_language || 'ja');
         setElementChecked('output-basic-info', currentSettings.output_basic_info !== false);
-        setElementChecked('output-meta-info', currentSettings.output_meta_info === true);
+        setElementChecked('output-meta-info', currentSettings.output_meta_info !== false);
         setElementChecked('output-source-info', currentSettings.output_source_info !== false);
         
         // ケースID設定
@@ -330,7 +330,7 @@ function updateSettings() {
             split_mode: getElementValue('split-mode', 'per_sheet'),
             output_language: getElementValue('output-language', 'ja'),
             output_basic_info: getElementChecked('output-basic-info', true),
-            output_meta_info: getElementChecked('output-meta-info', false),
+            output_meta_info: getElementChecked('output-meta-info', true),
             output_source_info: getElementChecked('output-source-info', true),
             id_prefix: getElementValue('id-prefix', 'TC'),
             id_padding: getElementNumber('id-padding', 3),

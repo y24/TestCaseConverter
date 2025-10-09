@@ -103,5 +103,6 @@
     "priority_row": true
   },
   "convert_linebreaks_to_spaces": true,
-  "output_source_info": true
+  "output_source_info": true,
+  "output_meta_info": true
 }
