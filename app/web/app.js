@@ -44,11 +44,17 @@ function setupEventListeners() {
     // ファイルアップロード
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
     
     uploadArea.addEventListener('click', () => fileInput.click());
     uploadArea.addEventListener('dragover', handleDragOver);
     uploadArea.addEventListener('dragleave', handleDragLeave);
     uploadArea.addEventListener('drop', handleDrop);
+    
+    // ファイルリストにもドラッグ＆ドロップ機能を追加
+    fileList.addEventListener('dragover', handleFileListDragOver);
+    fileList.addEventListener('dragleave', handleFileListDragLeave);
+    fileList.addEventListener('drop', handleFileListDrop);
     
     fileInput.addEventListener('change', handleFileSelect);
     
@@ -501,6 +507,27 @@ function handleDrop(e) {
     addFiles(files);
 }
 
+// ファイルリスト用ドラッグオーバー処理
+function handleFileListDragOver(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add('file-list-dragover');
+}
+
+// ファイルリスト用ドラッグリーブ処理
+function handleFileListDragLeave(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('file-list-dragover');
+}
+
+// ファイルリスト用ドロップ処理
+function handleFileListDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('file-list-dragover');
+    
+    const files = Array.from(e.dataTransfer.files);
+    addFiles(files);
+}
+
 // ファイル選択処理
 function handleFileSelect(e) {
     const files = Array.from(e.target.files);
@@ -517,6 +544,14 @@ function addFiles(files) {
     
     if (validFiles.length !== files.length) {
         showError('一部のファイルが無効です。Excelファイル（.xlsx, .xls）で20MB以下のファイルを選択してください。');
+    }
+    
+    // 既存のファイルがある場合はクリアして新規ファイルを読み込み
+    if (uploadedFiles.length > 0) {
+        // 既存のファイルをクリア
+        uploadedFiles = [];
+        // プレビューセクションを非表示にして初期状態に戻す
+        resetToInitialState();
     }
     
     // ファイル名の重複チェックと連番付与

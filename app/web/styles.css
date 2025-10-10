@@ -440,6 +440,16 @@ section h2 {
 /* ファイルリスト */
 .file-list {
     margin-top: 0;
+    border: 2px dashed transparent;
+    border-radius: 8px;
+    padding: 8px;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+/* ファイルリストのドラッグオーバー時のスタイル */
+.file-list.file-list-dragover {
+    border-color: var(--success-color);
+    background-color: rgba(39, 174, 96, 0.05);
 }
 
 .file-item {
@@ -452,6 +462,10 @@ section h2 {
     border-radius: 4px;
     margin-bottom: 10px;
     transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.file-item:last-child {
+    margin-bottom: 0;
 }
 
 .file-info {
