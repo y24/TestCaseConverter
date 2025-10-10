@@ -27,15 +27,17 @@ async function initializeApp() {
     // トグルスイッチの初期状態を確実に設定
     setTimeout(() => {
         console.log('Setting initial preview mode:', savedPreviewMode);
-        // 初期状態では常にテキストモードから始める
+        // 保存されたプレビューモードを復元
         const toggleSwitch = document.getElementById('preview-toggle');
         if (toggleSwitch) {
-            toggleSwitch.checked = false;
+            toggleSwitch.checked = (savedPreviewMode === 'wysiwyg');
             toggleSwitch.style.display = 'block';
-            console.log('Force set toggle switch to OFF for initial state');
+            console.log('Restored toggle switch state:', savedPreviewMode, 'checked:', toggleSwitch.checked);
         }
-        // 初期状態では常にテキストモードに設定
-        switchPreviewMode('text');
+        // 保存されたプレビューモードを適用
+        currentPreviewMode = savedPreviewMode;
+        // プレビューエリアの表示切り替えを確実に実行
+        ensurePreviewModeDisplay(savedPreviewMode);
     }, 50);
 }
 
@@ -1049,14 +1051,13 @@ function showPreview() {
             if (isMarkdownFormat) {
                 // Markdown形式の場合は表示
                 previewModeSwitcher.style.display = 'flex';
-                // 初期表示時は常にテキストモードから始める
-                if (currentPreviewMode === 'wysiwyg' && !toggleSwitch.hasAttribute('data-initialized')) {
-                    console.log('First time showing preview, forcing text mode');
-                    currentPreviewMode = 'text';
-                    toggleSwitch.setAttribute('data-initialized', 'true');
-                }
+                // 保存されたプレビューモードを復元
+                const savedPreviewMode = loadPreviewModeFromLocalStorage();
+                currentPreviewMode = savedPreviewMode;
                 toggleSwitch.checked = (currentPreviewMode === 'wysiwyg');
-                console.log('showPreview: Setting toggle switch to:', currentPreviewMode, 'checked:', toggleSwitch.checked);
+                console.log('showPreview: Restored toggle switch to:', currentPreviewMode, 'checked:', toggleSwitch.checked);
+                // プレビューエリアの表示切り替えを確実に実行
+                ensurePreviewModeDisplay(currentPreviewMode);
             } else {
                 // Markdown形式以外の場合は非表示
                 previewModeSwitcher.style.display = 'none';
@@ -1539,21 +1540,12 @@ function togglePreviewMode() {
     
     currentPreviewMode = mode;
     
-    // プレビューエリアの表示切り替え
-    const textPreview = document.getElementById('preview-content');
-    const wysiwygPreview = document.getElementById('preview-content-wysiwyg');
+    // プレビューエリアの表示切り替えを確実に実行
+    ensurePreviewModeDisplay(mode);
     
-    if (textPreview && wysiwygPreview) {
-        if (mode === 'text') {
-            textPreview.style.display = 'block';
-            wysiwygPreview.style.display = 'none';
-        } else {
-            textPreview.style.display = 'none';
-            wysiwygPreview.style.display = 'block';
-            
-            // WYSIWYGプレビューを更新
-            updateWysiwygPreview();
-        }
+    // WYSIWYGモードの場合は更新
+    if (mode === 'wysiwyg') {
+        updateWysiwygPreview();
     }
     
     // プレビューエリアのスクロール位置を一番上に戻す（表示切り替え後に実行）
@@ -1570,6 +1562,30 @@ function togglePreviewMode() {
     savePreviewModeToLocalStorage(mode);
 }
 
+// プレビューモードの表示切り替えを確実に実行する関数
+function ensurePreviewModeDisplay(mode) {
+    const textPreview = document.getElementById('preview-content');
+    const wysiwygPreview = document.getElementById('preview-content-wysiwyg');
+    
+    if (textPreview && wysiwygPreview) {
+        if (mode === 'text') {
+            textPreview.style.display = 'block';
+            wysiwygPreview.style.display = 'none';
+            console.log('Ensured text preview display');
+        } else if (mode === 'wysiwyg') {
+            textPreview.style.display = 'none';
+            wysiwygPreview.style.display = 'block';
+            console.log('Ensured wysiwyg preview display');
+        }
+    } else {
+        console.warn('Preview elements not found, retrying...');
+        // 要素が見つからない場合は少し待ってから再試行
+        setTimeout(() => {
+            ensurePreviewModeDisplay(mode);
+        }, 100);
+    }
+}
+
 // プレビューモード切り替え（従来の関数名も残す）
 function switchPreviewMode(mode) {
     const toggleSwitch = document.getElementById('preview-toggle');
@@ -1583,20 +1599,12 @@ function switchPreviewMode(mode) {
     // プレビューモードを更新
     currentPreviewMode = mode;
     
-    const textPreview = document.getElementById('preview-content');
-    const wysiwygPreview = document.getElementById('preview-content-wysiwyg');
+    // プレビューエリアの表示切り替えを確実に実行
+    ensurePreviewModeDisplay(mode);
     
-    if (textPreview && wysiwygPreview) {
-        if (mode === 'text') {
-            textPreview.style.display = 'block';
-            wysiwygPreview.style.display = 'none';
-        } else {
-            textPreview.style.display = 'none';
-            wysiwygPreview.style.display = 'block';
-            
-            // WYSIWYGプレビューを更新
-            updateWysiwygPreview();
-        }
+    // WYSIWYGモードの場合は更新
+    if (mode === 'wysiwyg') {
+        updateWysiwygPreview();
     }
     
     // プレビューエリアのスクロール位置を一番上に戻す（表示切り替え後に実行）
