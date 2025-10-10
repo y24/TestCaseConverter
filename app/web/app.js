@@ -1480,7 +1480,6 @@ function togglePreviewMode() {
     if (!toggleSwitch) return;
     
     const mode = toggleSwitch.checked ? 'wysiwyg' : 'text';
-    console.log('togglePreviewMode: mode =', mode, 'checked =', toggleSwitch.checked);
     
     // WYSIWYGモードが選択されたが、marked.jsが利用できない場合はテキストモードにフォールバック
     if (mode === 'wysiwyg' && !markedInstance) {
@@ -1507,6 +1506,16 @@ function togglePreviewMode() {
             updateWysiwygPreview();
         }
     }
+    
+    // プレビューエリアのスクロール位置を一番上に戻す（表示切り替え後に実行）
+    setTimeout(() => {
+        resetPreviewScrollPosition();
+    }, 10);
+    
+    // requestAnimationFrameでも実行（ブラウザの描画サイクルに合わせて）
+    requestAnimationFrame(() => {
+        resetPreviewScrollPosition();
+    });
     
     // 設定をローカルストレージに保存
     savePreviewModeToLocalStorage(mode);
@@ -1540,6 +1549,16 @@ function switchPreviewMode(mode) {
             updateWysiwygPreview();
         }
     }
+    
+    // プレビューエリアのスクロール位置を一番上に戻す（表示切り替え後に実行）
+    setTimeout(() => {
+        resetPreviewScrollPosition();
+    }, 10);
+    
+    // requestAnimationFrameでも実行（ブラウザの描画サイクルに合わせて）
+    requestAnimationFrame(() => {
+        resetPreviewScrollPosition();
+    });
 }
 
 // WYSIWYGプレビューの更新（デバウンス付き）
@@ -1605,6 +1624,13 @@ function updateWysiwygPreviewImmediate() {
     } else {
         wysiwygPreview.innerHTML = '';
     }
+    
+    // WYSIWYGプレビュー更新後にスクロール位置をリセット
+    setTimeout(() => {
+        if (wysiwygPreview) {
+            wysiwygPreview.scrollTop = 0;
+        }
+    }, 10);
 }
 
 // プレビューモード設定の保存・読み込み
@@ -1629,4 +1655,26 @@ function loadPreviewModeFromLocalStorage() {
     }
     console.log('Using default mode: text');
     return 'text'; // デフォルトはテキストモード
+}
+
+// プレビューエリアのスクロール位置を一番上に戻す関数
+function resetPreviewScrollPosition() {
+    const textPreview = document.getElementById('preview-content');
+    const wysiwygPreview = document.getElementById('preview-content-wysiwyg');
+    const previewContentContainer = document.querySelector('.preview-content');
+    
+    // プレビューコンテンツコンテナのスクロール位置をリセット
+    if (previewContentContainer) {
+        previewContentContainer.scrollTop = 0;
+    }
+    
+    // テキストプレビューエリアのスクロール位置をリセット
+    if (textPreview) {
+        textPreview.scrollTop = 0;
+    }
+    
+    // WYSIWYGプレビューエリアのスクロール位置をリセット
+    if (wysiwygPreview) {
+        wysiwygPreview.scrollTop = 0;
+    }
 }
