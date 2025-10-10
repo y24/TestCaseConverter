@@ -58,6 +58,10 @@ function setupEventListeners() {
     
     fileInput.addEventListener('change', handleFileSelect);
     
+    // グローバルなドロップイベントを無効化（エリア外でのファイルドロップを防ぐ）
+    document.addEventListener('dragover', handleGlobalDragOver);
+    document.addEventListener('drop', handleGlobalDrop);
+    
     // 設定変更 - 自動変換対応
     setupAutoConvertListeners();
     
@@ -526,6 +530,27 @@ function handleFileListDrop(e) {
     
     const files = Array.from(e.dataTransfer.files);
     addFiles(files);
+}
+
+// グローバルなドラッグオーバー処理（エリア外でのファイルドロップを防ぐ）
+function handleGlobalDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+// グローバルなドロップ処理（エリア外でのファイルドロップを防ぐ）
+function handleGlobalDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // ドロップされた要素がアップロードエリアまたはファイルリスト内でない場合は何もしない
+    const uploadArea = document.getElementById('upload-area');
+    const fileList = document.getElementById('file-list');
+    
+    if (!uploadArea.contains(e.target) && !fileList.contains(e.target)) {
+        console.log('ファイルがドロップエリア外にドロップされました。処理をスキップします。');
+        return;
+    }
 }
 
 // ファイル選択処理
