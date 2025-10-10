@@ -81,6 +81,7 @@ function setupAutoConvertListeners() {
             // 出力フォーマット変更時は特別処理
             if (select.id === 'output-format') {
                 toggleOutputLanguageSelect();
+                togglePreviewModeSwitcher();
             }
             updateSettings();
             autoConvert();
@@ -187,6 +188,9 @@ function applySettingsToUI() {
         
         // 出力言語プルダウンの有効/無効を設定
         toggleOutputLanguageSelect();
+        
+        // プレビューモード切り替えスイッチの表示/非表示を設定
+        togglePreviewModeSwitcher();
         
         // 文字列処理設定
         setElementChecked('trim-whitespaces', currentSettings.trim_whitespaces !== false);
@@ -375,6 +379,28 @@ function toggleCsvCheckboxes() {
             metaInfoCheckbox.style.cursor = 'default';
             sourceInfoCheckbox.style.opacity = '1';
             sourceInfoCheckbox.style.cursor = 'default';
+        }
+    }
+}
+
+// プレビューモード切り替えスイッチの表示/非表示制御関数
+function togglePreviewModeSwitcher() {
+    const outputFormatSelect = document.getElementById('output-format');
+    const previewModeSwitcher = document.querySelector('.preview-mode-switcher');
+    
+    if (outputFormatSelect && previewModeSwitcher) {
+        const outputFormat = outputFormatSelect.value;
+        const isMarkdownFormat = outputFormat === 'markdown';
+        
+        if (isMarkdownFormat) {
+            // Markdown形式の場合は表示
+            previewModeSwitcher.style.display = 'flex';
+        } else {
+            // Markdown形式以外の場合は非表示
+            previewModeSwitcher.style.display = 'none';
+            // 非表示の場合はテキストモードに強制切り替え
+            currentPreviewMode = 'text';
+            switchPreviewMode('text');
         }
     }
 }
@@ -1013,18 +1039,31 @@ function showPreview() {
         // プレビューセクションを表示
         previewSection.style.display = 'block';
         
-        // トグルスイッチの状態を確実に設定
+        // トグルスイッチの状態を確実に設定（Markdown形式のときのみ表示）
         const toggleSwitch = document.getElementById('preview-toggle');
-        if (toggleSwitch) {
-            // 初期表示時は常にテキストモードから始める
-            if (currentPreviewMode === 'wysiwyg' && !toggleSwitch.hasAttribute('data-initialized')) {
-                console.log('First time showing preview, forcing text mode');
+        const previewModeSwitcher = document.querySelector('.preview-mode-switcher');
+        if (toggleSwitch && previewModeSwitcher) {
+            const outputFormat = currentSettings.output_format || 'markdown';
+            const isMarkdownFormat = outputFormat === 'markdown';
+            
+            if (isMarkdownFormat) {
+                // Markdown形式の場合は表示
+                previewModeSwitcher.style.display = 'flex';
+                // 初期表示時は常にテキストモードから始める
+                if (currentPreviewMode === 'wysiwyg' && !toggleSwitch.hasAttribute('data-initialized')) {
+                    console.log('First time showing preview, forcing text mode');
+                    currentPreviewMode = 'text';
+                    toggleSwitch.setAttribute('data-initialized', 'true');
+                }
+                toggleSwitch.checked = (currentPreviewMode === 'wysiwyg');
+                console.log('showPreview: Setting toggle switch to:', currentPreviewMode, 'checked:', toggleSwitch.checked);
+            } else {
+                // Markdown形式以外の場合は非表示
+                previewModeSwitcher.style.display = 'none';
+                // 非表示の場合はテキストモードに強制切り替え
                 currentPreviewMode = 'text';
-                toggleSwitch.setAttribute('data-initialized', 'true');
+                switchPreviewMode('text');
             }
-            toggleSwitch.checked = (currentPreviewMode === 'wysiwyg');
-            toggleSwitch.style.display = 'block';
-            console.log('showPreview: Setting toggle switch to:', currentPreviewMode, 'checked:', toggleSwitch.checked);
         }
         
         // WYSIWYGモードの場合は更新
