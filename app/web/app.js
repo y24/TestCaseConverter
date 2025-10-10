@@ -1067,6 +1067,16 @@ function handlePreviewFileChange() {
     if (currentPreviewMode === 'wysiwyg') {
         updateWysiwygPreview();
     }
+    
+    // プレビューエリアのスクロール位置を一番上に戻す
+    setTimeout(() => {
+        resetPreviewScrollPosition();
+    }, 10);
+    
+    // requestAnimationFrameでも実行（ブラウザの描画サイクルに合わせて）
+    requestAnimationFrame(() => {
+        resetPreviewScrollPosition();
+    });
 }
 
 // 全ファイルダウンロード
