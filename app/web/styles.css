@@ -983,7 +983,7 @@ button:focus {
 .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 50px;
+    width: 46px;
     height: 24px;
     cursor: pointer;
 }
@@ -1034,7 +1034,7 @@ button:focus {
 }
 
 .toggle-switch input:checked + .toggle-slider:before {
-    transform: translateX(26px) translateY(-50%);
+    transform: translateX(22px) translateY(-50%);
     background-color: white;
     border-color: white;
 }
@@ -1153,7 +1153,7 @@ button:focus {
 /* レスポンシブデザイン対応 */
 @media (max-width: 768px) {
     .toggle-switch {
-        width: 45px;
+        width: 41px;
         height: 22px;
     }
     
@@ -1167,7 +1167,7 @@ button:focus {
     }
     
     .toggle-switch input:checked + .toggle-slider:before {
-        transform: translateX(23px) translateY(-50%);
+        transform: translateX(19px) translateY(-50%);
     }
     
     .toggle-label {
