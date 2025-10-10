@@ -2,6 +2,9 @@
 let uploadedFiles = [];
 let conversionResult = null;
 let currentSettings = {};
+let currentPreviewMode = 'text'; // 'text' または 'wysiwyg'
+let markedInstance = null;
+let updateWysiwygTimeout = null; // デバウンス用タイマー
 
 // 初期化
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,6 +18,25 @@ async function initializeApp() {
     initializeCollapsibleSections();
     initializeTheme();
     watchSystemTheme();
+    
+    // 新規追加: marked.jsの初期化とプレビューモードの復元
+    await initializeMarked();
+    const savedPreviewMode = loadPreviewModeFromLocalStorage();
+    console.log('Initial preview mode from localStorage:', savedPreviewMode);
+    
+    // トグルスイッチの初期状態を確実に設定
+    setTimeout(() => {
+        console.log('Setting initial preview mode:', savedPreviewMode);
+        // 初期状態では常にテキストモードから始める
+        const toggleSwitch = document.getElementById('preview-toggle');
+        if (toggleSwitch) {
+            toggleSwitch.checked = false;
+            toggleSwitch.style.display = 'block';
+            console.log('Force set toggle switch to OFF for initial state');
+        }
+        // 初期状態では常にテキストモードに設定
+        switchPreviewMode('text');
+    }, 50);
 }
 
 // イベントリスナー設定
@@ -655,7 +677,7 @@ function resetToInitialState() {
     }
     
     // ダウンロードボタンのテキストを元に戻す
-    const downloadBtn = document.querySelector('.preview-controls button');
+    const downloadBtn = document.querySelector('.preview-controls button[onclick="downloadAll()"]');
     if (downloadBtn) {
         downloadBtn.textContent = '📥 すべてダウンロード (.zip)';
     }
@@ -878,7 +900,7 @@ function showPreview() {
             fileNameDisplay.style.display = 'block';
             
             // ダウンロードボタンのテキストを変更
-            const downloadBtn = previewControls.querySelector('button');
+            const downloadBtn = previewControls.querySelector('button[onclick="downloadAll()"]');
             const outputFormat = currentSettings.出力?.output_format || currentSettings.output_format || 'markdown';
             let buttonText;
             if (outputFormat === 'yaml') {
@@ -918,7 +940,7 @@ function showPreview() {
             });
             
             // ダウンロードボタンのテキストを元に戻す
-            const downloadBtn = previewControls.querySelector('button');
+            const downloadBtn = previewControls.querySelector('button[onclick="downloadAll()"]');
             downloadBtn.textContent = '📥 すべてダウンロード (.zip)';
             
             // 最初のファイルを選択
@@ -930,6 +952,25 @@ function showPreview() {
         
         // プレビューセクションを表示
         previewSection.style.display = 'block';
+        
+        // トグルスイッチの状態を確実に設定
+        const toggleSwitch = document.getElementById('preview-toggle');
+        if (toggleSwitch) {
+            // 初期表示時は常にテキストモードから始める
+            if (currentPreviewMode === 'wysiwyg' && !toggleSwitch.hasAttribute('data-initialized')) {
+                console.log('First time showing preview, forcing text mode');
+                currentPreviewMode = 'text';
+                toggleSwitch.setAttribute('data-initialized', 'true');
+            }
+            toggleSwitch.checked = (currentPreviewMode === 'wysiwyg');
+            toggleSwitch.style.display = 'block';
+            console.log('showPreview: Setting toggle switch to:', currentPreviewMode, 'checked:', toggleSwitch.checked);
+        }
+        
+        // WYSIWYGモードの場合は更新
+        if (currentPreviewMode === 'wysiwyg') {
+            updateWysiwygPreview();
+        }
     } else {
         // conversionResultまたはrendered_textが存在しない場合はプレビューセクションを非表示
         console.log('showPreview - no conversion result or rendered text, hiding preview section');
@@ -960,6 +1001,11 @@ function handlePreviewFileChange() {
     } else {
         console.log('handlePreviewFileChange - clearing content');
         previewContent.textContent = '';
+    }
+    
+    // WYSIWYGモードの場合は更新
+    if (currentPreviewMode === 'wysiwyg') {
+        updateWysiwygPreview();
     }
 }
 
@@ -1336,3 +1382,191 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+// ===== WYSIWYGプレビュー機能 =====
+
+// marked.js の初期化
+async function initializeMarked() {
+    if (typeof marked !== 'undefined') {
+        markedInstance = marked;
+        configureMarked();
+        console.log('marked.js が正常に初期化されました');
+    } else {
+        console.warn('marked.js が読み込まれていません。WYSIWYGプレビューは利用できません。');
+        // フォールバック: WYSIWYGボタンを無効化
+        const wysiwygBtn = document.getElementById('wysiwyg-preview-btn');
+        if (wysiwygBtn) {
+            wysiwygBtn.disabled = true;
+            wysiwygBtn.title = 'marked.jsが読み込まれていません';
+        }
+    }
+}
+
+// marked.jsの設定
+function configureMarked() {
+    if (!markedInstance) return;
+    
+    markedInstance.setOptions({
+        breaks: true,
+        gfm: true,
+        headerIds: false,
+        mangle: false
+    });
+}
+
+// プレビューモード切り替え（トグルスイッチ用）
+function togglePreviewMode() {
+    const toggleSwitch = document.getElementById('preview-toggle');
+    if (!toggleSwitch) return;
+    
+    const mode = toggleSwitch.checked ? 'wysiwyg' : 'text';
+    console.log('togglePreviewMode: mode =', mode, 'checked =', toggleSwitch.checked);
+    
+    // WYSIWYGモードが選択されたが、marked.jsが利用できない場合はテキストモードにフォールバック
+    if (mode === 'wysiwyg' && !markedInstance) {
+        console.warn('marked.jsが利用できないため、テキストモードに切り替えます');
+        toggleSwitch.checked = false;
+        return;
+    }
+    
+    currentPreviewMode = mode;
+    
+    // プレビューエリアの表示切り替え
+    const textPreview = document.getElementById('preview-content');
+    const wysiwygPreview = document.getElementById('preview-content-wysiwyg');
+    
+    if (textPreview && wysiwygPreview) {
+        if (mode === 'text') {
+            textPreview.style.display = 'block';
+            wysiwygPreview.style.display = 'none';
+        } else {
+            textPreview.style.display = 'none';
+            wysiwygPreview.style.display = 'block';
+            
+            // WYSIWYGプレビューを更新
+            updateWysiwygPreview();
+        }
+    }
+    
+    // 設定をローカルストレージに保存
+    savePreviewModeToLocalStorage(mode);
+}
+
+// プレビューモード切り替え（従来の関数名も残す）
+function switchPreviewMode(mode) {
+    const toggleSwitch = document.getElementById('preview-toggle');
+    if (toggleSwitch) {
+        // トグルスイッチの状態を確実に設定
+        toggleSwitch.checked = (mode === 'wysiwyg');
+        toggleSwitch.style.display = 'block';
+        console.log('Setting toggle switch to:', mode, 'checked:', toggleSwitch.checked);
+    }
+    
+    // プレビューモードを更新
+    currentPreviewMode = mode;
+    
+    const textPreview = document.getElementById('preview-content');
+    const wysiwygPreview = document.getElementById('preview-content-wysiwyg');
+    
+    if (textPreview && wysiwygPreview) {
+        if (mode === 'text') {
+            textPreview.style.display = 'block';
+            wysiwygPreview.style.display = 'none';
+        } else {
+            textPreview.style.display = 'none';
+            wysiwygPreview.style.display = 'block';
+            
+            // WYSIWYGプレビューを更新
+            updateWysiwygPreview();
+        }
+    }
+}
+
+// WYSIWYGプレビューの更新（デバウンス付き）
+function updateWysiwygPreview() {
+    if (currentPreviewMode !== 'wysiwyg') return;
+    
+    // 既存のタイマーをクリア
+    if (updateWysiwygTimeout) {
+        clearTimeout(updateWysiwygTimeout);
+    }
+    
+    // 100ms後に実行（デバウンス）
+    updateWysiwygTimeout = setTimeout(() => {
+        updateWysiwygPreviewImmediate();
+    }, 100);
+}
+
+// WYSIWYGプレビューの即座更新
+function updateWysiwygPreviewImmediate() {
+    if (currentPreviewMode !== 'wysiwyg') return;
+    
+    const fileSelect = document.getElementById('preview-file-select');
+    const selectedFile = fileSelect ? fileSelect.value : '';
+    const wysiwygPreview = document.getElementById('preview-content-wysiwyg');
+    
+    if (!wysiwygPreview) return;
+    
+    if (selectedFile && conversionResult && conversionResult.rendered_text) {
+        const markdownContent = conversionResult.rendered_text[selectedFile];
+        
+        if (markdownContent && markdownContent.trim() !== '') {
+            // MarkdownをHTMLに変換
+            if (markedInstance) {
+                try {
+                    const htmlContent = markedInstance.parse(markdownContent);
+                    // DOMPurifyでサニタイズ（セキュリティ対策）
+                    if (typeof DOMPurify !== 'undefined') {
+                        const sanitizedHtml = DOMPurify.sanitize(htmlContent);
+                        wysiwygPreview.innerHTML = sanitizedHtml;
+                    } else {
+                        // DOMPurifyが利用できない場合はエスケープ処理
+                        wysiwygPreview.innerHTML = htmlContent.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        console.warn('DOMPurifyが利用できないため、基本的なエスケープ処理を実行しました');
+                    }
+                } catch (error) {
+                    console.error('Markdown変換エラー:', error);
+                    wysiwygPreview.innerHTML = '<div style="color: #e74c3c; padding: 20px; text-align: center;">' +
+                        '<p>⚠️ プレビューの変換中にエラーが発生しました</p>' +
+                        '<p style="font-size: 0.9em; color: #7f8c8d;">エラー詳細: ' + error.message + '</p>' +
+                        '</div>';
+                }
+            } else {
+                wysiwygPreview.innerHTML = '<div style="color: #f39c12; padding: 20px; text-align: center;">' +
+                    '<p>⏳ WYSIWYGプレビューを読み込み中...</p>' +
+                    '<p style="font-size: 0.9em; color: #7f8c8d;">marked.jsの初期化を待っています</p>' +
+                    '</div>';
+            }
+        } else {
+            wysiwygPreview.innerHTML = '<div style="color: #95a5a6; padding: 20px; text-align: center;">' +
+                '<p>📄 このファイルには表示可能なコンテンツがありません</p>' +
+                '</div>';
+        }
+    } else {
+        wysiwygPreview.innerHTML = '';
+    }
+}
+
+// プレビューモード設定の保存・読み込み
+function savePreviewModeToLocalStorage(mode) {
+    try {
+        localStorage.setItem('testCaseConverter_previewMode', mode);
+    } catch (error) {
+        console.warn('プレビューモード設定の保存に失敗しました:', error);
+    }
+}
+
+function loadPreviewModeFromLocalStorage() {
+    try {
+        const savedMode = localStorage.getItem('testCaseConverter_previewMode');
+        console.log('Raw saved mode from localStorage:', savedMode);
+        if (savedMode && (savedMode === 'text' || savedMode === 'wysiwyg')) {
+            console.log('Valid saved mode found:', savedMode);
+            return savedMode;
+        }
+    } catch (error) {
+        console.warn('プレビューモード設定の読み込みに失敗しました:', error);
+    }
+    console.log('Using default mode: text');
+    return 'text'; // デフォルトはテキストモード
+}

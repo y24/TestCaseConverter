@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TestCase Converter</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <!-- WYSIWYGプレビュー用ライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -267,10 +270,21 @@
                     <select id="preview-file-select">
                         <option value="">ファイルを選択してください</option>
                     </select>
-                    <button type="button" onclick="downloadAll()">📥 すべてダウンロード (.zip)</button>
+                    
+                    <!-- プレビューモード切り替えトグルスイッチ -->
+                    <div class="preview-mode-switcher">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="preview-toggle" onchange="togglePreviewMode()" style="display: none;">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">Preview</span>
+                    </div>
+                    
+                    <button type="button" onclick="downloadAll()">📥 ダウンロード</button>
                 </div>
                 <div class="preview-content">
-                    <pre id="preview-content"></pre>
+                    <pre id="preview-content" class="preview-mode-text"></pre>
+                    <div id="preview-content-wysiwyg" class="preview-mode-wysiwyg" style="display: none;"></div>
                 </div>
                 <!-- プレビューエラーメッセージ -->
                 <div class="preview-error-message" id="preview-error-message" style="display: none;">
