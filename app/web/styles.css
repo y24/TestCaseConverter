@@ -20,6 +20,8 @@
     --warning-bg: #fff3cd;
     --warning-text: #856404;
     --warning-border: #ffeaa7;
+    --toggle-bg: #e0e0e0;
+    --toggle-knob: #ffffff;
 }
 
 /* ダークモード用CSS変数 */
@@ -44,6 +46,8 @@
     --warning-bg: #4a3c2c;
     --warning-text: #ffd93d;
     --warning-border: #5a4c3c;
+    --toggle-bg: #555555;
+    --toggle-knob: #777777;
 }
 
 /* リセットとベーススタイル */
@@ -982,7 +986,7 @@ button:focus {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--bg-tertiary);
+    background-color: var(--toggle-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     transition: all 0.3s ease;
@@ -996,7 +1000,7 @@ button:focus {
     left: 2px;
     top: 50%;
     transform: translateY(-50%);
-    background-color: var(--bg-secondary);
+    background-color: var(--toggle-knob);
     border: 1px solid var(--border-color);
     border-radius: 50%;
     transition: all 0.3s ease;
@@ -1145,6 +1149,7 @@ button:focus {
         left: 2px;
         top: 50%;
         transform: translateY(-50%);
+        background-color: var(--toggle-knob);
     }
     
     .toggle-switch input:checked + .toggle-slider:before {
