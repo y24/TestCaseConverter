@@ -41,14 +41,32 @@ class CsvRenderer:
         rendered_files = {}
         
         for file_data in file_data_list:
+            # シート数を取得
+            total_sheets = len(file_data.sheets)
+            
             for sheet_data in file_data.sheets:
-                # ファイル名生成
-                filename = f"{sheet_data.sheet_name}.csv"
-                
                 # CSVデータ生成
                 csv_content = self._generate_csv_content(sheet_data.items)
                 
-                rendered_files[filename] = csv_content
+                # ファイル名を生成（シート数に応じてシート名を含めるかどうかを決定）
+                filename = self._sanitize_filename(file_data.filename)
+                id_range = self._get_id_range(sheet_data.items)
+                
+                if total_sheets == 1:
+                    # シートが1つの場合はシート名は不要
+                    if id_range:
+                        output_filename = f"{filename}_{id_range}.csv"
+                    else:
+                        output_filename = f"{filename}.csv"
+                else:
+                    # シートが複数の場合はシート名を含める
+                    sheet_name = self._sanitize_filename(sheet_data.sheet_name)
+                    if id_range:
+                        output_filename = f"{filename}_{sheet_name}_{id_range}.csv"
+                    else:
+                        output_filename = f"{filename}_{sheet_name}.csv"
+                
+                rendered_files[output_filename] = csv_content
         
         return rendered_files
     
@@ -57,19 +75,37 @@ class CsvRenderer:
         rendered_files = {}
         
         for file_data in file_data_list:
+            # シート数を取得
+            total_sheets = len(file_data.sheets)
+            
             for sheet_data in file_data.sheets:
                 # カテゴリごとにグループ化
                 category_groups = self._group_by_category(sheet_data.items)
                 
-                for category_path, test_cases in category_groups.items():
-                    # ファイル名生成
-                    category_name = "_".join(category_path) if category_path else "その他"
-                    filename = f"{sheet_data.sheet_name}_{category_name}.csv"
-                    
+                for category, test_cases in category_groups.items():
                     # CSVデータ生成
                     csv_content = self._generate_csv_content(test_cases)
                     
-                    rendered_files[filename] = csv_content
+                    # ファイル名を生成（シート数に応じてシート名を含めるかどうかを決定）
+                    filename = self._sanitize_filename(file_data.filename)
+                    category_name = self._sanitize_filename(category)
+                    id_range = self._get_id_range(test_cases)
+                    
+                    if total_sheets == 1:
+                        # シートが1つの場合はシート名は不要
+                        if id_range:
+                            output_filename = f"{filename}_{category_name}_{id_range}.csv"
+                        else:
+                            output_filename = f"{filename}_{category_name}.csv"
+                    else:
+                        # シートが複数の場合はシート名を含める
+                        sheet_name = self._sanitize_filename(sheet_data.sheet_name)
+                        if id_range:
+                            output_filename = f"{filename}_{sheet_name}_{category_name}_{id_range}.csv"
+                        else:
+                            output_filename = f"{filename}_{sheet_name}_{category_name}.csv"
+                    
+                    rendered_files[output_filename] = csv_content
         
         return rendered_files
     
@@ -80,13 +116,13 @@ class CsvRenderer:
         for file_data in file_data_list:
             for sheet_data in file_data.sheets:
                 for test_case in sheet_data.items:
-                    # ファイル名生成
-                    filename = f"{sheet_data.sheet_name}_{test_case.id}.csv"
-                    
                     # CSVデータ生成
                     csv_content = self._generate_csv_content([test_case])
                     
-                    rendered_files[filename] = csv_content
+                    # ファイル名を生成（ケース単位ではテストケースIDと拡張子のみ）
+                    output_filename = f"{test_case.id}.csv"
+                    
+                    rendered_files[output_filename] = csv_content
         
         return rendered_files
     
@@ -157,16 +193,17 @@ class CsvRenderer:
         # UTF-8 BOMを追加
         return '\ufeff' + content
     
-    def _group_by_category(self, test_cases: List[TestCase]) -> Dict[tuple, List[TestCase]]:
+    def _group_by_category(self, test_cases: List[TestCase]) -> Dict[str, List[TestCase]]:
         """カテゴリごとにグループ化"""
         groups = {}
         
         for test_case in test_cases:
-            # カテゴリをタプルに変換（空の場合は("その他",)）
-            category_key = tuple(test_case.category) if test_case.category else ("その他",)
+            # 大項目（最初のカテゴリ）でグループ化
+            category_key = test_case.category[0] if test_case.category else "未分類"
             
             if category_key not in groups:
                 groups[category_key] = []
+            
             groups[category_key].append(test_case)
         
         return groups
@@ -174,23 +211,23 @@ class CsvRenderer:
     def _resolve_filename_conflicts(self, rendered_files: Dict[str, str]) -> Dict[str, str]:
         """ファイル名の重複を解決"""
         resolved_files = {}
-        name_counts = {}
+        filename_counts = {}
         
         for filename, content in rendered_files.items():
             if filename in resolved_files:
-                # 重複している場合、番号を付ける
-                base_name = filename.rsplit('.', 1)[0]
-                extension = filename.rsplit('.', 1)[1] if '.' in filename else ''
+                # 重複している場合、連番を付与
+                base_name, extension = self._split_filename(filename)
+                counter = filename_counts.get(filename, 1)
                 
-                if base_name not in name_counts:
-                    name_counts[base_name] = 1
-                else:
-                    name_counts[base_name] += 1
+                while f"{base_name} ({counter}){extension}" in resolved_files:
+                    counter += 1
                 
-                new_filename = f"{base_name}_{name_counts[base_name]}.{extension}"
+                new_filename = f"{base_name} ({counter}){extension}"
                 resolved_files[new_filename] = content
+                filename_counts[filename] = counter + 1
             else:
                 resolved_files[filename] = content
+                filename_counts[filename] = 1
         
         return resolved_files
     
@@ -232,3 +269,46 @@ class CsvRenderer:
             ])
         
         return headers
+    
+    def _sanitize_filename(self, filename: str) -> str:
+        """ファイル名を安全化"""
+        # 禁止文字を置換
+        forbidden_chars = r'[<>:"/\\|?*]'
+        import re
+        sanitized = re.sub(forbidden_chars, '_', filename)
+        
+        # 長さ制限（100文字）
+        if len(sanitized) > 100:
+            sanitized = sanitized[:100]
+        
+        return sanitized
+    
+    def _get_id_range(self, test_cases: List[TestCase]) -> str:
+        """テストケースIDの範囲を取得"""
+        if not test_cases:
+            return ""
+        
+        # IDから数値部分を抽出してソート
+        id_numbers = []
+        for test_case in test_cases:
+            # IDから数値部分を抽出（例: "TC001" -> 1）
+            import re
+            match = re.search(r'\d+', test_case.id)
+            if match:
+                id_numbers.append(int(match.group()))
+        
+        if not id_numbers:
+            return ""
+        
+        id_numbers.sort()
+        min_id = min(id_numbers)
+        max_id = max(id_numbers)
+        
+        # 3桁のゼロパディングで範囲を返す
+        return f"{min_id:03d}-{max_id:03d}"
+    
+    def _split_filename(self, filename: str) -> tuple:
+        """ファイル名をベース名と拡張子に分割"""
+        import os
+        base_name, extension = os.path.splitext(filename)
+        return base_name, extension
