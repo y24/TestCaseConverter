@@ -1108,10 +1108,15 @@ function handlePreviewFileChange() {
         updateWysiwygPreview();
     }
     
-    // プレビューエリアのスクロール位置を一番上に戻す（ファイル変更時のみ）
+    // プレビューエリアのスクロール位置を一番上に戻す
     setTimeout(() => {
         resetPreviewScrollPosition();
     }, 10);
+    
+    // requestAnimationFrameでも実行（ブラウザの描画サイクルに合わせて）
+    requestAnimationFrame(() => {
+        resetPreviewScrollPosition();
+    });
 }
 
 // 全ファイルダウンロード
@@ -1543,8 +1548,15 @@ function togglePreviewMode() {
         updateWysiwygPreview();
     }
     
-    // プレビューモード切り替え時はスクロール位置をリセットしない
-    // （ユーザーのスクロール位置を保持する）
+    // プレビューエリアのスクロール位置を一番上に戻す（表示切り替え後に実行）
+    setTimeout(() => {
+        resetPreviewScrollPosition();
+    }, 10);
+    
+    // requestAnimationFrameでも実行（ブラウザの描画サイクルに合わせて）
+    requestAnimationFrame(() => {
+        resetPreviewScrollPosition();
+    });
     
     // 設定をローカルストレージに保存
     savePreviewModeToLocalStorage(mode);
@@ -1595,8 +1607,15 @@ function switchPreviewMode(mode) {
         updateWysiwygPreview();
     }
     
-    // プレビューモード切り替え時はスクロール位置をリセットしない
-    // （ユーザーのスクロール位置を保持する）
+    // プレビューエリアのスクロール位置を一番上に戻す（表示切り替え後に実行）
+    setTimeout(() => {
+        resetPreviewScrollPosition();
+    }, 10);
+    
+    // requestAnimationFrameでも実行（ブラウザの描画サイクルに合わせて）
+    requestAnimationFrame(() => {
+        resetPreviewScrollPosition();
+    });
 }
 
 // WYSIWYGプレビューの更新（デバウンス付き）
@@ -1663,8 +1682,12 @@ function updateWysiwygPreviewImmediate() {
         wysiwygPreview.innerHTML = '';
     }
     
-    // WYSIWYGプレビュー更新時はスクロール位置をリセットしない
-    // （ユーザーのスクロール位置を保持する）
+    // WYSIWYGプレビュー更新後にスクロール位置をリセット
+    setTimeout(() => {
+        if (wysiwygPreview) {
+            wysiwygPreview.scrollTop = 0;
+        }
+    }, 10);
 }
 
 // プレビューモード設定の保存・読み込み
