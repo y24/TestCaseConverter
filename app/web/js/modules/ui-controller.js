@@ -138,17 +138,17 @@ class UIController {
             const settings = configManager.getSettings();
             
             // 出力設定
-            setElementValue(DOM_IDS.OUTPUT_FORMAT, settings.output_format || 'markdown');
-            setElementValue(DOM_IDS.SPLIT_MODE, settings.split_mode || 'per_sheet');
-            setElementValue(DOM_IDS.OUTPUT_LANGUAGE, settings.output_language || 'ja');
+            setElementValue(DOM_IDS.OUTPUT_FORMAT, settings.output_format || DEFAULT_VALUES.OUTPUT_FORMAT);
+            setElementValue(DOM_IDS.SPLIT_MODE, settings.split_mode || DEFAULT_VALUES.SPLIT_MODE);
+            setElementValue(DOM_IDS.OUTPUT_LANGUAGE, settings.output_language || DEFAULT_VALUES.OUTPUT_LANGUAGE);
             setElementChecked(DOM_IDS.OUTPUT_BASIC_INFO, settings.output_basic_info !== false);
             setElementChecked(DOM_IDS.OUTPUT_META_INFO, settings.output_meta_info !== false);
             setElementChecked(DOM_IDS.OUTPUT_SOURCE_INFO, settings.output_source_info !== false);
             
             // ケースID設定
-            setElementValue(DOM_IDS.ID_PREFIX, settings.id_prefix || 'TC-');
-            setElementValue(DOM_IDS.ID_PADDING, settings.id_padding !== undefined ? settings.id_padding : 1);
-            setElementValue(DOM_IDS.ID_START_NUMBER, settings.id_start_number || 1);
+            setElementValue(DOM_IDS.ID_PREFIX, settings.id_prefix || DEFAULT_VALUES.ID_PREFIX);
+            setElementValue(DOM_IDS.ID_PADDING, settings.id_padding !== undefined ? settings.id_padding : DEFAULT_VALUES.ID_PADDING);
+            setElementValue(DOM_IDS.ID_START_NUMBER, settings.id_start_number || DEFAULT_VALUES.ID_START_NUMBER);
             setElementChecked(DOM_IDS.OUTPUT_CASE_ID, settings.output_case_id !== false);
             
             // ケースID関連のテキストボックスの有効/無効を設定
@@ -168,16 +168,16 @@ class UIController {
             
             // シート名設定
             setElementValue(DOM_IDS.SHEET_SEARCH_KEYS, 
-                settings.sheet_search_keys ? settings.sheet_search_keys.join(',') : 'テスト項目');
+                settings.sheet_search_keys ? settings.sheet_search_keys.join(',') : DEFAULT_VALUES.SHEET_SEARCH_KEYS);
             
             // 読み取り設定
-            const header = settings.header || { search_col: "A", search_key: "#" };
-            setElementValue(DOM_IDS.HEADER_SEARCH_COL, header.search_col || "A");
-            setElementValue(DOM_IDS.HEADER_SEARCH_KEY, header.search_key || "#");
+            const header = settings.header || { search_col: DEFAULT_VALUES.HEADER_SEARCH_COL, search_key: DEFAULT_VALUES.HEADER_SEARCH_KEY };
+            setElementValue(DOM_IDS.HEADER_SEARCH_COL, header.search_col || DEFAULT_VALUES.HEADER_SEARCH_COL);
+            setElementValue(DOM_IDS.HEADER_SEARCH_KEY, header.search_key || DEFAULT_VALUES.HEADER_SEARCH_KEY);
             
-            const categoryRow = settings.category_row || { keys: ["大項目", "中項目", "小項目1", "小項目2"] };
+            const categoryRow = settings.category_row || { keys: DEFAULT_VALUES.CATEGORY_KEYS.split(',') };
             setElementValue(DOM_IDS.CATEGORY_KEYS, 
-                categoryRow.keys ? categoryRow.keys.join(',') : "大項目,中項目,小項目1,小項目2");
+                categoryRow.keys ? categoryRow.keys.join(',') : DEFAULT_VALUES.CATEGORY_KEYS);
             
             // その他の設定も同様に適用
             this.applyRowSettings(settings);
