@@ -6,6 +6,7 @@ import { API_ENDPOINTS, ERROR_MESSAGES } from '../constants/config.js';
 import { handleApiError, handleGenericError } from '../utils/error-utils.js';
 import { appState } from '../core/state.js';
 import { configManager } from '../core/config.js';
+import { showLoadingToast, hideToast, showErrorToast } from '../utils/toast-utils.js';
 
 /**
  * 変換処理クラス
@@ -13,6 +14,8 @@ import { configManager } from '../core/config.js';
 class Converter {
     constructor() {
         this.isConverting = false;
+        this.loadingToast = null;
+        this.loadingStartTime = null;
     }
     
     /**
@@ -265,11 +268,24 @@ class Converter {
     
     // UI制御メソッド
     showLoading(show) {
-        const loading = document.getElementById('loading');
         const convertBtn = document.getElementById('convert-btn');
         
-        if (loading) {
-            loading.style.display = show ? 'flex' : 'none';
+        if (show) {
+            this.loadingStartTime = Date.now();
+            // 少し遅延してからトーストを表示（一瞬で終わる場合は表示しない）
+            setTimeout(() => {
+                const elapsed = Date.now() - this.loadingStartTime;
+                if (this.loadingStartTime && elapsed >= 500) {
+                    this.loadingToast = showLoadingToast('変換中...');
+                }
+            }, 500);
+        } else {
+            // ローディング終了
+            if (this.loadingToast) {
+                hideToast(this.loadingToast);
+                this.loadingToast = null;
+            }
+            this.loadingStartTime = null;
         }
         
         if (convertBtn) {
