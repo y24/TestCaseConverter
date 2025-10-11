@@ -7,7 +7,8 @@ import {
     CSS_CLASSES, 
     TIMER_CONSTANTS, 
     ERROR_MESSAGES, 
-    SUCCESS_MESSAGES 
+    SUCCESS_MESSAGES,
+    DEFAULT_VALUES 
 } from '../constants/config.js';
 import { 
     setElementValue, 
@@ -193,13 +194,13 @@ class UIController {
      */
     applyRowSettings(settings) {
         const rowSettings = [
-            { key: 'title_row', domId: DOM_IDS.TITLE_KEYS, default: '' },
-            { key: 'step_row', domId: DOM_IDS.STEP_KEYS, default: '手順' },
-            { key: 'tobe_row', domId: DOM_IDS.TOBE_KEYS, default: '結果,(実施結果)' },
-            { key: 'test_type_row', domId: DOM_IDS.TEST_TYPE_KEYS, default: 'テスト種別' },
-            { key: 'priority_row', domId: DOM_IDS.PRIORITY_KEYS, default: '優先度' },
-            { key: 'precondition_row', domId: DOM_IDS.PRECONDITION_KEYS, default: '前提条件' },
-            { key: 'note_row', domId: DOM_IDS.NOTE_KEYS, default: '備考,補足情報' }
+            { key: 'title_row', domId: DOM_IDS.TITLE_KEYS, default: DEFAULT_VALUES.TITLE_KEYS },
+            { key: 'step_row', domId: DOM_IDS.STEP_KEYS, default: DEFAULT_VALUES.STEP_KEYS },
+            { key: 'tobe_row', domId: DOM_IDS.TOBE_KEYS, default: DEFAULT_VALUES.TOBE_KEYS },
+            { key: 'test_type_row', domId: DOM_IDS.TEST_TYPE_KEYS, default: DEFAULT_VALUES.TEST_TYPE_KEYS },
+            { key: 'priority_row', domId: DOM_IDS.PRIORITY_KEYS, default: DEFAULT_VALUES.PRIORITY_KEYS },
+            { key: 'precondition_row', domId: DOM_IDS.PRECONDITION_KEYS, default: DEFAULT_VALUES.PRECONDITION_KEYS },
+            { key: 'note_row', domId: DOM_IDS.NOTE_KEYS, default: DEFAULT_VALUES.NOTE_KEYS }
         ];
         
         rowSettings.forEach(({ key, domId, default: defaultValue }) => {
