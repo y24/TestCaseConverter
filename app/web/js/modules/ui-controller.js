@@ -193,6 +193,7 @@ class UIController {
      */
     applyRowSettings(settings) {
         const rowSettings = [
+            { key: 'title_row', domId: DOM_IDS.TITLE_KEYS, default: '' },
             { key: 'step_row', domId: DOM_IDS.STEP_KEYS, default: '手順' },
             { key: 'tobe_row', domId: DOM_IDS.TOBE_KEYS, default: '結果,(実施結果)' },
             { key: 'test_type_row', domId: DOM_IDS.TEST_TYPE_KEYS, default: 'テスト種別' },

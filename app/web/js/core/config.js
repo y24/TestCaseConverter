@@ -90,6 +90,10 @@ class ConfigManager {
                 keys: this.parseCommaSeparated(DEFAULT_VALUES.CATEGORY_KEYS),
                 ignores: []
             },
+            title_row: {
+                keys: this.parseCommaSeparated(DEFAULT_VALUES.TITLE_KEYS),
+                ignores: []
+            },
             step_row: { keys: this.parseCommaSeparated(DEFAULT_VALUES.STEP_KEYS), ignores: [] },
             tobe_row: this.parseKeysAndIgnores(DEFAULT_VALUES.TOBE_KEYS),
             test_type_row: { keys: this.parseCommaSeparated(DEFAULT_VALUES.TEST_TYPE_KEYS), ignores: [] },
@@ -152,6 +156,10 @@ class ConfigManager {
                 },
                 category_row: {
                     keys: this.parseCommaSeparated(getElementValue('category-keys', DEFAULT_VALUES.CATEGORY_KEYS)),
+                    ignores: []
+                },
+                title_row: {
+                    keys: this.parseCommaSeparated(getElementValue('title-keys', DEFAULT_VALUES.TITLE_KEYS)),
                     ignores: []
                 },
                 step_row: this.parseKeysAndIgnores(getElementValue('step-keys', DEFAULT_VALUES.STEP_KEYS)),

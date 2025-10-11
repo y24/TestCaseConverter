@@ -22,6 +22,10 @@
     ],
     "ignores": []
   },
+  "title_row": {
+    "keys": [],
+    "ignores": []
+  },
   "step_row": {
     "keys": [
       "手順",
