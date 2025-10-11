@@ -527,29 +527,6 @@ section h2 {
     cursor: not-allowed;
 }
 
-/* ローディング */
-.loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--border-light);
-    border-top: 2px solid var(--accent-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 /* プレビュー */
 .preview-section {
     flex: 1;

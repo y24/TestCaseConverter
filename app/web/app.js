@@ -1205,16 +1205,29 @@ async function downloadAll() {
     }
 }
 
-// ローディング表示
+// ローディング表示（トースト版）
+let loadingToast = null;
+let loadingStartTime = null;
+
 function showLoading(show) {
-    const loading = document.getElementById('loading');
     const convertBtn = document.getElementById('convert-btn');
     
     if (show) {
-        loading.style.display = 'flex';
+        loadingStartTime = Date.now();
+        // 少し遅延してからトーストを表示（一瞬で終わる場合は表示しない）
+        setTimeout(() => {
+            if (loadingStartTime && Date.now() - loadingStartTime >= 500) {
+                loadingToast = showToast('変換中...', 'loading', 0); // 0 = 自動削除しない
+            }
+        }, 500);
         convertBtn.disabled = true;
     } else {
-        loading.style.display = 'none';
+        // ローディング終了
+        if (loadingToast) {
+            hideToast(loadingToast);
+            loadingToast = null;
+        }
+        loadingStartTime = null;
         convertBtn.disabled = uploadedFiles.length === 0;
     }
 }
@@ -1288,27 +1301,102 @@ function resetToDefaultSettings() {
     }
 }
 
-// 成功メッセージ表示
-function showSuccess(message) {
-    // 簡単なトースト通知
+// トースト表示機能
+function showToast(message, type = 'info', duration = 3000) {
     const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    
+    // タイプに応じたスタイル設定
+    let backgroundColor, icon;
+    switch (type) {
+        case 'success':
+            backgroundColor = '#27ae60';
+            icon = '✅';
+            break;
+        case 'error':
+            backgroundColor = '#e74c3c';
+            icon = '❌';
+            break;
+        case 'warning':
+            backgroundColor = '#f39c12';
+            icon = '⚠️';
+            break;
+        case 'loading':
+            backgroundColor = '#3498db';
+            icon = '⏳';
+            break;
+        default:
+            backgroundColor = '#3498db';
+            icon = 'ℹ️';
+    }
+    
     toast.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: #27ae60;
+        background: ${backgroundColor};
         color: white;
         padding: 15px 20px;
-        border-radius: 4px;
-        z-index: 1000;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        border-radius: 8px;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        max-width: 400px;
+        word-wrap: break-word;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease-in-out;
     `;
-    toast.textContent = message;
+    
+    toast.innerHTML = `
+        <span style="font-size: 16px;">${icon}</span>
+        <span>${message}</span>
+    `;
+    
     document.body.appendChild(toast);
     
+    // アニメーション表示
     setTimeout(() => {
-        document.body.removeChild(toast);
-    }, 3000);
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+    }, 10);
+    
+    // 自動削除
+    if (duration > 0) {
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, duration);
+    }
+    
+    return toast;
+}
+
+// トーストを手動で削除する関数
+function hideToast(toast) {
+    if (toast && document.body.contains(toast)) {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 成功メッセージ表示（後方互換性のため残す）
+function showSuccess(message) {
+    showToast(message, 'success');
 }
 
 // 折りたたみ可能セクションの初期化
