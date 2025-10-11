@@ -304,8 +304,11 @@ class CsvRenderer:
         min_id = min(id_numbers)
         max_id = max(id_numbers)
         
-        # 3桁のゼロパディングで範囲を返す
-        return f"{min_id:03d}-{max_id:03d}"
+        # ID桁数設定に応じたゼロパディングで範囲を返す
+        if self.settings.id_padding <= 1:
+            return f"{min_id}-{max_id}"
+        else:
+            return f"{min_id:0{self.settings.id_padding}d}-{max_id:0{self.settings.id_padding}d}"
     
     def _split_filename(self, filename: str) -> tuple:
         """ファイル名をベース名と拡張子に分割"""

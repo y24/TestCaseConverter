@@ -560,7 +560,10 @@ class ExcelReader:
         
         # テストケースIDを生成（グローバルカウンターを使用して通しの連番）
         self.global_test_case_counter += 1
-        test_id = f"{self.settings.id_prefix}-{self.global_test_case_counter:0{self.settings.id_padding}d}"
+        if self.settings.id_padding <= 1:
+            test_id = f"{self.settings.id_prefix}{self.global_test_case_counter}"
+        else:
+            test_id = f"{self.settings.id_prefix}{self.global_test_case_counter:0{self.settings.id_padding}d}"
         
         # 新しいフィールドの値を取得
         backlog_id = cell_info.get('backlog_id', '') if cell_info else ''

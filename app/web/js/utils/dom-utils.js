@@ -62,7 +62,15 @@ export function getElementChecked(elementId, defaultValue = false) {
  */
 export function getElementNumber(elementId, defaultValue = 0) {
     const element = document.getElementById(elementId);
-    return element ? parseInt(element.value) || defaultValue : defaultValue;
+    if (!element) {
+        return defaultValue;
+    }
+    const value = element.value.trim();
+    if (value === '') {
+        return defaultValue;
+    }
+    const parsed = parseInt(value);
+    return isNaN(parsed) ? defaultValue : parsed;
 }
 
 /**

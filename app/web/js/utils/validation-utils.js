@@ -140,8 +140,8 @@ export function normalizeSettings(settings) {
     const normalized = { ...settings };
     
     // 数値フィールドの正規化
-    if (normalized.id_padding) {
-        normalized.id_padding = parseInt(normalized.id_padding) || 3;
+    if (normalized.id_padding !== undefined && normalized.id_padding !== null && normalized.id_padding !== '') {
+        normalized.id_padding = parseInt(normalized.id_padding) || 1;
     }
     
     if (normalized.id_start_number) {

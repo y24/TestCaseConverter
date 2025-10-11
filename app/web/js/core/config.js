@@ -9,7 +9,8 @@ import {
 } from '../constants/config.js';
 import { 
     loadSettingsFromLocalStorage, 
-    saveSettingsToLocalStorage 
+    saveSettingsToLocalStorage,
+    clearSettingsFromLocalStorage 
 } from '../utils/storage-utils.js';
 import { 
     validateSettings, 
@@ -210,6 +211,9 @@ class ConfigManager {
      * 設定をリセットする
      */
     resetToDefault() {
+        // localStorageから設定を削除
+        clearSettingsFromLocalStorage();
+        // メモリ上の設定をデフォルトにリセット
         this.settings = this.getDefaultSettings();
     }
     

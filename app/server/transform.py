@@ -255,7 +255,10 @@ class DataTransformer:
         
         for test_case in test_cases:
             self.global_test_case_counter += 1
-            new_id = f"{self.settings.id_prefix}-{self.global_test_case_counter:0{self.settings.id_padding}d}"
+            if self.settings.id_padding <= 1:
+                new_id = f"{self.settings.id_prefix}{self.global_test_case_counter}"
+            else:
+                new_id = f"{self.settings.id_prefix}{self.global_test_case_counter:0{self.settings.id_padding}d}"
             
             regenerated_cases.append(TestCase(
                 id=new_id,

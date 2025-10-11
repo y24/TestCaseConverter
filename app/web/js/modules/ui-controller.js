@@ -82,13 +82,25 @@ class UIController {
             });
         });
         
-        // テキストボックスのフォーカスOFF時
+        // テキストボックスの入力時のみ自動変換
         const textInputs = document.querySelectorAll('.sidebar-content input[type="text"], .sidebar-content input[type="number"]');
         textInputs.forEach(input => {
-            input.addEventListener('blur', () => {
-                this.updateSettings();
-                this.triggerAutoConvert();
+            // フォーカス時の初期値を保存
+            let initialValue = input.value;
+            
+            input.addEventListener('focus', () => {
+                // フォーカス時の値を保存
+                initialValue = input.value;
             });
+            
+            input.addEventListener('blur', () => {
+                // 値が実際に変更された場合のみ自動変換
+                if (input.value !== initialValue) {
+                    this.updateSettings();
+                    this.triggerAutoConvert();
+                }
+            });
+            
             // 入力中にもリアルタイムで変換（デバウンス付き）
             let timeoutId;
             input.addEventListener('input', () => {
@@ -133,8 +145,8 @@ class UIController {
             setElementChecked(DOM_IDS.OUTPUT_SOURCE_INFO, settings.output_source_info !== false);
             
             // ケースID設定
-            setElementValue(DOM_IDS.ID_PREFIX, settings.id_prefix || 'TC');
-            setElementValue(DOM_IDS.ID_PADDING, settings.id_padding || 3);
+            setElementValue(DOM_IDS.ID_PREFIX, settings.id_prefix || 'TC-');
+            setElementValue(DOM_IDS.ID_PADDING, settings.id_padding !== undefined ? settings.id_padding : 1);
             setElementValue(DOM_IDS.ID_START_NUMBER, settings.id_start_number || 1);
             setElementChecked(DOM_IDS.OUTPUT_CASE_ID, settings.output_case_id !== false);
             
