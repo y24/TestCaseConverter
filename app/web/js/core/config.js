@@ -77,7 +77,7 @@ class ConfigManager {
             id_start_number: DEFAULT_VALUES.ID_START_NUMBER,
             output_case_id: true,
             force_id_regenerate: false,
-            sheet_search_keys: [DEFAULT_VALUES.SHEET_SEARCH_KEYS],
+            sheet_search_keys: this.parseCommaSeparated(DEFAULT_VALUES.SHEET_SEARCH_KEYS),
             sheet_search_ignores: [],
             
             // 読み取り設定
@@ -86,15 +86,15 @@ class ConfigManager {
                 search_key: DEFAULT_VALUES.HEADER_SEARCH_KEY
             },
             category_row: {
-                keys: DEFAULT_VALUES.CATEGORY_KEYS.split(','),
+                keys: this.parseCommaSeparated(DEFAULT_VALUES.CATEGORY_KEYS),
                 ignores: []
             },
-            step_row: { keys: [DEFAULT_VALUES.STEP_KEYS], ignores: [] },
-            tobe_row: { keys: ['結果'], ignores: ['実施結果'] },
-            test_type_row: { keys: [DEFAULT_VALUES.TEST_TYPE_KEYS], ignores: [] },
-            priority_row: { keys: [DEFAULT_VALUES.PRIORITY_KEYS], ignores: [] },
-            precondition_row: { keys: [DEFAULT_VALUES.PRECONDITION_KEYS], ignores: [] },
-            note_row: { keys: ['備考', '補足情報'], ignores: [] },
+            step_row: { keys: this.parseCommaSeparated(DEFAULT_VALUES.STEP_KEYS), ignores: [] },
+            tobe_row: this.parseKeysAndIgnores(DEFAULT_VALUES.TOBE_KEYS),
+            test_type_row: { keys: this.parseCommaSeparated(DEFAULT_VALUES.TEST_TYPE_KEYS), ignores: [] },
+            priority_row: { keys: this.parseCommaSeparated(DEFAULT_VALUES.PRIORITY_KEYS), ignores: [] },
+            precondition_row: { keys: this.parseCommaSeparated(DEFAULT_VALUES.PRECONDITION_KEYS), ignores: [] },
+            note_row: this.parseKeysAndIgnores(DEFAULT_VALUES.NOTE_KEYS),
             
             // 新しいセル設定
             backlog_id_cell: { keys: ['案件チケットID'], ignores: [] },
@@ -146,7 +146,7 @@ class ConfigManager {
                 
                 // 読み取り設定
                 header: {
-                    search_col: getElementValue('header-search-col', DEFAULT_VALUES.HEADER_SEARCH_COL),
+                    search_col: this.normalizeColumnName(getElementValue('header-search-col', DEFAULT_VALUES.HEADER_SEARCH_COL)),
                     search_key: getElementValue('header-search-key', DEFAULT_VALUES.HEADER_SEARCH_KEY)
                 },
                 category_row: {
@@ -247,6 +247,31 @@ class ConfigManager {
         });
         
         return { keys, ignores };
+    }
+    
+    /**
+     * 列名を正規化する（Excelの列名形式に変換）
+     * @param {string} columnName - 列名
+     * @returns {string} 正規化された列名
+     */
+    normalizeColumnName(columnName) {
+        if (!columnName) return 'A';
+        
+        // 文字列を大文字に変換し、前後の空白を削除
+        const normalized = columnName.toString().trim().toUpperCase();
+        
+        // 数字のみの場合はそのまま返す
+        if (/^\d+$/.test(normalized)) {
+            return normalized;
+        }
+        
+        // 文字のみの場合は最初の文字のみを使用（A, B, C...）
+        if (/^[A-Z]+$/.test(normalized)) {
+            return normalized[0];
+        }
+        
+        // その他の場合はデフォルト値を使用
+        return 'A';
     }
     
     /**

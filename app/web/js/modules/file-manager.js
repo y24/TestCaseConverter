@@ -298,7 +298,6 @@ class FileManager {
         const fileList = document.getElementById('file-list');
         
         if (!uploadArea.contains(e.target) && !fileList.contains(e.target)) {
-            console.log('ファイルがドロップエリア外にドロップされました。処理をスキップします。');
             return;
         }
     }

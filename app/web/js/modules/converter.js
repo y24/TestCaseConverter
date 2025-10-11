@@ -56,8 +56,20 @@ class Converter {
             
         } catch (error) {
             console.error('Conversion error:', error);
-            const errorMessage = handleGenericError(error, 'autoConvert');
-            this.showPreviewError('Conversion Error: ' + errorMessage);
+            
+            // プレビューセクションを非表示にして、エラーメッセージのみを表示
+            const previewSection = document.getElementById('preview-section');
+            if (previewSection) {
+                previewSection.style.display = 'none';
+            }
+            
+            // APIエラーの場合は詳細メッセージを表示、その他の場合は汎用エラーハンドラーを使用
+            if (error.message && !error.message.includes('fetch')) {
+                this.showError(error.message);
+            } else {
+                const errorMessage = handleGenericError(error, 'autoConvert');
+                this.showError(errorMessage);
+            }
             
             // 変換に失敗した場合はプレビューをクリア
             appState.clearConversionResult();
@@ -102,8 +114,20 @@ class Converter {
             
         } catch (error) {
             console.error('Conversion error:', error);
-            const errorMessage = handleGenericError(error, 'convertFiles');
-            this.showPreviewError('変換に失敗しました: ' + errorMessage);
+            
+            // プレビューセクションを非表示にして、エラーメッセージのみを表示
+            const previewSection = document.getElementById('preview-section');
+            if (previewSection) {
+                previewSection.style.display = 'none';
+            }
+            
+            // APIエラーの場合は詳細メッセージを表示、その他の場合は汎用エラーハンドラーを使用
+            if (error.message && !error.message.includes('fetch')) {
+                this.showError(error.message);
+            } else {
+                const errorMessage = handleGenericError(error, 'convertFiles');
+                this.showError(errorMessage);
+            }
         } finally {
             this.isConverting = false;
             this.showLoading(false);
@@ -296,7 +320,9 @@ class Converter {
     showError(message) {
         const errorDiv = document.getElementById('error-message');
         if (errorDiv) {
-            errorDiv.textContent = message;
+            // 改行文字を<br>タグに変換して表示
+            const formattedMessage = message.replace(/\n/g, '<br>');
+            errorDiv.innerHTML = formattedMessage;
             errorDiv.style.display = 'block';
         }
     }
@@ -313,9 +339,17 @@ class Converter {
         if (previewErrorDiv) {
             const errorTextDiv = previewErrorDiv.querySelector('.error-text');
             if (errorTextDiv) {
-                errorTextDiv.textContent = message;
+                // 改行文字を<br>タグに変換して表示
+                const formattedMessage = message.replace(/\n/g, '<br>');
+                errorTextDiv.innerHTML = formattedMessage;
             }
             previewErrorDiv.style.display = 'flex';
+            
+            // プレビューコントロールを非表示
+            const previewControls = document.querySelector('.preview-controls');
+            if (previewControls) {
+                previewControls.style.display = 'none';
+            }
             
             // プレビュー内容を非表示
             const previewContent = document.getElementById('preview-content');

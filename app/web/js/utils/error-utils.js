@@ -11,7 +11,9 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants/config.js';
 export function showError(message) {
     const errorDiv = document.getElementById('error-message');
     if (errorDiv) {
-        errorDiv.textContent = message;
+        // 改行文字を<br>タグに変換して表示
+        const formattedMessage = message.replace(/\n/g, '<br>');
+        errorDiv.innerHTML = formattedMessage;
         errorDiv.style.display = 'block';
     }
 }
@@ -35,9 +37,17 @@ export function showPreviewError(message) {
     if (previewErrorDiv) {
         const errorTextDiv = previewErrorDiv.querySelector('.error-text');
         if (errorTextDiv) {
-            errorTextDiv.textContent = message;
+            // 改行文字を<br>タグに変換して表示
+            const formattedMessage = message.replace(/\n/g, '<br>');
+            errorTextDiv.innerHTML = formattedMessage;
         }
         previewErrorDiv.style.display = 'flex';
+        
+        // プレビューコントロールを非表示
+        const previewControls = document.querySelector('.preview-controls');
+        if (previewControls) {
+            previewControls.style.display = 'none';
+        }
         
         // プレビュー内容を非表示
         const previewContent = document.getElementById('preview-content');
@@ -54,6 +64,12 @@ export function hidePreviewError() {
     const previewErrorDiv = document.getElementById('preview-error-message');
     if (previewErrorDiv) {
         previewErrorDiv.style.display = 'none';
+        
+        // プレビューコントロールを表示
+        const previewControls = document.querySelector('.preview-controls');
+        if (previewControls) {
+            previewControls.style.display = 'flex';
+        }
         
         // プレビュー内容を表示
         const previewContent = document.getElementById('preview-content');
@@ -102,10 +118,23 @@ export async function handleApiError(response) {
     try {
         const errorData = await response.json();
         console.error('Server error response:', errorData);
-        errorMessage = errorData.detail || errorMessage;
+        console.error('Error data type:', typeof errorData);
+        console.error('Error data keys:', Object.keys(errorData));
+        
+        // 複数のフィールドからエラーメッセージを取得を試行
+        if (errorData.detail) {
+            errorMessage = errorData.detail;
+        } else if (errorData.error) {
+            errorMessage = errorData.error;
+        } else if (errorData.message) {
+            errorMessage = errorData.message;
+        } else if (typeof errorData === 'string') {
+            errorMessage = errorData;
+        }
     } catch (jsonError) {
         console.error('Failed to parse error response:', jsonError);
         errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        console.log('Using fallback error message:', errorMessage);
     }
     
     return errorMessage;
@@ -120,6 +149,16 @@ export async function handleApiError(response) {
 export function handleGenericError(error, context = '') {
     console.error(`Error in ${context}:`, error);
     
+    // APIエラーの場合は元のメッセージを保持（詳細なエラーメッセージが含まれている可能性がある）
+    if (error.message && (
+        error.message.includes('変換結果が空です') ||
+        error.message.includes('対象シートが見つかりません') ||
+        error.message.includes('ファイル') ||
+        error.message.includes('シート')
+    )) {
+        return error.message;
+    }
+    
     // エラーの種類に応じてメッセージを決定
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
         return 'ネットワークエラーが発生しました。インターネット接続を確認してください。';
@@ -131,10 +170,6 @@ export function handleGenericError(error, context = '') {
     
     if (error.message.includes('設定')) {
         return ERROR_MESSAGES.SETTINGS_LOAD_FAILED;
-    }
-    
-    if (error.message.includes('変換')) {
-        return ERROR_MESSAGES.CONVERSION_FAILED;
     }
     
     if (error.message.includes('ダウンロード')) {

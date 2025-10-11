@@ -108,7 +108,7 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 // 開発環境でのデバッグ情報
-if (process?.env?.NODE_ENV === 'development') {
+if (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development') {
     window.appDebug = {
         themeManager,
         previewManager,
